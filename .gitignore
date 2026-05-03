@@ -1,0 +1,25 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Compiled Java
+*.class
+*.jar
+target/
+
+# Processing
+applet/
+application.linux64/
+application.macosx/
+application.windows64/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs y datos generados en runtime
+data/output/*.csv
+data/output/*.json
