@@ -1,0 +1,121 @@
+src/main/java/mirage/model/fisica/ColisionDetector.java
+  a15032dfe4de1804 1-54
+src/main/java/mirage/model/estado/EstadoGameOver.java
+  a15032dfe4de1804 1-44
+src/main/java/mirage/controller/commands/DispararCmd.java
+  a15032dfe4de1804 1-33
+src/main/java/game/entities/enemies/EnemyBasico.java
+  a15032dfe4de1804 1-28
+src/main/java/mirage/model/entidades/enemigos/FragataEnemiga.java
+  a15032dfe4de1804 1-63
+src/main/java/mirage/controller/InputHandler.java
+  a15032dfe4de1804 1-54
+docs/README-arquitectura.md
+  a15032dfe4de1804 1-131
+src/main/java/game/levels/EnemySpawner.java
+  a15032dfe4de1804 1-35
+docs/analisis/casos-de-uso.md
+  a15032dfe4de1804 1-221
+src/main/java/mirage/controller/commands/MoverDerechaCmd.java
+  a15032dfe4de1804 1-23
+src/main/java/mirage/model/estado/EstadoJugando.java
+  a15032dfe4de1804 1-54
+src/main/java/Juego1982.java
+  a15032dfe4de1804 1-45
+src/main/java/game/entities/Nave.java
+  a15032dfe4de1804 1-37
+src/main/java/mirage/model/niveles/EnemySpawner.java
+  a15032dfe4de1804 1-66
+src/main/java/mirage/view/pantallas/PantallaGameOver.java
+  a15032dfe4de1804 1-37
+src/main/java/mirage/controller/commands/MoverArribaCmd.java
+  a15032dfe4de1804 1-23
+src/main/java/mirage/MirageModulo.java
+  a15032dfe4de1804 1-61
+src/main/java/mirage/model/entidades/enemigos/EnemyFactory.java
+  a15032dfe4de1804 1-34
+src/main/java/mirage/view/pantallas/Pantalla.java
+  a15032dfe4de1804 1-19
+src/main/java/mirage/view/GameRenderer.java
+  a15032dfe4de1804 1-55
+src/main/java/mirage/controller/GameController.java
+  a15032dfe4de1804 1-92
+src/main/java/mirage/excepciones/ColisionException.java
+  a15032dfe4de1804 1-18
+src/main/java/mirage/model/entidades/enemigos/HarrierEnemigo.java
+  a15032dfe4de1804 1-46
+README.md
+  a15032dfe4de1804 1-212
+src/main/java/game/entities/enemies/Enemy.java
+  a15032dfe4de1804 1-28
+src/main/java/mirage/controller/commands/MoverAbajoCmd.java
+  a15032dfe4de1804 1-23
+docs/diseño/diagramas-estado.md
+  a15032dfe4de1804 1-156
+src/main/java/game/entities/player/Player.java
+  a15032dfe4de1804 1-45
+.gitignore
+  a15032dfe4de1804 1-25
+src/main/java/mirage/controller/commands/MoverIzquierdaCmd.java
+  a15032dfe4de1804 1-27
+src/main/java/mirage/model/fisica/HitBox.java
+  a15032dfe4de1804 1-49
+src/main/java/mirage/model/entidades/Mirage.java
+  a15032dfe4de1804 1-96
+src/main/java/mirage/model/stats/EstadisticasMirage.java
+  a15032dfe4de1804 1-66
+src/main/java/game/entities/enemies/EnemyFactory.java
+  a15032dfe4de1804 1-23
+src/main/java/mirage/controller/commands/Comando.java
+  a15032dfe4de1804 1-22
+src/main/java/mirage/view/sprites/Animacion.java
+  a15032dfe4de1804 1-54
+src/main/java/mirage/excepciones/RecursoNoEncontradoException.java
+  a15032dfe4de1804 1-20
+src/main/java/mirage/excepciones/JuegoException.java
+  a15032dfe4de1804 1-19
+src/main/java/mirage/model/niveles/Nivel.java
+  a15032dfe4de1804 1-26
+src/main/java/mirage/model/estado/EstadoPausado.java
+  a15032dfe4de1804 1-39
+src/main/java/mirage/model/estado/EstadoJuego.java
+  a15032dfe4de1804 1-27
+src/main/java/mirage/model/entidades/Nave.java
+  a15032dfe4de1804 1-53
+src/main/java/game/GameManager.java
+  a15032dfe4de1804 1-60
+src/main/java/mirage/model/niveles/NivelMirage.java
+  a15032dfe4de1804 1-62
+src/main/java/mirage/model/entidades/enemigos/Enemigo.java
+  a15032dfe4de1804 1-50
+src/main/java/mirage/view/sprites/SpriteLoader.java
+  a15032dfe4de1804 1-48
+src/main/java/mirage/model/stats/ResumenPartida.java
+  a15032dfe4de1804 1-33
+docs/diseño/diagrama-clases.md
+  a15032dfe4de1804 1-360
+src/main/java/mirage/model/entidades/Proyectil.java
+  a15032dfe4de1804 1-61
+src/main/java/mirage/view/pantallas/PantallaJuego.java
+  a15032dfe4de1804 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d729aae0240cd081e26f0b629b0eb6945c199793",
+  "prompts": {
+    "a15032dfe4de1804": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4388081b-cbd8-4b24-be7a-acb023617449",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Christian-Rojas-Rodriguez",
+      "messages": [],
+      "total_additions": 2982,
+      "total_deletions": 0,
+      "accepted_lines": 2982,
+      "overriden_lines": 0
+    }
+  }
+}
