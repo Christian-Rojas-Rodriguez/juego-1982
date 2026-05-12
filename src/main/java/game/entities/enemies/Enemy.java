@@ -26,3 +26,4 @@ public abstract class Enemy extends Nave {
 
     public int getPuntos() { return puntos; }
 }
+
