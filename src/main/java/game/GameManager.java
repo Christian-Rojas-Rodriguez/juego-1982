@@ -21,7 +21,7 @@ public class GameManager {
     public void init() {
         player  = new Player(sketch);
         enemies = new ArrayList<>();
-        spawner = new EnemySpawner(sketch, enemies, 10); // un enemigo cada 90 frames (1.5s)
+        spawner = new EnemySpawner(sketch, enemies, 90); // un enemigo cada 90 frames (1.5s)
     }
 
     public void update() {
