@@ -1,5 +1,5 @@
 {
     "java.project.referencedLibraries": [
-        "C:/Program Files/Processing/app/resources/core/library/core-4.5.2.jar"
+        "/snap/processing/27/opt/processing/lib/app/core-4.5.2-89b462cb5a60f9cd98bcbbe677efaf98.jar"
     ]
 }
