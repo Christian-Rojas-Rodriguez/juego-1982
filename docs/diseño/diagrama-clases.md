@@ -7,8 +7,21 @@
 
 ## Diagrama completo del módulo
 
+**Leyenda de relaciones:** `<|--` herencia, `<|..` implementación,
+`*--` composición, `o--` agregación, `-->` asociación y `..>` dependencia/uso.
+
 ```mermaid
 classDiagram
+    %% ── EXTERNOS / FRONTERA ────────────────────────────────
+    class HOME {
+        <<external>>
+        +iniciarModulo() void
+        +updateModulo() void
+        +renderModulo() void
+        +enviarInput(key, keyCode) void
+        +recibirResumen(resumen) void
+    }
+
     %% ── FACADE ─────────────────────────────────────────────
     class MirageModulo {
         <<Facade>>
@@ -16,6 +29,10 @@ classDiagram
         +iniciar(sketch) void
         +pausar() void
         +reanudar() void
+        +update() void
+        +render() void
+        +onKeyPressed(key, keyCode) void
+        +onKeyReleased(key, keyCode) void
         +getResumen() ResumenPartida
     }
 
@@ -37,29 +54,37 @@ classDiagram
         +setEstado(EstadoJuego) void
         +onKeyPressed(keyCode) void
         +onKeyReleased(keyCode) void
+        +agregarProyectil(proyectil) void
+        +limpiarEntidadesInactivas() void
         +getMirage() Mirage
         +getEnemigos() List~Enemigo~
         +getProyectiles() List~Proyectil~
+        +getNivel() NivelMirage
+        +getColisionDetector() ColisionDetector
+        +getEstadisticas() EstadisticasMirage
+        +getRenderer() GameRenderer
+        +getInputHandler() InputHandler
+        +finalizarModulo() void
     }
 
     class InputHandler {
         <<Pure Fabrication>>
         -comandos Map~Integer, Comando~
-        +onKeyPressed(keyCode, mirage) void
-        +onKeyReleased(keyCode) void
+        +onKeyPressed(keyCode, controller) void
+        +onKeyReleased(keyCode, controller) void
         -registrarComandos() void
     }
 
     class Comando {
         <<interface>>
-        +ejecutar(mirage) void
-        +deshacer(mirage) void
+        +ejecutar(controller) void
+        +deshacer(controller) void
     }
-    class MoverIzquierdaCmd { +ejecutar(mirage) void }
-    class MoverDerechaCmd   { +ejecutar(mirage) void }
-    class MoverArribaCmd    { +ejecutar(mirage) void }
-    class MoverAbajoCmd     { +ejecutar(mirage) void }
-    class DispararCmd       { +ejecutar(mirage) void }
+    class MoverIzquierdaCmd { +ejecutar(controller) void }
+    class MoverDerechaCmd   { +ejecutar(controller) void }
+    class MoverArribaCmd    { +ejecutar(controller) void }
+    class MoverAbajoCmd     { +ejecutar(controller) void }
+    class DispararCmd       { +ejecutar(controller) void }
 
     %% ── STATE ───────────────────────────────────────────────
     class EstadoJuego {
@@ -69,11 +94,12 @@ classDiagram
         +alEntrar(controller) void
         +onKeyPressed(controller, keyCode) void
     }
-    class EstadoJugando  { +update() +render() +alEntrar() +onKeyPressed() }
-    class EstadoPausado  { +update() +render() +alEntrar() +onKeyPressed() }
+    class EstadoJugando  { +update(controller) +render(controller) +alEntrar(controller) +onKeyPressed(controller, keyCode) }
+    class EstadoPausado  { +update(controller) +render(controller) +alEntrar(controller) +onKeyPressed(controller, keyCode) }
     class EstadoGameOver {
         -puntajeFinal int
-        +update() +render() +alEntrar() +onKeyPressed()
+        +EstadoGameOver()
+        +update(controller) +render(controller) +alEntrar(controller) +onKeyPressed(controller, keyCode)
     }
 
     %% ── MODEL: ENTIDADES ────────────────────────────────────
@@ -101,13 +127,19 @@ classDiagram
         +render(sketch) void
         +disparar() Proyectil
         +sumarPuntos(puntos) void
+        +setMoverIzquierda(valor) void
+        +setMoverDerecha(valor) void
+        +setMoverArriba(valor) void
+        +setMoverAbajo(valor) void
         +getVidas() int
         +getPuntuacion() int
+        +isInvencible() bool
     }
 
     class Proyectil {
         -activo bool
         -danio int
+        +Proyectil(x, y, sketch)
         +update() void
         +render(sketch) void
         +isActivo() bool
@@ -131,9 +163,10 @@ classDiagram
     }
 
     class FragataEnemiga {
-        -disparaProyectiles bool
+        -framesSinDisparar int
         +render(sketch) void
         #moverIA() void
+        +debeDisparar() bool
         +disparar() Proyectil
     }
 
@@ -154,7 +187,8 @@ classDiagram
 
     class ColisionDetector {
         <<Pure Fabrication>>
-        +detectarProyectilEnemigo(proyectiles, enemigos) void
+        -estadisticas EstadisticasMirage
+        +detectarProyectilEnemigo(proyectiles, enemigos, mirage) void
         +detectarEnemigoMirage(enemigos, mirage) void
     }
 
@@ -178,7 +212,8 @@ classDiagram
         <<Pure Fabrication>>
         -intervaloFrames int
         -frameCounter int
-        +update() List~Enemigo~
+        +update() void
+        +getEnemigosNuevos() List~Enemigo~
     }
 
     %% ── MODEL: STATS ────────────────────────────────────────
@@ -202,6 +237,9 @@ classDiagram
         -duracionSegundos float
         +getPuntajeFinal() int
         +getEnemigosDerribados() int
+        +getVidasRestantes() int
+        +getDuracionSegundos() float
+        +getModuloNombre() String
     }
 
     %% ── VIEW ────────────────────────────────────────────────
@@ -220,6 +258,7 @@ classDiagram
     class PantallaJuego   { +render(sketch) void +update() void }
     class PantallaGameOver {
         -puntaje int
+        +PantallaGameOver(puntaje, enemigosDerribados)
         +render(sketch) void
         +update() void
     }
@@ -245,53 +284,66 @@ classDiagram
     class RecursoNoEncontradoException { <<Exception>> }
 
     %% ── RELACIONES ──────────────────────────────────────────
-    MirageModulo --> GameController
-    MirageModulo ..> ResumenPartida
+    HOME --> MirageModulo : ejecuta módulo
+    MirageModulo *-- GameController : compone
+    MirageModulo ..> ResumenPartida : retorna DTO
 
-    GameController --> EstadoJuego
-    GameController --> Mirage
-    GameController --> GameRenderer
-    GameController --> InputHandler
-    GameController --> NivelMirage
-    GameController --> ColisionDetector
-    GameController --> EstadisticasMirage
+    GameController --> EstadoJuego : estado actual
+    GameController *-- Mirage : compone jugador
+    GameController *-- GameRenderer : compone vista
+    GameController *-- InputHandler : compone input
+    GameController *-- NivelMirage : compone nivel
+    GameController *-- ColisionDetector : compone servicio
+    GameController *-- EstadisticasMirage : compone stats
+    GameController o-- Enemigo : agrega enemigos activos
+    GameController o-- Proyectil : agrega proyectiles activos
+    GameController ..> PantallaGameOver : crea pantalla cierre
 
-    InputHandler --> Comando
-    Comando <|.. MoverIzquierdaCmd
-    Comando <|.. MoverDerechaCmd
-    Comando <|.. MoverArribaCmd
-    Comando <|.. MoverAbajoCmd
-    Comando <|.. DispararCmd
+    InputHandler *-- Comando : registra comandos
+    InputHandler ..> GameController : ejecuta sobre contexto
+    Comando <|.. MoverIzquierdaCmd : implementa
+    Comando <|.. MoverDerechaCmd : implementa
+    Comando <|.. MoverArribaCmd : implementa
+    Comando <|.. MoverAbajoCmd : implementa
+    Comando <|.. DispararCmd : implementa
 
-    EstadoJuego <|.. EstadoJugando
-    EstadoJuego <|.. EstadoPausado
-    EstadoJuego <|.. EstadoGameOver
+    EstadoJuego <|.. EstadoJugando : implementa
+    EstadoJuego <|.. EstadoPausado : implementa
+    EstadoJuego <|.. EstadoGameOver : implementa
+    EstadoJuego ..> GameController : recibe contexto
 
-    Nave <|-- Mirage
-    Nave <|-- Enemigo
-    Nave <|-- Proyectil
-    Nave --> HitBox
+    Nave <|-- Mirage : hereda
+    Nave <|-- Enemigo : hereda
+    Nave <|-- Proyectil : hereda
+    Nave ..> HitBox : crea/retorna
+    Mirage ..> Proyectil : crea al disparar
 
-    Enemigo <|-- HarrierEnemigo
-    Enemigo <|-- FragataEnemiga
-    EnemyFactory ..> Enemigo
+    Enemigo <|-- HarrierEnemigo : hereda
+    Enemigo <|-- FragataEnemiga : hereda
+    FragataEnemiga ..> Proyectil : crea al disparar
+    EnemyFactory ..> Enemigo : crea
 
-    Nivel <|-- NivelMirage
-    NivelMirage --> EnemySpawner
-    EnemySpawner ..> EnemyFactory
+    Nivel <|-- NivelMirage : hereda
+    NivelMirage *-- EnemySpawner : compone
+    EnemySpawner ..> EnemyFactory : usa factory
 
-    ColisionDetector --> HitBox
+    ColisionDetector ..> HitBox : consulta
+    ColisionDetector --> EstadisticasMirage : registra eventos
+    ColisionDetector ..> ColisionException : puede lanzar
 
-    GameRenderer --> Pantalla
-    GameRenderer --> SpriteLoader
-    Pantalla <|.. PantallaJuego
-    Pantalla <|.. PantallaGameOver
-    Animacion --> SpriteLoader
+    GameRenderer --> Pantalla : pantalla activa
+    GameRenderer --> SpriteLoader : usa recursos
+    Pantalla <|.. PantallaJuego : implementa
+    Pantalla <|.. PantallaGameOver : implementa
+    Animacion ..> SpriteLoader : obtiene frames
 
-    EstadisticasMirage ..> ResumenPartida
+    EstadisticasMirage ..> ResumenPartida : exporta
+    SpriteLoader ..> RecursoNoEncontradoException : puede lanzar
+    MirageModulo ..> JuegoException : propaga errores del módulo
+    GameController ..> JuegoException : reclasifica errores
 
-    JuegoException <|-- ColisionException
-    JuegoException <|-- RecursoNoEncontradoException
+    JuegoException <|-- ColisionException : hereda
+    JuegoException <|-- RecursoNoEncontradoException : hereda
 ```
 
 ---
@@ -315,11 +367,13 @@ classDiagram
     class HarrierEnemigo
     class FragataEnemiga { +disparar() Proyectil }
 
-    Nave <|-- Mirage
-    Nave <|-- Proyectil
-    Nave <|-- Enemigo
-    Enemigo <|-- HarrierEnemigo
-    Enemigo <|-- FragataEnemiga
+    Nave <|-- Mirage : hereda
+    Nave <|-- Proyectil : hereda
+    Nave <|-- Enemigo : hereda
+    Enemigo <|-- HarrierEnemigo : hereda
+    Enemigo <|-- FragataEnemiga : hereda
+    Mirage ..> Proyectil : crea al disparar
+    FragataEnemiga ..> Proyectil : crea al disparar
 ```
 
 ---
@@ -347,14 +401,14 @@ classDiagram
     class InputHandler { <<Pure Fabrication>> }
     class Comando      { <<interface>> }
 
-    GameController --> EstadoJuego
-    GameController --> GameRenderer
-    GameController --> InputHandler
-    EstadoJuego <|.. EstadoJugando
-    EstadoJuego <|.. EstadoPausado
-    EstadoJuego <|.. EstadoGameOver
-    GameRenderer --> Pantalla
-    Pantalla <|.. PantallaJuego
-    Pantalla <|.. PantallaGameOver
-    InputHandler --> Comando
+    GameController --> EstadoJuego : estado actual
+    GameController *-- GameRenderer : compone
+    GameController *-- InputHandler : compone
+    EstadoJuego <|.. EstadoJugando : implementa
+    EstadoJuego <|.. EstadoPausado : implementa
+    EstadoJuego <|.. EstadoGameOver : implementa
+    GameRenderer --> Pantalla : pantalla activa
+    Pantalla <|.. PantallaJuego : implementa
+    Pantalla <|.. PantallaGameOver : implementa
+    InputHandler *-- Comando : registra
 ```

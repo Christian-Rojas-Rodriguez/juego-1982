@@ -27,14 +27,13 @@ graph LR
     J --> UC3[UC-03: Pausar el juego]
     J --> UC4[UC-04: Reiniciar partida]
 
-    UC2 --> UC5[UC-05: Proyectil destruye enemigo]
-    UC5 --> UC6[UC-06: Sumar puntuación]
+    UC2 --> UC5[UC-05: Proyectil destruye enemigo y suma puntuación]
 
     UC7[UC-07: Enemigo impacta al Mirage] --> UC8[UC-08: Perder vida]
-    UC8 --> UC9[UC-09: Fin de partida - Game Over]
+    UC8 -->|si vidas == 0| UC9[UC-09: Fin de partida]
+    UC5 -->|si completa objetivo del nivel| UC9
 
     UC9 --> H
-    UC10[UC-10: Nivel completado] --> H
 
     style UC1 fill:#d4edda
     style UC2 fill:#d4edda
@@ -54,19 +53,30 @@ graph LR
 ```mermaid
 sequenceDiagram
     actor Jugador
-    participant Juego1982
+    participant HOME
+    participant MirageModulo
     participant GameController
+    participant EstadoJugando
     participant InputHandler
     participant MoverCmd as MoverXxxCmd
     participant Mirage
 
-    Jugador->>Juego1982: keyPressed(keyCode)
-    Juego1982->>GameController: onKeyPressed(keyCode)
-    GameController->>InputHandler: onKeyPressed(keyCode, mirage)
-    InputHandler->>MoverCmd: ejecutar(mirage)
-    MoverCmd->>Mirage: moverIzquierda() / moverDerecha() / etc.
-    Mirage->>Mirage: actualizar x,y con constrain()
-    Note over Mirage: x = constrain(x, 0, width)<br/>y = constrain(y, 0, height)
+    Jugador->>HOME: presiona tecla
+    HOME->>MirageModulo: onKeyPressed(key, keyCode)
+    MirageModulo->>GameController: onKeyPressed(keyCode)
+    GameController->>EstadoJugando: onKeyPressed(controller, keyCode)
+    EstadoJugando->>InputHandler: onKeyPressed(keyCode, controller)
+    InputHandler->>MoverCmd: ejecutar(controller)
+    MoverCmd->>GameController: getMirage()
+    GameController-->>MoverCmd: mirage
+    MoverCmd->>Mirage: setMoverIzquierda(true) / etc.
+    loop cada frame
+        HOME->>MirageModulo: update()
+        MirageModulo->>GameController: update()
+        GameController->>EstadoJugando: update(controller)
+        EstadoJugando->>Mirage: update()
+    end
+    Note over Mirage: update() actualiza x,y con constrain()
 ```
 
 ---
@@ -80,26 +90,32 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor Jugador
-    participant Juego1982
+    participant HOME
+    participant MirageModulo
     participant GameController
+    participant EstadoJugando
     participant InputHandler
     participant DispararCmd
     participant Mirage
     participant Proyectil
 
-    Jugador->>Juego1982: keyPressed(SPACE)
-    Juego1982->>GameController: onKeyPressed(SPACE)
-    GameController->>InputHandler: onKeyPressed(SPACE, mirage)
-    InputHandler->>DispararCmd: ejecutar(mirage)
+    Jugador->>HOME: presiona SPACE
+    HOME->>MirageModulo: onKeyPressed(key, SPACE)
+    MirageModulo->>GameController: onKeyPressed(SPACE)
+    GameController->>EstadoJugando: onKeyPressed(controller, SPACE)
+    EstadoJugando->>InputHandler: onKeyPressed(SPACE, controller)
+    InputHandler->>DispararCmd: ejecutar(controller)
+    DispararCmd->>GameController: getMirage()
+    GameController-->>DispararCmd: mirage
     DispararCmd->>Mirage: disparar()
-    Mirage-->>Proyectil: new Proyectil(x, y)
+    Mirage-->>Proyectil: new Proyectil(x, y, sketch)
     Mirage-->>DispararCmd: proyectil
-    DispararCmd->>GameController: proyectiles.add(proyectil)
+    DispararCmd->>GameController: agregarProyectil(proyectil)
 ```
 
 ---
 
-## UC-03: Proyectil destruye enemigo
+## UC-05: Proyectil destruye enemigo y suma puntuación
 
 **Actor:** Sistema  
 **Precondición:** Proyectil activo y Enemigo activo en pantalla  
@@ -111,14 +127,15 @@ sequenceDiagram
     participant ColisionDetector
     participant Proyectil
     participant Enemigo
+    participant HitBox
     participant Mirage
     participant EstadisticasMirage
 
-    GameController->>ColisionDetector: detectarProyectilEnemigo(proyectiles, enemigos)
+    GameController->>ColisionDetector: detectarProyectilEnemigo(proyectiles, enemigos, mirage)
     loop por cada par proyectil-enemigo
         ColisionDetector->>Proyectil: getHitBox()
         ColisionDetector->>Enemigo: getHitBox()
-        ColisionDetector->>ColisionDetector: hitboxA.colisionaCon(hitboxB)
+        ColisionDetector->>HitBox: colisionaCon(hitboxB)
         alt colisión detectada
             ColisionDetector->>Enemigo: recibirDanio(proyectil.getDanio())
             ColisionDetector->>Proyectil: desactivar()
@@ -128,13 +145,12 @@ sequenceDiagram
             end
         end
     end
-    GameController->>GameController: enemigos.removeIf(!estaViva())
-    GameController->>GameController: proyectiles.removeIf(!isActivo())
+    GameController->>GameController: limpiarEntidadesInactivas()
 ```
 
 ---
 
-## UC-04: Enemigo impacta al Mirage
+## UC-07/UC-08: Enemigo impacta al Mirage y pierde vida
 
 **Actor:** Sistema  
 **Precondición:** Enemigo activo colisiona con la HitBox del Mirage, Mirage no invencible  
@@ -143,63 +159,76 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant GameController
+    participant EstadoJugando
     participant ColisionDetector
     participant Enemigo
+    participant HitBox
     participant Mirage
     participant EstadoGameOver
 
-    GameController->>ColisionDetector: detectarEnemigoMirage(enemigos, mirage)
+    GameController->>EstadoJugando: update(controller)
+    EstadoJugando->>ColisionDetector: detectarEnemigoMirage(enemigos, mirage)
     loop por cada enemigo
-        ColisionDetector->>Mirage: estaInvencible()
+        ColisionDetector->>Mirage: isInvencible()
         alt Mirage NO es invencible
             ColisionDetector->>Mirage: getHitBox()
             ColisionDetector->>Enemigo: getHitBox()
-            ColisionDetector->>ColisionDetector: colisionaCon()
+            ColisionDetector->>HitBox: colisionaCon(hitBoxEnemigo)
             alt colisión detectada
                 ColisionDetector->>Mirage: recibirDanio(1)
                 Note over Mirage: vidas--<br/>activa invencibilidad temporal
-                alt vidas == 0
-                    GameController->>GameController: setEstado(new EstadoGameOver())
-                    GameController->>EstadisticasMirage: registrarFinPartida(puntuacion)
-                end
             end
         end
+    end
+    EstadoJugando->>Mirage: estaViva()
+    alt Mirage sin vidas
+        EstadoJugando->>GameController: setEstado(new EstadoGameOver())
     end
 ```
 
 ---
 
-## UC-05: Fin de partida (Game Over)
+## UC-09: Fin de partida
 
 **Actor:** Sistema  
-**Precondición:** Mirage sin vidas  
-**Postcondición:** Estadísticas guardadas, pantalla Game Over visible, HOME puede solicitar resumen
+**Precondición:** Mirage sin vidas o nivel completado  
+**Postcondición:** Estadísticas guardadas, pantalla de cierre visible, HOME puede solicitar resumen
 
 ```mermaid
 sequenceDiagram
     participant GameController
     participant EstadoGameOver
+    participant NivelMirage
     participant EstadisticasMirage
     participant PantallaGameOver
     participant GameRenderer
+    participant Mirage
     participant MirageModulo
     participant HOME as HOME (Lobby)
 
-    GameController->>EstadoGameOver: alEntrar(controller)
-    EstadoGameOver->>EstadisticasMirage: registrarFinPartida(puntajeFinal)
-    EstadisticasMirage->>EstadisticasMirage: guardar() en archivo CSV/JSON
-    EstadoGameOver->>PantallaGameOver: new PantallaGameOver(puntaje)
-    EstadoGameOver->>GameRenderer: setPantalla(pantallaGameOver)
-
-    loop cada frame
-        GameController->>EstadoGameOver: update(controller)
-        GameController->>EstadoGameOver: render(controller)
-        EstadoGameOver->>GameRenderer: render(...)
+    alt Derrota: Mirage sin vidas
+        GameController->>EstadoGameOver: alEntrar(controller)
+        EstadoGameOver->>GameController: getMirage()
+        GameController-->>EstadoGameOver: mirage
+        EstadoGameOver->>Mirage: getPuntuacion()
+    else Victoria: nivel completado
+        GameController->>NivelMirage: isTerminado()
+        GameController->>Mirage: getPuntuacion()
     end
 
-    alt Jugador presiona ESC
-        EstadoGameOver->>GameController: señal de finalizar módulo
+    GameController->>EstadisticasMirage: registrarFinPartida(puntajeFinal)
+    EstadisticasMirage->>EstadisticasMirage: guardar() en archivo CSV/JSON
+    GameController->>PantallaGameOver: new PantallaGameOver(puntajeFinal, enemigosDerribados)
+    GameController->>GameRenderer: setPantalla(pantallaGameOver)
+
+    loop cada frame
+        GameController->>GameRenderer: render(...)
+    end
+
+    alt Jugador confirma volver al HOME
+        GameController->>GameController: finalizarModulo()
         HOME->>MirageModulo: getResumen()
+        MirageModulo->>GameController: getEstadisticas()
         MirageModulo->>EstadisticasMirage: exportar()
         EstadisticasMirage-->>MirageModulo: ResumenPartida
         MirageModulo-->>HOME: ResumenPartida
@@ -214,8 +243,9 @@ sequenceDiagram
 |----|-------------|--------------------------------|
 | UC-01 | Mover el Mirage | `InputHandler`, `MoverXxxCmd`, `Mirage` |
 | UC-02 | Disparar misil | `InputHandler`, `DispararCmd`, `Mirage`, `Proyectil` |
-| UC-03 | Proyectil destruye enemigo | `ColisionDetector`, `HitBox`, `Proyectil`, `Enemigo`, `Mirage` |
-| UC-04 | Enemigo impacta al Mirage | `ColisionDetector`, `HitBox`, `Mirage`, `EstadoGameOver` |
-| UC-05 | Fin de partida (Game Over) | `EstadoGameOver`, `EstadisticasMirage`, `PantallaGameOver`, `MirageModulo` |
-| UC-06 | Pausar el juego | `GameController`, `EstadoPausado` |
-| UC-07 | Nivel completado | `NivelMirage`, `EstadisticasMirage`, `MirageModulo`, `HOME` |
+| UC-03 | Pausar el juego | `GameController`, `EstadoPausado` |
+| UC-04 | Reiniciar partida | `GameController`, `EstadoGameOver`, `EstadoJugando` |
+| UC-05 | Proyectil destruye enemigo y suma puntuación | `ColisionDetector`, `HitBox`, `Proyectil`, `Enemigo`, `Mirage`, `EstadisticasMirage` |
+| UC-07 | Enemigo impacta al Mirage | `ColisionDetector`, `HitBox`, `Mirage` |
+| UC-08 | Perder vida | `Mirage`, `EstadoJugando`, `EstadoGameOver` |
+| UC-09 | Fin de partida (victoria o derrota) | `EstadoGameOver`, `NivelMirage`, `EstadisticasMirage`, `PantallaGameOver`, `MirageModulo`, `HOME` |
