@@ -52,6 +52,7 @@ classDiagram
 
     class Comando {
         <<interface>>
+        -controller GameController
         +ejecutar(mirage) void
         +deshacer(mirage) void
     }
@@ -257,6 +258,7 @@ classDiagram
     GameController --> EstadisticasMirage
 
     InputHandler --> Comando
+    Comando --> GameController
     Comando <|.. MoverIzquierdaCmd
     Comando <|.. MoverDerechaCmd
     Comando <|.. MoverArribaCmd
@@ -292,69 +294,8 @@ classDiagram
 
     JuegoException <|-- ColisionException
     JuegoException <|-- RecursoNoEncontradoException
-```
 
----
-
-## Vista p6 — Model (entidades y jerarquía)
-
-```mermaid
-classDiagram
-    class Nave {
-        <<abstract>>
-        #x, y, velocidad, vida
-        +update()*
-        +render(sketch)*
-        +estaViva() bool
-        +recibirDanio(int)
-        +getHitBox() HitBox
-    }
-    class Mirage   { +disparar() Proyectil }
-    class Proyectil{ +isActivo() bool +desactivar() }
-    class Enemigo  { <<abstract>> #puntos int +moverIA()* }
-    class HarrierEnemigo
-    class FragataEnemiga { +disparar() Proyectil }
-
-    Nave <|-- Mirage
-    Nave <|-- Proyectil
-    Nave <|-- Enemigo
-    Enemigo <|-- HarrierEnemigo
-    Enemigo <|-- FragataEnemiga
-```
-
----
-
-## Vista p7 — Vista y Controlador
-
-```mermaid
-classDiagram
-    class GameController {
-        <<Controller>>
-        -estadoActual EstadoJuego
-        +update()
-        +render()
-        +setEstado(EstadoJuego)
-    }
-    class EstadoJuego { <<interface>> }
-    class EstadoJugando
-    class EstadoPausado
-    class EstadoGameOver
-
-    class GameRenderer { +render(...) void }
-    class Pantalla     { <<interface>> +render(sketch) }
-    class PantallaJuego
-    class PantallaGameOver
-    class InputHandler { <<Pure Fabrication>> }
-    class Comando      { <<interface>> }
-
-    GameController --> EstadoJuego
-    GameController --> GameRenderer
-    GameController --> InputHandler
-    EstadoJuego <|.. EstadoJugando
-    EstadoJuego <|.. EstadoPausado
-    EstadoJuego <|.. EstadoGameOver
-    GameRenderer --> Pantalla
-    Pantalla <|.. PantallaJuego
-    Pantalla <|.. PantallaGameOver
-    InputHandler --> Comando
+    %% ── NEW DEPENDENCIES ────────────────────────────────────
+    Mirage ..> Proyectil : «create»
+    Comando ..> Mirage : «parameter»
 ```
