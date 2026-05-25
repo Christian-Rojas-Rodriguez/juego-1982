@@ -94,6 +94,8 @@ sequenceDiagram
     DispararCmd->>Mirage: disparar()
     Mirage-->>Proyectil: new Proyectil(x, y)
     Mirage-->>DispararCmd: proyectil
+    DispararCmd->>GameController: getProyectiles() 
+    GameController-->>DispararCmd: List<Proyectil>
     DispararCmd->>GameController: proyectiles.add(proyectil)
 ```
 
