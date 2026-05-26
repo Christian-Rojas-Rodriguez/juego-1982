@@ -19,6 +19,8 @@ El avión que controla el jugador. Es el objeto más referenciado del sistema: e
 | `x`, `y` | `float` | Posición en pantalla. Se constrain a los bordes en `update()` |
 | `velocidad` | `float` | Píxeles por frame. Aumenta con el powerup `VELOCIDAD_MOVIMIENTO` |
 | `hitBox` | `HitBox` | Rectángulo de colisión, sincronizado con `x`, `y` cada frame |
+| `proyectiles` | `List<Proyectil>` | Proyectiles activos disparados por este Mirage. `GameController` la consulta cada frame para mover, colisionar y limpiar |
+| `disparosTotales` | `int` | Contador de disparos realizados. Se incrementa en `disparar()`. Lo consulta `EstadisticasMirage.exportar()` al calcular precisión |
 | `vidas` | `int` | Vidas actuales. Arranca en 3, máximo 3, Game Over si llega a 0 |
 | `puntuacion` | `int` | Puntos acumulados. Crece con `sumarPuntos()`. Lo consulta `PowerupManager` para los umbrales |
 | `invencible` | `bool` | Si es `true`, `ColisionDetector` ignora colisiones con enemigos |
@@ -36,7 +38,9 @@ El avión que controla el jugador. Es el objeto más referenciado del sistema: e
 |--------|---------|
 | `update(sketch)` | Lee los flags → mueve x/y → constrain → decrementa cooldowns y frames de powerup/invencibilidad |
 | `render(sketch)` | Dibuja el sprite. Si `invencible`, parpadea alternando visibilidad cada N frames |
-| `disparar(sketch)` | Si `cooldownActual == 0`: crea 1 o 2 `Proyectil` según `powerupActivo`. Resetea cooldown. Retorna la lista |
+| `disparar(sketch)` | Si `cooldownActual == 0`: crea 1 o 2 `Proyectil` según `powerupActivo`, los agrega a `this.proyectiles`, incrementa `disparosTotales`, resetea cooldown |
+| `getProyectiles()` | Retorna la lista interna de proyectiles. `GameController` la itera cada frame para update, colisión y cleanup |
+| `getDisparosTotales()` | Retorna el contador de disparos. Lo llama `EstadisticasMirage.exportar()` para calcular la precisión final |
 | `aplicarPowerup(tipo, duracion)` | Guarda el tipo, setea `framesPowerupRestantes`. Modifica `velocidad`, `cooldownDisparo` o activa disparo doble |
 | `setMoverX(v)` | Setters de los flags. Los llaman los `Commands` desde `InputHandler` |
 | `sumarPuntos(puntos)` | Incrementa `puntuacion`. Lo llama `ColisionDetector` al destruir un enemigo |
@@ -50,7 +54,7 @@ El avión que controla el jugador. Es el objeto más referenciado del sistema: e
 **Paquete:** `mirage.controller`  
 **Patrón:** GRASP Controller
 
-Recibe todos los eventos de Processing y coordina el resto del sistema. Es el único dueño de las listas de enemigos, proyectiles y powerups. Nadie más las modifica directamente.
+Recibe todos los eventos de Processing y coordina el resto del sistema. Es el dueño de las listas de enemigos y powerups. Los proyectiles los gestiona `Mirage` directamente; `GameController` los consulta via `mirage.getProyectiles()`.
 
 ### Atributos
 
@@ -60,7 +64,6 @@ Recibe todos los eventos de Processing y coordina el resto del sistema. Es el ú
 | `estadoActual` | `EstadoJuego` | Estado activo del patrón State. Todo el comportamiento de cada frame se delega aquí |
 | `mirage` | `Mirage` | El jugador. Se actualiza, renderiza y consulta en colisiones |
 | `enemigos` | `List<Enemigo>` | Todos los enemigos activos (normales y el boss actual). Se limpia cada frame con `removeIf(!estaViva())` |
-| `proyectiles` | `List<Proyectil>` | Proyectiles activos del jugador. Se limpia con `removeIf(!isActivo())` |
 | `powerups` | `List<Powerup>` | Powerups cayendo en pantalla. Se limpia con `removeIf(!isActivo())` |
 | `nivel` | `NivelMirage` | Gestiona oleadas y bosses. Se reemplaza entero al subir de nivel |
 | `colisionDetector` | `ColisionDetector` | Detecta todas las colisiones del frame |
@@ -582,7 +585,7 @@ Mantiene un mapa `keyCode → Comando`. Cuando llega un evento de teclado, busca
 | `MoverDerechaCmd` | `mirage.setMoverDerecha(true)` | `mirage.setMoverDerecha(false)` |
 | `MoverArribaCmd` | `mirage.setMoverArriba(true)` | `mirage.setMoverArriba(false)` |
 | `MoverAbajoCmd` | `mirage.setMoverAbajo(true)` | `mirage.setMoverAbajo(false)` |
-| `DispararCmd` | Consulta `mirage.getPowerupActivo()` → llama `mirage.disparar(sketch)` → agrega proyectiles al `GameController` | No hace nada (`deshacer` no aplica al disparo) |
+| `DispararCmd` | Llama `mirage.disparar(sketch)`. Mirage agrega los proyectiles a su propia lista interna — `DispararCmd` no necesita saber nada de esa lista | No hace nada (`deshacer` no aplica al disparo) |
 
 ---
 
@@ -596,7 +599,6 @@ Recolecta todas las métricas avanzadas durante la partida. Al finalizar, las em
 
 | Atributo | Tipo | Rol |
 |----------|------|-----|
-| `disparosTotales` | `int` | Se incrementa en `DispararCmd` |
 | `disparosAcertados` | `int` | Se incrementa en `ColisionDetector` al impactar un enemigo |
 | `heatmap` | `int[][]` | Grilla 20×20. Cada celda acumula cuántos frames pasó el Mirage en esa zona |
 | `enemigosPorTipo` | `Map<String, Integer>` | Bajas por tipo de enemigo. Clave: `enemigo.getTipo()` |
@@ -607,11 +609,10 @@ Recolecta todas las métricas avanzadas durante la partida. Al finalizar, las em
 | Método | Qué hace |
 |--------|---------|
 | `registrarPosicion(x, y, w, h)` | Cuantiza `(x,y)` a una celda de la grilla y la incrementa. Se llama cada frame desde `EstadoJugando` |
-| `registrarDisparoTotal()` | Incrementa `disparosTotales` |
-| `registrarDisparoAcertado()` | Incrementa `disparosAcertados` |
+| `registrarDisparoAcertado()` | Incrementa `disparosAcertados`. Lo llama `ColisionDetector` cuando un proyectil impacta un enemigo |
 | `registrarDerribo(tipo, puntos)` | Incrementa el contador del tipo en `enemigosPorTipo` |
-| `getPrecision()` | Retorna `disparosAcertados / disparosTotales`. Protege división por cero |
-| `exportar(vidasRestantes)` | Construye y retorna el `ResumenPartida` con todas las métricas |
+| `getPrecision(mirage)` | Retorna `disparosAcertados / mirage.getDisparosTotales()`. Protege división por cero |
+| `exportar(vidasRestantes, mirage)` | Consulta `mirage.getDisparosTotales()` para calcular precisión. Construye y retorna el `ResumenPartida` |
 
 ---
 

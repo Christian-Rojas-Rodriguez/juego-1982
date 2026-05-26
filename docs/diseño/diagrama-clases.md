@@ -39,7 +39,6 @@ classDiagram
         -estadoActual EstadoJuego
         -mirage Mirage
         -enemigos List~Enemigo~
-        -proyectiles List~Proyectil~
         -powerups List~Powerup~
         -nivel NivelMirage
         -colisionDetector ColisionDetector
@@ -74,6 +73,8 @@ classDiagram
     class MoverAbajoCmd     { +ejecutar(mirage Mirage) void +deshacer(mirage Mirage) void }
 
     class DispararCmd {
+        -sketch PApplet
+        +DispararCmd(sketch PApplet)
         +ejecutar(mirage Mirage) void
         +deshacer(mirage Mirage) void
     }
@@ -122,11 +123,13 @@ classDiagram
         -moverDerecha bool
         -moverArriba bool
         -moverAbajo bool
+        -proyectiles List~Proyectil~
+        -disparosTotales int
         -powerupActivo TipoPowerup
         -framesPowerupRestantes int
         +update(sketch PApplet) void
         +render(sketch PApplet) void
-        +disparar(sketch PApplet) List~Proyectil~
+        +disparar(sketch PApplet) void
         +sumarPuntos(puntos int) void
         +aplicarPowerup(tipo TipoPowerup, duracion int) void
         +setMoverIzquierda(v bool) void
@@ -135,6 +138,8 @@ classDiagram
         +setMoverAbajo(v bool) void
         +getVidas() int
         +getPuntuacion() int
+        +getProyectiles() List~Proyectil~
+        +getDisparosTotales() int
         +isInvencible() bool
         +getPowerupActivo() TipoPowerup
     }
@@ -364,18 +369,16 @@ classDiagram
         -enemigosDerribados int
         -tiempoInicioMs long
         -puntajeMaximo int
-        -disparosTotales int
         -disparosAcertados int
         -heatmap int[][]
         -enemigosPorTipo Map~String,Integer~
         -proyectilesDestruidos int
         -nivelMaximo int
-        +registrarDisparoTotal() void
         +registrarDisparoAcertado() void
         +registrarPosicion(x float, y float, w int, h int) void
         +registrarDerribo(tipo String, puntos int) void
         +registrarFinPartida(puntaje int, nivel int) void
-        +exportar(vidasRestantes int) ResumenPartida
+        +exportar(vidasRestantes int, mirage Mirage) ResumenPartida
         +guardar() void
         +cargar() void
         +getPrecision() float
@@ -473,6 +476,7 @@ classDiagram
     Nave <|-- Proyectil
     Nave <|-- Enemigo
     Nave --> HitBox
+    Mirage o-- Proyectil
 
     Enemigo <|-- HarrierEnemigo
     Enemigo <|-- FragataEnemiga

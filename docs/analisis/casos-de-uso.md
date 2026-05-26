@@ -144,7 +144,6 @@ sequenceDiagram
     participant InputHandler
     participant DispararCmd
     participant Mirage
-    participant EstadisticasMirage
 
     Jugador->>+Juego1982: keyPressed(key=SPACE)
     Juego1982->>+GameController: onKeyPressed(key, keyCode)
@@ -152,17 +151,15 @@ sequenceDiagram
     InputHandler->>+DispararCmd: ejecutar(mirage)
     DispararCmd->>+Mirage: disparar(sketch)
     Mirage->>Mirage: cooldownActual = cooldownDisparo
+    Mirage->>Mirage: disparosTotales++
     alt TipoPowerup == DISPARO_DOBLE
-        Mirage-->>DispararCmd: [Proyectil(x-10,y), Proyectil(x+10,y)]
+        Mirage->>Mirage: proyectiles.add(Proyectil(x-10,y)) x2
     else disparo normal
-        Mirage-->>DispararCmd: [Proyectil(x, y)]
+        Mirage->>Mirage: proyectiles.add(Proyectil(x, y))
     end
     deactivate Mirage
-    GameController->>GameController: proyectiles.addAll(nuevos)
     deactivate DispararCmd
     deactivate InputHandler
-    GameController->>+EstadisticasMirage: registrarDisparoTotal()
-    deactivate EstadisticasMirage
     deactivate GameController
     deactivate Juego1982
 ```
