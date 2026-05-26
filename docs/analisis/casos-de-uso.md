@@ -153,12 +153,12 @@ sequenceDiagram
     DispararCmd->>+Mirage: disparar(sketch)
     Mirage->>Mirage: cooldownActual = cooldownDisparo
     alt TipoPowerup == DISPARO_DOBLE
-        Mirage-->>-DispararCmd: [Proyectil(x-10,y), Proyectil(x+10,y)]
+        Mirage-->>DispararCmd: [Proyectil(x-10,y), Proyectil(x+10,y)]
     else disparo normal
-        Mirage-->>-DispararCmd: [Proyectil(x, y)]
+        Mirage-->>DispararCmd: [Proyectil(x, y)]
     end
-    DispararCmd->>+GameController: proyectiles.addAll(nuevos)
-    deactivate GameController
+    deactivate Mirage
+    GameController->>GameController: proyectiles.addAll(nuevos)
     deactivate DispararCmd
     deactivate InputHandler
     GameController->>+EstadisticasMirage: registrarDisparoTotal()
@@ -359,7 +359,6 @@ sequenceDiagram
     NivelMirage->>NivelMirage: jefesVencidos++
     alt jefesVencidos == 4
         NivelMirage->>NivelMirage: isTerminado() → true
-        deactivate NivelMirage
         EstadoJugando->>+GameController: setEstado(new EstadoNivelCompletado())
         GameController->>+EstadoNivelCompletado: alEntrar(controller)
         EstadoNivelCompletado->>+EstadisticasMirage: registrarFinPartida(puntaje, nivelActual)
@@ -373,9 +372,8 @@ sequenceDiagram
         Note over EstadoNivelCompletado: timerFrames cuenta hasta DURACION, luego → EstadoJugando
         deactivate EstadoNivelCompletado
         deactivate GameController
-    else
-        deactivate NivelMirage
     end
+    deactivate NivelMirage
 ```
 
 ---
@@ -418,7 +416,6 @@ sequenceDiagram
     GameController->>+EstadisticasMirage: registrarPosicion(mirage.x, mirage.y, width, height)
     deactivate EstadisticasMirage
     deactivate GameController
-    deactivate draw
 ```
 
 ---
@@ -455,7 +452,6 @@ sequenceDiagram
     end
     deactivate JefeBarco
     deactivate NivelMirage
-    deactivate EstadoJugando
 ```
 
 ---
@@ -501,7 +497,6 @@ sequenceDiagram
     end
     deactivate ColisionDetector
     EstadoJugando->>EstadoJugando: powerups.removeIf(!isActivo())
-    deactivate EstadoJugando
 ```
 
 ---
@@ -549,5 +544,4 @@ sequenceDiagram
         deactivate EstadisticasMirage
     end
     deactivate ColisionDetector
-    deactivate GameController
 ```
