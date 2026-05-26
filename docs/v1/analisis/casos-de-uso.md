@@ -77,6 +77,7 @@ sequenceDiagram
     deactivate Juego1982
 
     Note over Juego1982,Mirage: En el siguiente draw() frame
+    activate Juego1982
     Juego1982->>+GameController: actualizar()
     GameController->>+Mirage: update(sketch)
     Mirage->>Mirage: x += velocidad (flag moverDerecha == true)

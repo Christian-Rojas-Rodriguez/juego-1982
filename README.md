@@ -5,6 +5,12 @@ Trabajo Práctico Integrador · Versión 1.0 · 01/03/2026
 
 ---
 
+> **Versión actual en desarrollo: MVP 1**  
+> Un tipo de enemigo (HarrierEnemigo) · puntos · integración con HOME  
+> Documentación: [`docs/v1/`](docs/v1/README.md)
+
+---
+
 ## Enunciado del problema
 
 Se propone el desarrollo de un videojuego bidimensional de estilo arcade clásico, inspirado en los "vertical scrolling shooters", bajo el título **"1982"**.
