@@ -23,3 +23,5 @@ Thumbs.db
 # Logs y datos generados en runtime
 data/output/*.csv
 data/output/*.json
+
+.vscode/
