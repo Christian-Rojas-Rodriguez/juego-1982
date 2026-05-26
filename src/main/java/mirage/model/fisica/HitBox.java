@@ -23,7 +23,10 @@ public class HitBox {
 
     // --- Constructor ---
     public HitBox(float x, float y, float ancho, float alto) {
-        // TODO: asignar todos los parámetros
+        this.x     = x;
+        this.y     = y;
+        this.ancho = ancho;
+        this.alto  = alto;
     }
 
     // --- Detección AABB ---

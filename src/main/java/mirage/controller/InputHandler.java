@@ -1,54 +1,49 @@
-// ============================================================
-// InputHandler — Traduce códigos de teclado a Commands
-// ============================================================
-// GRASP : Pure Fabrication, Low Coupling
-// Patrón: Command (registra un Comando por tecla)
-// ============================================================
-// Qué implementar:
-//   - registrarComandos(): mapear keyCode → instancia de Comando
-//     Ej: comandos.put(PApplet.LEFT, new MoverIzquierdaCmd())
-//   - onKeyPressed(): buscar comando en el mapa y llamar ejecutar(mirage)
-//   - onKeyReleased(): llamar deshacer(mirage) si el comando lo requiere
-// ============================================================
-
 package mirage.controller;
 
-import processing.core.PApplet;
 import mirage.controller.commands.Comando;
 import mirage.model.entidades.Mirage;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Traduce códigos de teclado a Commands y los ejecuta sobre el Mirage.
+ *
+ * Mantiene un mapa keyCode → Comando. GameController registra los comandos
+ * en init() via registrarComando() y luego propaga los eventos de Processing.
+ *
+ * Patrón: GRASP Pure Fabrication + Command
+ */
 public class InputHandler {
 
-    // --- Atributos ---
+    /** Mapa keyCode → Comando. Se configura en GameController.init(). */
     private final Map<Integer, Comando> comandos = new HashMap<>();
 
-    // --- Constructor ---
-    public InputHandler() {
-        registrarComandos();
+    /**
+     * Asocia una tecla con un comando.
+     * Llamado desde GameController.init() para configurar todos los controles.
+     */
+    public void registrarComando(int keyCode, Comando comando) {
+        // TODO: comandos.put(keyCode, comando)
     }
 
-    // --- Registrar mapeo tecla → comando ---
-    private void registrarComandos() {
-        // TODO: comandos.put(PApplet.LEFT,  new MoverIzquierdaCmd())
-        // TODO: comandos.put(PApplet.RIGHT, new MoverDerechaCmd())
-        // TODO: comandos.put(PApplet.UP,    new MoverArribaCmd())
-        // TODO: comandos.put(PApplet.DOWN,  new MoverAbajoCmd())
-        // TODO: comandos.put(32,            new DispararCmd())  // 32 = SPACE
-    }
-
-    // --- Ejecutar comando al presionar tecla ---
-    public void onKeyPressed(int keyCode, Mirage mirage) {
+    /**
+     * Ejecutar el comando asociado a la tecla presionada.
+     * Para teclas de movimiento: activa el flag (moverDerecha = true).
+     * Para SPACE: llama mirage.disparar().
+     */
+    public void onKeyPressed(int keyCode, char key, Mirage mirage) {
         // TODO: Comando cmd = comandos.get(keyCode)
         // TODO: if (cmd != null) cmd.ejecutar(mirage)
     }
 
-    // --- Deshacer comando al soltar tecla ---
-    public void onKeyReleased(int keyCode) {
+    /**
+     * Deshacer el comando asociado a la tecla soltada.
+     * Para teclas de movimiento: desactiva el flag (moverDerecha = false).
+     * Para SPACE: no hace nada (el disparo no se deshace).
+     */
+    public void onKeyReleased(int keyCode, char key, Mirage mirage) {
         // TODO: Comando cmd = comandos.get(keyCode)
         // TODO: if (cmd != null) cmd.deshacer(mirage)
-        // Nota: necesitarás pasar el mirage como parámetro también
     }
 }
