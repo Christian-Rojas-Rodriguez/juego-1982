@@ -1,50 +1,58 @@
-// ============================================================
-// Enemigo — Clase abstracta base para todos los enemigos
-// ============================================================
-// GRASP : Polymorphism, Protected Variations
-// Patrón: Template Method — update() es final, moverIA() es el hook
-// ============================================================
-// Qué implementar:
-//   - update() final: llama a moverIA() — NO sobreescribir en subclases
-//   - moverIA() abstracto: cada subclase define su comportamiento de IA
-//   - render() abstracto: cada subclase dibuja su sprite
-//   - getHitBox(): hitbox del tamaño apropiado para el enemigo
-// ============================================================
-
 package mirage.model.entidades.enemigos;
 
-import processing.core.PApplet;
 import mirage.model.entidades.Nave;
 import mirage.model.fisica.HitBox;
+import processing.core.PApplet;
 
+/**
+ * Clase abstracta base para todos los enemigos del módulo Mirage.
+ *
+ * Implementa el patrón Template Method: update() define el ciclo de vida fijo
+ * (moverIA + hitBox sync), y cada subclase sobreescribe moverIA() con su
+ * patrón de movimiento propio.
+ *
+ * Agregar un nuevo tipo de enemigo = 1 subclase que sobreescribe moverIA()
+ * y getTipo(). GameController y ColisionDetector no necesitan cambios.
+ *
+ * Patrón: Template Method
+ */
 public abstract class Enemigo extends Nave {
 
-    // --- Atributos ---
     protected int puntos;
     protected final PApplet sketch;
 
-    // --- Constructor ---
     public Enemigo(PApplet sketch, float x, float y, float velocidad, int vida, int puntos) {
         super(x, y, velocidad, vida);
         this.sketch = sketch;
-        // TODO: this.puntos = puntos
+        this.puntos = puntos;
     }
 
-    // Template Method: ciclo de vida fijo
+    /**
+     * Ciclo de vida fijo: llamado cada frame por GameController.
+     * Delega el movimiento a moverIA() — no sobreescribir en subclases.
+     */
     @Override
     public final void update() {
-        moverIA();
+        // TODO: moverIA()
     }
 
-    // Hook: cada subclase implementa su lógica de movimiento
+    /**
+     * Hook del Template Method: cada subclase implementa su patrón de movimiento.
+     * HarrierEnemigo: zigzag horizontal + descenso.
+     */
     protected abstract void moverIA();
 
-    // Cada subclase dibuja su propio sprite
+    /** Dibuja el sprite del enemigo. Implementado por cada subclase. */
     public abstract void render(PApplet sk);
 
     @Override
     public abstract HitBox getHitBox();
 
-    // --- Getter ---
+    /**
+     * Retorna el identificador de tipo para estadísticas.
+     * Ejemplo: "HARRIER". Usado en EstadisticasMirage.registrarDerribo().
+     */
+    public abstract String getTipo();
+
     public int getPuntos() { return puntos; }
 }

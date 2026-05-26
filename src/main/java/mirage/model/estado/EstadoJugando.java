@@ -42,13 +42,13 @@ public class EstadoJugando implements EstadoJuego {
         // TODO: controller.getRenderer().render(
         //           controller.getMirage(),
         //           controller.getEnemigos(),
-        //           controller.getProyectiles(),
+        //           controller.getMirage().getProyectiles(),
         //           controller.getSketch()
         //       )
     }
 
     @Override
-    public void onKeyPressed(GameController controller, int keyCode) {
-        // TODO: si keyCode == 'p' o 'P' → controller.setEstado(new EstadoPausado())
+    public void onKeyPressed(GameController controller, char key, int keyCode) {
+        // TODO: si key == 'p' o key == 'P' → controller.setEstado(new EstadoPausado())
     }
 }

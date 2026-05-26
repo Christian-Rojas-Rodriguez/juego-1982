@@ -1,45 +1,51 @@
 import processing.core.PApplet;
-import game.GameManager;
+import mirage.MirageModulo;
 
+/**
+ * Punto de entrada de Processing y del módulo Mirage en modo standalone.
+ *
+ * En producción el HOME team instancia MirageModulo y lo controla via ModuloJuego.
+ * Esta clase existe para correr el módulo de forma independiente durante desarrollo.
+ *
+ * Responsabilidades:
+ *   - Configurar el sketch (tamaño, framerate)
+ *   - Delegar setup/draw/input a MirageModulo
+ */
 public class Juego1982 extends PApplet {
 
-    private GameManager gameManager;
+    private MirageModulo mirageModulo;
 
-    // --- Processing entry point ---
     public static void main(String[] args) {
         PApplet.main("Juego1982");
     }
 
-    // --- Configuración inicial (tamaño, framerate, etc.) ---
     @Override
     public void settings() {
-        size(600, 600);
+        size(600, 800);
         pixelDensity(displayDensity());
     }
 
-    // --- Se ejecuta una sola vez al iniciar ---
     @Override
     public void setup() {
         frameRate(60);
-        gameManager = new GameManager(this);
-        gameManager.init();
+        mirageModulo = new MirageModulo();
+        mirageModulo.inicializarContexto(this);
+        mirageModulo.iniciar();
     }
 
-    // --- Se ejecuta 60 veces por segundo ---
     @Override
     public void draw() {
-        gameManager.update();
-        gameManager.render();
+        mirageModulo.actualizar();
+        mirageModulo.dibujar();
     }
 
-    // --- Input ---
     @Override
     public void keyPressed() {
-        gameManager.onKeyPressed(key, keyCode);
+        mirageModulo.onKeyPressed(key, keyCode);
     }
 
     @Override
     public void keyReleased() {
-        gameManager.onKeyReleased(key, keyCode);
+        mirageModulo.onKeyReleased(key, keyCode);
     }
 }

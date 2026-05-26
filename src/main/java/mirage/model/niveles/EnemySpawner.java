@@ -1,65 +1,64 @@
-// ============================================================
-// EnemySpawner — Genera enemigos según intervalos de tiempo
-// ============================================================
-// GRASP : Pure Fabrication, Low Coupling
-// ============================================================
-// Qué implementar:
-//   - update(): incrementar frameCounter, si alcanzó el intervalo
-//               generar un enemigo con EnemyFactory y agregar a la lista interna
-//   - getEnemigosNuevos(): retornar y LIMPIAR la lista de nuevos de este frame
-//     (el Controller los agrega a su lista maestra)
-//   - setIntervalo(): permite aumentar dificultad desde NivelMirage
-// Diferencia con el EnemySpawner anterior (game.levels):
-//   Este NO mutata una lista externa — devuelve los nuevos al Controller.
-// ============================================================
-
 package mirage.model.niveles;
 
-import processing.core.PApplet;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.model.entidades.enemigos.EnemyFactory;
+import processing.core.PApplet;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Genera oleadas de enemigos a intervalos regulares de frames de Processing.
+ *
+ * Cada vez que frameCounter alcanza intervaloFrames, crea un batch de tamanoOleada
+ * enemigos en posiciones X aleatorias fuera de la pantalla (y = -20).
+ *
+ * Los enemigos nuevos se acumulan en nuevosEsteFrame; getEnemigosNuevos()
+ * los retorna y limpia el buffer. GameController los agrega a su lista activa.
+ *
+ * En MVP 2 recibirá ConfiguradorDificultad para escalar vida y velocidad.
+ *
+ * Patrón: GRASP Pure Fabrication
+ */
 public class EnemySpawner {
 
-    // --- Atributos ---
     private final PApplet sketch;
     private int intervaloFrames;
+    private final int tamanoOleada;
     private int frameCounter;
+
+    /** Buffer de enemigos generados en el frame actual. Se limpia tras cada consulta. */
     private final List<Enemigo> nuevosEsteFrame = new ArrayList<>();
 
-    // --- Constructor ---
-    public EnemySpawner(PApplet sketch, int intervaloFrames) {
+    public EnemySpawner(PApplet sketch, int intervaloFrames, int tamanoOleada) {
         this.sketch          = sketch;
-        // TODO: this.intervaloFrames = intervaloFrames
-        // TODO: this.frameCounter = 0
+        this.intervaloFrames = intervaloFrames;
+        this.tamanoOleada    = tamanoOleada;
+        this.frameCounter    = 0;
     }
 
-    // --- Avanzar un frame ---
+    /** Avanza el contador y genera una oleada cuando se alcanza el intervalo. */
     public void update() {
         // TODO: frameCounter++
-        // TODO: si frameCounter >= intervaloFrames:
-        //         spawnEnemigo()
+        // TODO: if (frameCounter >= intervaloFrames):
+        //         for i in 0..tamanoOleada-1:
+        //           float x = sketch.random(20, sketch.width - 20)
+        //           nuevosEsteFrame.add(EnemyFactory.crear(EnemyFactory.Tipo.HARRIER, sketch, x, -20))
         //         frameCounter = 0
     }
 
-    private void spawnEnemigo() {
-        // TODO: float x = sketch.random(20, sketch.width - 20)
-        // TODO: nuevosEsteFrame.add(EnemyFactory.crear(EnemyFactory.Tipo.HARRIER, sketch, x, -20))
-    }
-
-    // --- Retornar y limpiar nuevos de este frame ---
+    /**
+     * Retorna los enemigos generados en este frame y limpia el buffer.
+     * Llamado por NivelMirage.getEnemigosNuevos() cada frame.
+     */
     public List<Enemigo> getEnemigosNuevos() {
-        // TODO:
-        // List<Enemigo> resultado = new ArrayList<>(nuevosEsteFrame)
-        // nuevosEsteFrame.clear()
-        // return resultado
+        // TODO: List<Enemigo> resultado = new ArrayList<>(nuevosEsteFrame)
+        // TODO: nuevosEsteFrame.clear()
+        // TODO: return resultado
         return new ArrayList<>();
     }
 
-    // --- Ajustar dificultad ---
+    /** Permite ajustar la cadencia en MVPs futuros (ConfiguradorDificultad). */
     public void setIntervalo(int nuevoIntervalo) {
         // TODO: this.intervaloFrames = nuevoIntervalo
     }
