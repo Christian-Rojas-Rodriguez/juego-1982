@@ -33,7 +33,7 @@ public class EstadoPausado implements EstadoJuego {
     }
 
     @Override
-    public void onKeyPressed(GameController controller, int keyCode) {
-        // TODO: si keyCode == 'p' o 'P' → controller.setEstado(new EstadoJugando())
+    public void onKeyPressed(GameController controller, char key, int keyCode) {
+        // TODO: si key == 'p' o key == 'P' → controller.setEstado(new EstadoJugando())
     }
 }

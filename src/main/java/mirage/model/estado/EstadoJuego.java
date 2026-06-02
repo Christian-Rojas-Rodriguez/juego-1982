@@ -23,5 +23,5 @@ public interface EstadoJuego {
 
     void alEntrar(GameController controller);
 
-    void onKeyPressed(GameController controller, int keyCode);
+    void onKeyPressed(GameController controller, char key, int keyCode);
 }
