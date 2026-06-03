@@ -19,7 +19,8 @@ public class PantallaGameOver implements Pantalla {
 
     // --- Constructor ---
     public PantallaGameOver(int puntajeFinal, int enemigosDerribados) {
-        // TODO: asignar parámetros
+        this.puntajeFinal       = puntajeFinal;
+        this.enemigosDerribados = enemigosDerribados;
     }
 
     @Override

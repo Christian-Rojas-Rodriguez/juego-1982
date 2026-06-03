@@ -1,6 +1,5 @@
 package mirage.model.estado;
 
-import home.TipoEvento;
 import mirage.controller.GameController;
 
 /**
@@ -21,7 +20,7 @@ public class EstadoGameOver implements EstadoJuego {
         // TODO: int puntaje = controller.getMirage().getPuntuacion()
         // TODO: controller.getEstadisticas().registrarFinPartida(puntaje)
         // TODO: controller.getEstadisticas().guardar()
-        // TODO: controller.getMirageModulo().notificar(TipoEvento.FINALIZADO)
+        // TODO: controller.getMirageModulo().finalizar()  // emite ModuloEvento.Tipo.FINALIZADO al HOME
         // TODO: PantallaGameOver pantalla = new PantallaGameOver(puntaje, enemigosDerribados)
         // TODO: controller.getRenderer().setPantalla(pantalla)
     }

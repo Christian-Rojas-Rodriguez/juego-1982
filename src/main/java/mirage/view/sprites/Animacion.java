@@ -28,7 +28,11 @@ public class Animacion {
 
     // --- Constructor ---
     public Animacion(List<String> nombresFrames, int velocidad) {
-        // TODO: asignar parámetros, frameActual = 0, contador = 0, terminada = false
+        this.nombresFrames = nombresFrames;
+        this.velocidad     = velocidad;
+        this.frameActual   = 0;
+        this.contador      = 0;
+        this.terminada     = false;
     }
 
     // --- Avanzar la animación un frame ---

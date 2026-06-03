@@ -31,7 +31,8 @@ public class Proyectil extends Nave {
     public Proyectil(float x, float y, PApplet sketch) {
         super(x, y, 8f, 1);
         this.sketch = sketch;
-        // TODO: activo = true, danio = 1
+        this.activo = true;
+        this.danio  = 1;
     }
 
     @Override

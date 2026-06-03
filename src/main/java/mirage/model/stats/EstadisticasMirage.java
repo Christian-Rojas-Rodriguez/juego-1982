@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * ColisionDetector la llama para registrar aciertos y derribos.
  * Al finalizar la partida, exportar() construye un ResumenPartida interno
- * que MirageModulo.getEstadisticasGenerales() mapea al DTO del HOME team.
+ * que ModuloMirage.getEstadisticasGenerales() mapea al DTO del HOME team.
  *
  * disparosTotales NO se almacena aquí: es responsabilidad de Mirage (quien dispara).
  * Para calcular precisión se consulta mirage.getDisparosTotales() en exportar().
@@ -84,7 +84,7 @@ public class EstadisticasMirage {
 
     /**
      * Construye el ResumenPartida con todos los datos de la partida.
-     * MirageModulo.getEstadisticasGenerales() lo usa para crear el DTO del HOME.
+     * ModuloMirage.getEstadisticasGenerales() lo usa para crear el DTO del HOME.
      *
      * @param vidasRestantes vidas que le quedaban al Mirage al terminar
      * @param mirage         referencia para obtener disparosTotales y puntuacion
