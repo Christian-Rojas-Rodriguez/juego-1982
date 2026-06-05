@@ -34,12 +34,11 @@ public abstract class Nave {
     public abstract HitBox getHitBox();
 
     public boolean estaViva() {
-        // TODO: return vida > 0
-        return false;
+        return vida > 0;
     }
 
     public void recibirDanio(int danio) {
-        // TODO: vida -= danio
+        vida -= danio;
     }
 
     public float getX() { return x; }

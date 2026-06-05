@@ -43,7 +43,7 @@ public class EstadisticasMirage {
      * Solo incrementa aciertos; el total de disparos está en Mirage.
      */
     public void registrarDisparoAcertado() {
-        // TODO: disparosAcertados++
+        disparosAcertados++;
     }
 
     /**
@@ -53,8 +53,8 @@ public class EstadisticasMirage {
      * @param puntos puntos que otorgó el derribo
      */
     public void registrarDerribo(String tipo, int puntos) {
-        // TODO: enemigosDerribados++
-        // TODO: enemigosPorTipo.merge(tipo, 1, Integer::sum)
+        enemigosDerribados++;
+        enemigosPorTipo.merge(tipo, 1, Integer::sum);
     }
 
     /** Llamado desde EstadoGameOver.alEntrar() al finalizar la partida. */

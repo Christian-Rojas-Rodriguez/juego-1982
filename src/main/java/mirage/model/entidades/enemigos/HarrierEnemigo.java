@@ -38,8 +38,7 @@ public class HarrierEnemigo extends Enemigo {
 
     @Override
     public HitBox getHitBox() {
-        // TODO: return new HitBox(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO)
-        return null;
+        return new HitBox(x - ANCHO/2f, y - ALTO/2f, ANCHO, ALTO);
     }
 
     @Override
