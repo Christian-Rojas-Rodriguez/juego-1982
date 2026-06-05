@@ -17,7 +17,7 @@ public class DispararCmd implements Comando {
 
     @Override
     public void ejecutar(Mirage mirage) {
-        // TODO: mirage.disparar()
+        mirage.disparar();
     }
 
     @Override

@@ -94,7 +94,7 @@ public class GameController {
 
     public void onKeyPressed(char key, int keyCode) {
         // TODO: estadoActual.onKeyPressed(this, key, keyCode)   ← state handles P, R, ESC
-        // TODO: inputHandler.onKeyPressed(keyCode, key, mirage) ← command handles movement + SPACE
+        this.inputHandler.onKeyPressed(keyCode, key, mirage); // ← command handles movement + SPACE
     }
 
     public void onKeyReleased(char key, int keyCode) {

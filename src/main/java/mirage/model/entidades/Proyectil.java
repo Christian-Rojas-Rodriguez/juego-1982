@@ -31,28 +31,30 @@ public class Proyectil extends Nave {
     public Proyectil(float x, float y, PApplet sketch) {
         super(x, y, 8f, 1);
         this.sketch = sketch;
-        // TODO: activo = true, danio = 1
+        this.activo = true;
+        this.danio = 1;
     }
 
     @Override
     public void update() {
-        // TODO: y -= velocidad
-        // TODO: si y < -ALTO → desactivar()
+        this.y -= velocidad;
+        if (y < -ALTO) {
+            desactivar();
+        }
     }
 
     public void render(PApplet sk) {
-        // TODO: sk.fill(255, 255, 0)  // amarillo pixel-art
-        // TODO: sk.rect(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO)
+        //sk.fill(255, 255, 0);  // amarillo pixel-art
+        //sk.rect(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO);
     }
 
     public void desactivar() {
-        // TODO: activo = false
+        this.activo = false;
     }
 
     @Override
     public HitBox getHitBox() {
-        // TODO: return new HitBox(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO)
-        return null;
+        return null; //return new HitBox(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO);
     }
 
     // --- Getters ---

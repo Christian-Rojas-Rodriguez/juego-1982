@@ -1,10 +1,9 @@
 package mirage.controller;
 
-import mirage.controller.commands.Comando;
-import mirage.model.entidades.Mirage;
-
 import java.util.HashMap;
 import java.util.Map;
+import mirage.controller.commands.Comando;
+import mirage.model.entidades.Mirage;
 
 /**
  * Traduce códigos de teclado a Commands y los ejecuta sobre el Mirage.
@@ -33,8 +32,8 @@ public class InputHandler {
      * Para SPACE: llama mirage.disparar().
      */
     public void onKeyPressed(int keyCode, char key, Mirage mirage) {
-        // TODO: Comando cmd = comandos.get(keyCode)
-        // TODO: if (cmd != null) cmd.ejecutar(mirage)
+        Comando cmd = comandos.get(keyCode);
+        if (cmd != null) {cmd.ejecutar(mirage);}
     }
 
     /**
