@@ -162,34 +162,61 @@ sequenceDiagram
     participant EstadoJugando
     participant GameController
     participant ColisionDetector
+    participant Mirage
     participant Proyectil
     participant HarrierEnemigo
-    participant Mirage
+    participant HitBox
     participant EstadisticasMirage
 
-    EstadoJugando->>+ColisionDetector: detectarProyectilEnemigo(mirage.getProyectiles(), enemigos, mirage)
-    loop por cada par (proyectil, enemigo)
-        ColisionDetector->>+Proyectil: getHitBox()
-        deactivate Proyectil
-        ColisionDetector->>+HarrierEnemigo: getHitBox()
-        deactivate HarrierEnemigo
-        ColisionDetector->>ColisionDetector: hitBoxP.colisionaCon(hitBoxE)?
-        alt colisión
-            ColisionDetector->>+HarrierEnemigo: recibirDanio(proyectil.getDanio())
-            deactivate HarrierEnemigo
-            ColisionDetector->>+Proyectil: desactivar()
-            deactivate Proyectil
-            ColisionDetector->>+EstadisticasMirage: registrarDisparoAcertado()
-            deactivate EstadisticasMirage
-            alt HarrierEnemigo.vida <= 0
-                ColisionDetector->>+Mirage: sumarPuntos(enemigo.getPuntos())
-                deactivate Mirage
-                ColisionDetector->>+EstadisticasMirage: registrarDerribo(tipo, puntos)
+    EstadoJugando->>+GameController: getMirage()
+    GameController-->>-EstadoJugando: mirage
+    EstadoJugando->>+GameController: getEnemigos()
+    GameController-->>-EstadoJugando: enemigos
+    EstadoJugando->>+GameController: getColisionDetector()
+    GameController-->>-EstadoJugando: colisionDetector
+    EstadoJugando->>+Mirage: getProyectiles()
+    Mirage-->>-EstadoJugando: proyectiles
+
+    EstadoJugando->>+ColisionDetector: detectarProyectilEnemigo(proyectiles, enemigos, mirage)
+    loop for (Proyectil p : proyectiles)
+        ColisionDetector->>Proyectil: p.isActivo()
+        loop for (Enemigo e : enemigos)
+            ColisionDetector->>HarrierEnemigo: e.estaViva()
+            ColisionDetector->>+Proyectil: p.getHitBox()
+            Proyectil->>+HitBox: new HitBox(...)
+            HitBox-->>-Proyectil: hitBoxP
+            Proyectil-->>-ColisionDetector: hitBoxP
+            ColisionDetector->>+HarrierEnemigo: e.getHitBox()
+            HarrierEnemigo->>+HitBox: new HitBox(...)
+            HitBox-->>-HarrierEnemigo: hitBoxE
+            HarrierEnemigo-->>-ColisionDetector: hitBoxE
+            ColisionDetector->>+HitBox: hitBoxP.colisionaCon(hitBoxE)
+            HitBox-->>-ColisionDetector: hayColision
+            alt colision
+                ColisionDetector->>+Proyectil: p.getDanio()
+                Proyectil-->>-ColisionDetector: danio
+                ColisionDetector->>+HarrierEnemigo: e.recibirDanio(danio)
+                deactivate HarrierEnemigo
+                ColisionDetector->>+Proyectil: p.desactivar()
+                deactivate Proyectil
+                ColisionDetector->>+EstadisticasMirage: registrarDisparoAcertado()
                 deactivate EstadisticasMirage
+                ColisionDetector->>HarrierEnemigo: e.estaViva()
+                alt enemigo destruido
+                    ColisionDetector->>HarrierEnemigo: e.getPuntos()
+                    HarrierEnemigo-->>ColisionDetector: puntos
+                    ColisionDetector->>HarrierEnemigo: e.getTipo()
+                    HarrierEnemigo-->>ColisionDetector: tipo
+                    ColisionDetector->>+Mirage: sumarPuntos(puntos)
+                    deactivate Mirage
+                    ColisionDetector->>+EstadisticasMirage: registrarDerribo(tipo, puntos)
+                    deactivate EstadisticasMirage
+                end
             end
         end
     end
     deactivate ColisionDetector
+
     EstadoJugando->>GameController: enemigos.removeIf(!estaViva())
     EstadoJugando->>Mirage: getProyectiles().removeIf(!isActivo())
 ```
