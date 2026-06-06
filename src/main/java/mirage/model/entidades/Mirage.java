@@ -132,6 +132,6 @@ public class Mirage extends Nave {
     public int getDisparosTotales()         { return disparosTotales; }
 
     public void sumarPuntos(int puntos) {
-        // TODO: puntuacion += puntos
+        puntuacion += puntos;
     }
 }

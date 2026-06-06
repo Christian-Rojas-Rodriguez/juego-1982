@@ -31,17 +31,16 @@ public class HitBox {
 
     // --- Detección AABB ---
     public boolean colisionaCon(HitBox otro) {
-        // TODO:
-        // return !(this.x + this.ancho < otro.x ||
-        //          otro.x  + otro.ancho < this.x  ||
-        //          this.y + this.alto  < otro.y ||
-        //          otro.y  + otro.alto  < this.y);
-        return false;
+        return !(this.x + this.ancho < otro.x ||
+                  otro.x  + otro.ancho < this.x  ||
+                  this.y + this.alto  < otro.y ||
+                  otro.y  + otro.alto  < this.y);
     }
 
     // --- Actualizar posición cada frame ---
     public void moverA(float x, float y) {
-        // TODO: this.x = x; this.y = y;
+        this.x = x;
+        this.y = y;
     }
 
     // --- Getters ---
