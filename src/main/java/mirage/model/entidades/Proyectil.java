@@ -37,13 +37,13 @@ public class Proyectil extends Nave {
 
     @Override
     public void update() {
-        // TODO: y -= velocidad
-        // TODO: si y < -ALTO → desactivar()
+        y -= velocidad;
+        if (y < -ALTO) desactivar();
     }
 
     public void render(PApplet sk) {
-        // TODO: sk.fill(255, 255, 0)  // amarillo pixel-art
-        // TODO: sk.rect(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO)
+        sk.fill(255, 255, 0); // amarillo pixel-art
+        sk.rect(x - ANCHO / 2f, y - ALTO / 2f, ANCHO, ALTO);
     }
 
     public void desactivar() {
