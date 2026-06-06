@@ -7,6 +7,7 @@ import mirage.controller.commands.MoverArribaCmd;
 import mirage.controller.commands.MoverDerechaCmd;
 import mirage.controller.commands.MoverIzquierdaCmd;
 import mirage.model.estado.EstadoJuego;
+import mirage.model.estado.EstadoJugando;
 import mirage.model.entidades.Mirage;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.model.fisica.ColisionDetector;
@@ -62,21 +63,23 @@ public class GameController {
         renderer         = new GameRenderer();
         inputHandler     = new InputHandler();
 
-        // TODO: inputHandler.registrarComando(PApplet.LEFT,  new MoverIzquierdaCmd())
-        // TODO: inputHandler.registrarComando(PApplet.RIGHT, new MoverDerechaCmd())
-        // TODO: inputHandler.registrarComando(PApplet.UP,    new MoverArribaCmd())
-        // TODO: inputHandler.registrarComando(PApplet.DOWN,  new MoverAbajoCmd())
-        // TODO: inputHandler.registrarComando(32,            new DispararCmd())  // 32 = SPACE
+        inputHandler.registrarComando(PApplet.LEFT,  new MoverIzquierdaCmd());
+        inputHandler.registrarComando(PApplet.RIGHT, new MoverDerechaCmd());
+        inputHandler.registrarComando(PApplet.UP,    new MoverArribaCmd());
+        inputHandler.registrarComando(PApplet.DOWN,  new MoverAbajoCmd());
+        inputHandler.registrarComando(32,            new DispararCmd());  // 32 = SPACE
+
+        setEstado(new EstadoJugando());
     }
 
     // ── Game loop ────────────────────────────────────────────────────────────
 
     public void update() {
-        // TODO: estadoActual.update(this)
+        estadoActual.update(this);
     }
 
     public void render() {
-        // TODO: estadoActual.render(this)
+        estadoActual.render(this);
     }
 
     // ── Estado ───────────────────────────────────────────────────────────────
@@ -86,19 +89,19 @@ public class GameController {
      * Usado por los estados y por ModuloMirage para transicionar.
      */
     public void setEstado(EstadoJuego nuevoEstado) {
-        // TODO: estadoActual = nuevoEstado
-        // TODO: nuevoEstado.alEntrar(this)
+        this.estadoActual = nuevoEstado;
+        nuevoEstado.alEntrar(this);
     }
 
     // ── Input ────────────────────────────────────────────────────────────────
 
     public void onKeyPressed(char key, int keyCode) {
-        // TODO: estadoActual.onKeyPressed(this, key, keyCode)   ← state handles P, R, ESC
-        // TODO: inputHandler.onKeyPressed(keyCode, key, mirage) ← command handles movement + SPACE
+        estadoActual.onKeyPressed(this, key, keyCode);   // state handles P, R, ESC
+        inputHandler.onKeyPressed(keyCode, key, mirage); // command handles movement + SPACE
     }
 
     public void onKeyReleased(char key, int keyCode) {
-        // TODO: inputHandler.onKeyReleased(keyCode, key, mirage)
+        inputHandler.onKeyReleased(keyCode, key, mirage);
     }
 
     // ── Getters (solo lectura para los estados) ───────────────────────────────

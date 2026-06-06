@@ -24,7 +24,7 @@ public class InputHandler {
      * Llamado desde GameController.init() para configurar todos los controles.
      */
     public void registrarComando(int keyCode, Comando comando) {
-        // TODO: comandos.put(keyCode, comando)
+        comandos.put(keyCode, comando);
     }
 
     /**
@@ -33,8 +33,8 @@ public class InputHandler {
      * Para SPACE: llama mirage.disparar().
      */
     public void onKeyPressed(int keyCode, char key, Mirage mirage) {
-        // TODO: Comando cmd = comandos.get(keyCode)
-        // TODO: if (cmd != null) cmd.ejecutar(mirage)
+        Comando cmd = comandos.get(keyCode);
+        if (cmd != null) cmd.ejecutar(mirage);
     }
 
     /**
@@ -43,7 +43,7 @@ public class InputHandler {
      * Para SPACE: no hace nada (el disparo no se deshace).
      */
     public void onKeyReleased(int keyCode, char key, Mirage mirage) {
-        // TODO: Comando cmd = comandos.get(keyCode)
-        // TODO: if (cmd != null) cmd.deshacer(mirage)
+        Comando cmd = comandos.get(keyCode);
+        if (cmd != null) cmd.deshacer(mirage);
     }
 }

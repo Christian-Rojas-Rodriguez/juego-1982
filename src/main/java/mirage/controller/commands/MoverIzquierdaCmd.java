@@ -17,11 +17,11 @@ public class MoverIzquierdaCmd implements Comando {
 
     @Override
     public void ejecutar(Mirage mirage) {
-        // TODO: mirage.setMoverIzquierda(true)
+        mirage.setMoverIzquierda(true);
     }
 
     @Override
     public void deshacer(Mirage mirage) {
-        // TODO: mirage.setMoverIzquierda(false)
+        mirage.setMoverIzquierda(false);
     }
 }

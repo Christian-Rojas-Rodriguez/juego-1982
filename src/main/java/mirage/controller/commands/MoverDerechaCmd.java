@@ -13,11 +13,11 @@ public class MoverDerechaCmd implements Comando {
 
     @Override
     public void ejecutar(Mirage mirage) {
-        // TODO: mirage.setMoverDerecha(true)
+        mirage.setMoverDerecha(true);
     }
 
     @Override
     public void deshacer(Mirage mirage) {
-        // TODO: mirage.setMoverDerecha(false)
+        mirage.setMoverDerecha(false);
     }
 }
