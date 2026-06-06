@@ -46,8 +46,8 @@ flowchart LR
 | UC-04 | Proyectil destruye enemigo | Sistema | `ColisionDetector`, `Proyectil`, `HarrierEnemigo`, `Mirage`, `EstadisticasMirage` |
 | UC-05 | Enemigo impacta al Mirage | Sistema | `ColisionDetector`, `HarrierEnemigo`, `Mirage` |
 | UC-06 | Oleada de enemigos se activa | Sistema | `EnemySpawner`, `HarrierEnemigo`, `NivelMirage` |
-| UC-07 | Game Over | Sistema | `GameController`, `EstadoGameOver`, `MirageModulo` |
-| UC-08 | Exportar estadísticas al HOME | Sistema / HOME | `MirageModulo`, `EstadisticasMirage`, `EstadisticasGenerales`, `IModuloObserver` |
+| UC-07 | Game Over | Sistema | `GameController`, `EstadoGameOver`, `ModuloMirage` |
+| UC-08 | Exportar estadísticas al HOME | Sistema / HOME | `ModuloMirage`, `EstadisticasMirage`, `EstadisticasGenerales`, `IModuloObserver` |
 
 ---
 
@@ -305,16 +305,17 @@ sequenceDiagram
 sequenceDiagram
     participant GameController
     participant EstadoGameOver
-    participant MirageModulo
+    participant ModuloMirage
     participant IModuloObserver
 
     GameController->>+EstadoGameOver: alEntrar(controller)
-    EstadoGameOver->>+MirageModulo: notificar(FINALIZADO)
+    EstadoGameOver->>+ModuloMirage: finalizar()
+    Note over ModuloMirage: internamente notifica FINALIZADO
     loop por cada observer registrado
-        MirageModulo->>+IModuloObserver: onEventoModulo(ModuloEvento(FINALIZADO))
+        ModuloMirage->>+IModuloObserver: onEventoModulo(ModuloEvento(FINALIZADO))
         deactivate IModuloObserver
     end
-    deactivate MirageModulo
+    deactivate ModuloMirage
     deactivate EstadoGameOver
 ```
 

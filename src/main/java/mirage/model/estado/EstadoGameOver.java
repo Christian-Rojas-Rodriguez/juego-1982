@@ -17,12 +17,20 @@ public class EstadoGameOver implements EstadoJuego {
 
     @Override
     public void alEntrar(GameController controller) {
-        // TODO: int puntaje = controller.getMirage().getPuntuacion()
-        // TODO: controller.getEstadisticas().registrarFinPartida(puntaje)
-        // TODO: controller.getEstadisticas().guardar()
-        // TODO: controller.getMirageModulo().finalizar()  // emite ModuloEvento.Tipo.FINALIZADO al HOME
-        // TODO: PantallaGameOver pantalla = new PantallaGameOver(puntaje, enemigosDerribados)
-        // TODO: controller.getRenderer().setPantalla(pantalla)
+        int puntaje    = controller.getMirage().getPuntuacion();
+        int derribados = controller.getEstadisticas().getEnemigosDerribados();
+
+        controller.getEstadisticas().registrarFinPartida(puntaje);
+        // TODO(UC-08): controller.getEstadisticas().guardar() — persistencia a CSV fuera de v1.
+
+        controller.getRenderer()
+                  .setPantalla(new mirage.view.pantallas.PantallaGameOver(puntaje, derribados));
+
+        try {
+            controller.getMirageModulo().finalizar();   // notifica FINALIZADO al HOME
+        } catch (contracts.EstadoInvalidoException e) {
+            // Ya finalizado o estado no válido: el HOME maneja el ciclo de vida.
+        }
     }
 
     @Override
@@ -32,13 +40,20 @@ public class EstadoGameOver implements EstadoJuego {
 
     @Override
     public void render(GameController controller) {
-        // TODO: controller.getRenderer().render(controller.getSketch(),
-        //           controller.getMirage(), controller.getEnemigos())
+        // Juego de fondo + la pantalla de Game Over (ya seteada en alEntrar()).
+        controller.getRenderer().render(
+                controller.getMirage(),
+                controller.getEnemigos(),
+                controller.getMirage().getProyectiles(),
+                controller.getSketch()
+        );
     }
 
     @Override
     public void onKeyPressed(GameController controller, char key, int keyCode) {
-        // TODO: si key == 'r' o key == 'R' → controller.getMirageModulo().reset()
-        // TODO: si keyCode == ESC → controller.getMirageModulo().finalizar()
+        // R reinicia. ESC lo intercepta el HOME; no se maneja acá.
+        if (key == 'r' || key == 'R') {
+            controller.getMirageModulo().reset();
+        }
     }
 }
