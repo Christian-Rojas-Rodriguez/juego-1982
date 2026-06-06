@@ -330,18 +330,18 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant HomeJuego
-    participant MirageModulo
+    participant ModuloMirage
     participant EstadisticasMirage
     participant Mirage
     participant EstadisticasGenerales
 
-    HomeJuego->>+MirageModulo: getEstadisticasGenerales()
-    MirageModulo->>+EstadisticasMirage: exportar(mirage.getVidas(), mirage)
+    HomeJuego->>+ModuloMirage: getEstadisticasGenerales()
+    ModuloMirage->>+EstadisticasMirage: exportar(mirage.getVidas(), mirage)
     EstadisticasMirage->>+Mirage: getDisparosTotales()
     deactivate Mirage
     EstadisticasMirage->>EstadisticasMirage: calcular precision = acertados / totales
-    EstadisticasMirage-->>-MirageModulo: datos internos
-    MirageModulo->>+EstadisticasGenerales: new EstadisticasGenerales(nombreModulo, puntaje, ...)
+    EstadisticasMirage-->>-ModuloMirage: datos internos
+    ModuloMirage->>+EstadisticasGenerales: new EstadisticasGenerales(nombreModulo, puntaje, ...)
     deactivate EstadisticasGenerales
-    MirageModulo-->>-HomeJuego: EstadisticasGenerales
+    ModuloMirage-->>-HomeJuego: EstadisticasGenerales
 ```

@@ -32,8 +32,8 @@ public class EstadisticasMirage {
     private int partidasPerdidas;
 
     public EstadisticasMirage() {
-        // TODO: cargar()  — recuperar historial previo de archivo
-        // TODO: tiempoInicioMs = System.currentTimeMillis()
+        this.tiempoInicioMs = System.currentTimeMillis();
+        cargar();  // no-op en v1 (persistencia CSV fuera de v1)
     }
 
     // ── Registro durante la partida ──────────────────────────────────────────
@@ -59,10 +59,9 @@ public class EstadisticasMirage {
 
     /** Llamado desde EstadoGameOver.alEntrar() al finalizar la partida. */
     public void registrarFinPartida(int puntajeFinal) {
-        // TODO: float duracion = (System.currentTimeMillis() - tiempoInicioMs) / 1000f
-        // TODO: partidasJugadas++
-        // TODO: partidasPerdidas++  (en MVP 1 toda partida termina en derrota)
-        // TODO: if (puntajeFinal > puntajeMaximo) puntajeMaximo = puntajeFinal
+        partidasJugadas++;
+        partidasPerdidas++;  // en v1 toda partida termina en derrota
+        if (puntajeFinal > puntajeMaximo) puntajeMaximo = puntajeFinal;
     }
 
     // ── Precisión ────────────────────────────────────────────────────────────
@@ -74,10 +73,9 @@ public class EstadisticasMirage {
      * @return valor entre 0.0 y 1.0, o 0.0 si no se disparó
      */
     public float getPrecision(Mirage mirage) {
-        // TODO: int totales = mirage.getDisparosTotales()
-        // TODO: if (totales == 0) return 0f
-        // TODO: return (float) disparosAcertados / totales
-        return 0f;
+        int totales = mirage.getDisparosTotales();
+        if (totales == 0) return 0f;
+        return (float) disparosAcertados / totales;
     }
 
     // ── Export al HOME ───────────────────────────────────────────────────────
@@ -90,18 +88,17 @@ public class EstadisticasMirage {
      * @param mirage         referencia para obtener disparosTotales y puntuacion
      */
     public ResumenPartida exportar(int vidasRestantes, Mirage mirage) {
-        // TODO: float duracion = (System.currentTimeMillis() - tiempoInicioMs) / 1000f
-        // TODO: return new ResumenPartida(
-        //           mirage.getPuntuacion(),
-        //           enemigosDerribados,
-        //           vidasRestantes,
-        //           duracion,
-        //           getPrecision(mirage),
-        //           partidasJugadas,
-        //           partidasGanadas,
-        //           partidasPerdidas
-        //       )
-        return null;
+        float duracion = (System.currentTimeMillis() - tiempoInicioMs) / 1000f;
+        return new ResumenPartida(
+                mirage.getPuntuacion(),
+                enemigosDerribados,
+                vidasRestantes,
+                duracion,
+                getPrecision(mirage),
+                partidasJugadas,
+                partidasGanadas,
+                partidasPerdidas
+        );
     }
 
     // ── Persistencia ────────────────────────────────────────────────────────
@@ -112,8 +109,7 @@ public class EstadisticasMirage {
     }
 
     public void cargar() {
-        // TODO: leer "data/estadisticas_mirage.csv" si existe
-        // TODO: recuperar puntajeMaximo, partidasJugadas, etc.
+        // No-op en v1: persistencia CSV fuera de v1 (no se leen archivos).
     }
 
     // ── Getters ───────────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ import contracts.ModuloJuego;
 import contracts.NoIniciadoState;
 import contracts.PausadoState;
 import mirage.controller.GameController;
+import mirage.model.stats.ResumenPartida;
 import processing.core.PApplet;
 
 import java.util.ArrayList;
@@ -200,26 +201,25 @@ public class ModuloMirage implements ModuloJuego {
 
     @Override
     public EstadisticasGenerales getEstadisticasGenerales() {
-        // TODO: mapear desde EstadisticasMirage/ResumenPartida cuando exista lógica real:
-        //   ResumenPartida r = controller.getEstadisticas()
-        //                                 .exportar(controller.getMirage().getVidas(),
-        //                                           controller.getMirage());
-        //   return new EstadisticasGenerales(NOMBRE_MODULO, r.getPuntajeFinal(),
-        //       r.getPartidasJugadas(), r.getPartidasGanadas(), r.getPartidasPerdidas(),
-        //       r.getEnemigosDerribados(), (long) r.getDuracionSegundos());
+        if (controller != null && controller.getMirage() != null) {
+            ResumenPartida r = controller.getEstadisticas()
+                    .exportar(controller.getMirage().getVidas(), controller.getMirage());
+            return new EstadisticasGenerales(
+                    NOMBRE_MODULO,
+                    r.getPuntajeFinal(),
+                    r.getPartidasJugadas(),
+                    r.getPartidasGanadas(),
+                    r.getPartidasPerdidas(),
+                    r.getEnemigosDerribados(),
+                    (long) r.getDuracionSegundos()
+            );
+        }
+        // Fallback (aún no se creó el game loop): DTO no-null basado en el placeholder.
         long enJuegoMs = tAcumuladoMs;
         if ("EN_EJECUCION".equals(estadoActual.getNombre())) {
             enJuegoMs += System.currentTimeMillis() - tInicioJuegoMs;
         }
-        return new EstadisticasGenerales(
-                NOMBRE_MODULO,
-                puntaje,            // puntajeTotal
-                1,                  // partidasJugadas
-                0,                  // partidasGanadas (sin condición de victoria aún)
-                1,                  // partidasPerdidas
-                puntaje / 10,       // enemigosDestruidos (placeholder)
-                enJuegoMs / 1000    // tiempoJugadoSegundos (long)
-        );
+        return new EstadisticasGenerales(NOMBRE_MODULO, puntaje, 1, 0, 1, 0, enJuegoMs / 1000);
     }
 
     // ── Observer ──────────────────────────────────────────────────────────────
