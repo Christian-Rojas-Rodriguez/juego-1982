@@ -49,7 +49,7 @@ classDiagram
     }
 
     %% ── FACADE ───────────────────────────────────────────────────
-    class MirageModulo {
+    class ModuloMirage {
         <<Facade - implements ModuloJuego>>
         -controller GameController
         -observers List~IModuloObserver~
@@ -88,6 +88,11 @@ classDiagram
         +getMirage() Mirage
         +getEnemigos() List~Enemigo~
         +getEstadisticas() EstadisticasMirage
+        +getSketch() PApplet
+        +getNivel() NivelMirage
+        +getColisionDetector() ColisionDetector
+        +getRenderer() GameRenderer
+        +getMirageModulo() ModuloMirage
     }
 
     class InputHandler {
@@ -109,12 +114,7 @@ classDiagram
     class MoverArribaCmd    { +ejecutar(mirage Mirage) void +deshacer(mirage Mirage) void }
     class MoverAbajoCmd     { +ejecutar(mirage Mirage) void +deshacer(mirage Mirage) void }
 
-    class DispararCmd {
-        -sketch PApplet
-        +DispararCmd(sketch PApplet)
-        +ejecutar(mirage Mirage) void
-        +deshacer(mirage Mirage) void
-    }
+    class DispararCmd { +ejecutar(mirage Mirage) void +deshacer(mirage Mirage) void }
 
     %% ── STATE ────────────────────────────────────────────────────
     class EstadoJuego {
@@ -173,6 +173,8 @@ classDiagram
         +getProyectiles() List~Proyectil~
         +getDisparosTotales() int
         +isInvencible() bool
+        +estaViva() bool
+        +getHitBox() HitBox
     }
 
     class Proyectil {
@@ -240,6 +242,11 @@ classDiagram
         +getEnemigosNuevos() List~Enemigo~
     }
 
+    class EnemyFactory {
+        <<Factory Method>>
+        +crear(tipo Tipo, sketch PApplet, x float, y float) Enemigo$
+    }
+
     %% ── ESTADÍSTICAS ─────────────────────────────────────────────
     class EstadisticasMirage {
         -disparosAcertados int
@@ -249,14 +256,28 @@ classDiagram
         +registrarDisparoAcertado() void
         +registrarDerribo(tipo String, puntos int) void
         +registrarFinPartida(puntaje int) void
-        +exportar(vidasRestantes int, mirage Mirage) datos
+        +exportar(vidasRestantes int, mirage Mirage) ResumenPartida
         +getPrecision(mirage Mirage) float
+    }
+
+    class ResumenPartida {
+        <<DTO interno>>
+        -puntajeFinal int
+        -enemigosDerribados int
+        -vidasRestantes int
+        -duracionSegundos float
+        -precision float
+        +getPuntajeFinal() int
+        +getEnemigosDerribados() int
+        +getVidasRestantes() int
+        +getPrecision() float
     }
 
     %% ── VISTA ────────────────────────────────────────────────────
     class GameRenderer {
         -spriteLoader SpriteLoader
-        +render(sketch PApplet, mirage Mirage, enemigos List~Enemigo~) void
+        +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, sketch PApplet) void
+        +setPantalla(p Pantalla) void
         -dibujarHUD(sketch PApplet, mirage Mirage) void
     }
 
@@ -279,11 +300,11 @@ classDiagram
     class JuegoException { <<checked>> }
 
     %% ── RELACIONES ───────────────────────────────────────────────
-    MirageModulo ..|> ModuloJuego
-    MirageModulo --> GameController
-    MirageModulo --> IModuloObserver
-    MirageModulo ..> ModuloEvento
-    MirageModulo ..> EstadisticasGenerales
+    ModuloMirage ..|> ModuloJuego
+    ModuloMirage --> GameController
+    ModuloMirage --> IModuloObserver
+    ModuloMirage ..> ModuloEvento
+    ModuloMirage ..> EstadisticasGenerales
 
     GameController --> EstadoJuego
     GameController --> Mirage
@@ -319,8 +340,11 @@ classDiagram
     ColisionDetector ..> Mirage
 
     NivelMirage --> EnemySpawner
+    EnemySpawner ..> EnemyFactory
+    EnemyFactory ..> HarrierEnemigo
 
     EstadisticasMirage ..> EstadisticasGenerales
+    EstadisticasMirage ..> ResumenPartida
 
     GameRenderer --> Pantalla
     GameRenderer --> SpriteLoader
@@ -334,10 +358,10 @@ classDiagram
 
 | Decisión | Elección | Justificación |
 |----------|----------|---------------|
-| Contrato con HOME | `MirageModulo implements ModuloJuego` | HOME define la interfaz; nosotros la implementamos. No hay `HomeFacade` propia |
-| Notificación al HOME | Observer: `List<IModuloObserver>` en `MirageModulo` | HOME registra su `HomeJuego` como observer; lo notificamos en cambios de estado |
+| Contrato con HOME | `ModuloMirage implements ModuloJuego` | HOME define la interfaz; nosotros la implementamos. No hay `HomeFacade` propia |
+| Notificación al HOME | Observer: `List<IModuloObserver>` en `ModuloMirage` | HOME registra su `HomeJuego` como observer; lo notificamos en cambios de estado |
 | Proyectiles | `Mirage` dueño de `List<Proyectil>` | `DispararCmd` solo llama `mirage.disparar()` — sin acoplamiento a listas externas |
 | Contador de disparos | `Mirage.disparosTotales` | Information Expert: quien dispara, cuenta |
 | Movimiento suave | Flags booleanos en `Mirage` + `keyReleased` | `keyPressed()` se repite con OS key-repeat; flags permiten movimiento continuo en `draw()` |
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` |
-| Sin factory en MVP1 | Instanciación directa en `EnemySpawner` | La factory se justifica cuando hay múltiples tipos (MVP 6) |
+| Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
