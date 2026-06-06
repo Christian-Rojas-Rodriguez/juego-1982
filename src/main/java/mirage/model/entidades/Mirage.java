@@ -76,10 +76,10 @@ public class Mirage extends Nave {
         if (moverAbajo)     y += velocidad;
         x = PApplet.constrain(x, 0, sketch.width);
         y = PApplet.constrain(y, 0, sketch.height);
-        // TODO: if (cooldownActual > 0) cooldownActual--
+        if (cooldownActual > 0) cooldownActual--;
         // TODO: if (invencible) { frameInvencible--; if (frameInvencible <= 0) invencible = false }
-        // TODO: proyectiles.forEach(Proyectil::update)
-        // TODO: proyectiles.removeIf(p -> !p.isActivo())
+        proyectiles.forEach(Proyectil::update);
+        proyectiles.removeIf(p -> !p.isActivo());
     }
 
     public void render(PApplet sk) {
@@ -97,10 +97,10 @@ public class Mirage extends Nave {
      * Llamado por DispararCmd.ejecutar(mirage) — el comando no conoce la lista.
      */
     public void disparar() {
-        // TODO: if (cooldownActual > 0) return
-        // TODO: proyectiles.add(new Proyectil(x, y - 20, sketch))
-        // TODO: disparosTotales++
-        // TODO: cooldownActual = cooldownDisparo
+        if (cooldownActual > 0) return;
+        proyectiles.add(new Proyectil(x, y - 20, sketch));
+        disparosTotales++;
+        cooldownActual = cooldownDisparo;
     }
 
     // ── Daño e invencibilidad ────────────────────────────────────────────────
