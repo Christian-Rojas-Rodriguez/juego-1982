@@ -37,10 +37,15 @@ public class EstadoJugando implements EstadoJuego {
                 controller.getEnemigos(),
                 controller.getMirage()
         );
-        // TODO: controller.getColisionDetector().detectarEnemigoMirage(...)
+        controller.getColisionDetector().detectarEnemigoMirage(
+                controller.getEnemigos(),
+                controller.getMirage()
+        );
         controller.getEnemigos().removeIf(enemigo -> !enemigo.estaViva());
         controller.getMirage().getProyectiles().removeIf(proyectil -> !proyectil.isActivo());
-        // TODO: si !mirage.estaViva() → controller.setEstado(new EstadoGameOver())
+        if (!controller.getMirage().estaViva()) {
+            controller.setEstado(new EstadoGameOver());
+        }
         // TODO: si nivel.isTerminado() → finalizar módulo
     }
 

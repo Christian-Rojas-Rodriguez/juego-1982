@@ -238,22 +238,26 @@ sequenceDiagram
     participant GameController
 
     EstadoJugando->>+ColisionDetector: detectarEnemigoMirage(enemigos, mirage)
-    loop por cada enemigo activo
+    loop por cada enemigo activo (corta si mirage.isInvencible())
         ColisionDetector->>+HarrierEnemigo: getHitBox()
         deactivate HarrierEnemigo
         ColisionDetector->>+Mirage: getHitBox()
         deactivate Mirage
         ColisionDetector->>ColisionDetector: hitBoxE.colisionaCon(hitBoxM)?
-        alt colisión && !mirage.isInvencible()
+        alt colisión
             ColisionDetector->>+Mirage: recibirDanio(1)
-            Note over Mirage: vidas-- · invencible=true · frameInvencible=0
+            Note over Mirage: vidas-- · invencible=true · frameInvencible=DURACION
             deactivate Mirage
-            alt mirage.getVidas() == 0
-                ColisionDetector->>GameController: setEstado(new EstadoGameOver())
-            end
         end
     end
     deactivate ColisionDetector
+
+    Note over EstadoJugando,GameController: La transición a Game Over la decide EstadoJugando, que es quien tiene el controller (el ColisionDetector solo aplica daño)
+    EstadoJugando->>+Mirage: estaViva()
+    Mirage-->>-EstadoJugando: vidas > 0 ?
+    alt !mirage.estaViva()
+        EstadoJugando->>GameController: setEstado(new EstadoGameOver())
+    end
 ```
 
 ---

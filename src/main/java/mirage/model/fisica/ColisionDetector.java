@@ -76,9 +76,12 @@ public class ColisionDetector {
      *   - El Mirage activa su periodo de invencibilidad internamente
      */
     public void detectarEnemigoMirage(List<Enemigo> enemigos, Mirage mirage) {
-        // TODO: for Enemigo e : enemigos (si e.estaViva()):
-        //         if !mirage.isInvencible():
-        //           if e.getHitBox().colisionaCon(mirage.getHitBox()):
-        //             mirage.recibirDanio(1)
+        for (Enemigo e : enemigos) {
+            if (!e.estaViva()) continue;
+            if (mirage.isInvencible()) return; // ya invencible: nada más este frame
+            if (e.getHitBox().colisionaCon(mirage.getHitBox())) {
+                mirage.recibirDanio(1);
+            }
+        }
     }
 }
