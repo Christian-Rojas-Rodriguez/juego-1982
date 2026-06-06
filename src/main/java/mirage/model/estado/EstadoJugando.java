@@ -26,10 +26,12 @@ public class EstadoJugando implements EstadoJuego {
 
     @Override
     public void update(GameController controller) {
-        // TODO: controller.getNivel().update()
-        // TODO: controller.getEnemigos().addAll(nivel.getEnemigosNuevos())
+        controller.getNivel().update();
+        controller.getEnemigos().addAll(controller.getNivel().getEnemigosNuevos());
         controller.getMirage().update();
-        // TODO: actualizar cada enemigo y proyectil
+        for (mirage.model.entidades.enemigos.Enemigo e : controller.getEnemigos()) {
+            e.update();
+        }
         controller.getColisionDetector().detectarProyectilEnemigo(
                 controller.getMirage().getProyectiles(),
                 controller.getEnemigos(),

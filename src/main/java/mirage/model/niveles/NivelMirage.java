@@ -28,7 +28,7 @@ public class NivelMirage extends Nivel {
 
     @Override
     public void update() {
-        // TODO: spawner.update()
+        spawner.update();
     }
 
     /**
@@ -37,8 +37,7 @@ public class NivelMirage extends Nivel {
      */
     @Override
     public List<Enemigo> getEnemigosNuevos() {
-        // TODO: return spawner.getEnemigosNuevos()
-        return null;
+        return spawner.getEnemigosNuevos();
     }
 
     /**
