@@ -1,19 +1,28 @@
+import contracts.ContextoJuego;
+import contracts.EstadoInvalidoException;
+import mirage.ModuloMirage;
 import processing.core.PApplet;
-import mirage.MirageModulo;
 
 /**
- * Punto de entrada de Processing y del módulo Mirage en modo standalone.
+ * Runner STANDALONE del módulo Mirage (sin lobby), para desarrollo.
  *
- * En producción el HOME team instancia MirageModulo y lo controla via ModuloJuego.
- * Esta clase existe para correr el módulo de forma independiente durante desarrollo.
+ * En producción el HOME instancia ModuloMirage y lo controla vía
+ * contracts.ModuloJuego. Esta clase emula al lobby para correr el módulo solo.
  *
- * Responsabilidades:
- *   - Configurar el sketch (tamaño, framerate)
- *   - Delegar setup/draw/input a MirageModulo
+ * Para correr el LOBBY completo y seleccionar Mirage, usar HomeRunner.
+ *
+ * Emulación de teclas del lobby (que en producción intercepta el HOME):
+ *   ESC → pausar / reanudar (toggle)
+ *   Q   → finalizar
+ * El resto del input se reenvía al módulo (movimiento, disparo).
  */
 public class Juego1982 extends PApplet {
 
-    private MirageModulo mirageModulo;
+    private static final int ANCHO = 600;
+    private static final int ALTO  = 800;
+
+    private ModuloMirage modulo;
+    private boolean pausado = false;
 
     public static void main(String[] args) {
         PApplet.main("Juego1982");
@@ -21,31 +30,50 @@ public class Juego1982 extends PApplet {
 
     @Override
     public void settings() {
-        size(600, 800);
+        size(ANCHO, ALTO);
         pixelDensity(displayDensity());
     }
 
     @Override
     public void setup() {
         frameRate(60);
-        mirageModulo = new MirageModulo();
-        mirageModulo.inicializarContexto(this);
-        mirageModulo.iniciar();
+        modulo = new ModuloMirage();
+        modulo.inicializarContexto(new ContextoJuego("Jugador", width, height));
+        try {
+            modulo.iniciar();
+        } catch (EstadoInvalidoException e) {
+            System.err.println("No se pudo iniciar el modulo: " + e.getMessage());
+        }
     }
 
     @Override
     public void draw() {
-        mirageModulo.actualizar();
-        mirageModulo.dibujar();
+        modulo.actualizar(this);
+        modulo.dibujar(this);
     }
 
     @Override
     public void keyPressed() {
-        mirageModulo.onKeyPressed(key, keyCode);
+        try {
+            if (keyCode == ESC) {
+                key = 0; // evita que Processing cierre la ventana con ESC
+                if (pausado) { modulo.reanudar(); } else { modulo.pausar(); }
+                pausado = !pausado;
+                return;
+            }
+            if (key == 'q' || key == 'Q') {
+                modulo.finalizar();
+                return;
+            }
+        } catch (EstadoInvalidoException e) {
+            System.err.println("Transicion invalida: " + e.getMessage());
+            return;
+        }
+        modulo.onKeyPressed(key, keyCode);
     }
 
     @Override
     public void keyReleased() {
-        mirageModulo.onKeyReleased(key, keyCode);
+        modulo.onKeyReleased(key, keyCode);
     }
 }

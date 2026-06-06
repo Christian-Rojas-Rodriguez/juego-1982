@@ -1,6 +1,6 @@
 package mirage.controller;
 
-import mirage.MirageModulo;
+import mirage.ModuloMirage;
 import mirage.controller.commands.DispararCmd;
 import mirage.controller.commands.MoverAbajoCmd;
 import mirage.controller.commands.MoverArribaCmd;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Orquestador central del módulo Mirage.
  *
- * Recibe todos los eventos de Processing (via MirageModulo) y coordina
+ * Recibe todos los eventos de Processing (via ModuloMirage) y coordina
  * Model y View. Aplica el patrón State: delega update/render al estado activo.
  *
  * Los proyectiles son propiedad de Mirage; GameController los consulta
@@ -32,7 +32,7 @@ import java.util.List;
 public class GameController {
 
     private final PApplet sketch;
-    private final MirageModulo mirageModulo;
+    private final ModuloMirage mirageModulo;
 
     private EstadoJuego estadoActual;
     private Mirage mirage;
@@ -44,14 +44,14 @@ public class GameController {
     private GameRenderer renderer;
     private InputHandler inputHandler;
 
-    public GameController(PApplet sketch, MirageModulo mirageModulo) {
+    public GameController(PApplet sketch, ModuloMirage mirageModulo) {
         this.sketch        = sketch;
         this.mirageModulo  = mirageModulo;
     }
 
     /**
      * Crea e inicializa todas las dependencias.
-     * Llamado desde MirageModulo.inicializarContexto() y reset().
+     * Llamado desde ModuloMirage.inicializarContexto() y reset().
      */
     public void init() {
         mirage           = new Mirage(sketch);
@@ -83,7 +83,7 @@ public class GameController {
 
     /**
      * Cambia el estado activo y llama alEntrar() en el nuevo estado.
-     * Usado por los estados y por MirageModulo para transicionar.
+     * Usado por los estados y por ModuloMirage para transicionar.
      */
     public void setEstado(EstadoJuego nuevoEstado) {
         // TODO: estadoActual = nuevoEstado
@@ -104,7 +104,7 @@ public class GameController {
     // ── Getters (solo lectura para los estados) ───────────────────────────────
 
     public PApplet getSketch()                    { return sketch; }
-    public MirageModulo getMirageModulo()          { return mirageModulo; }
+    public ModuloMirage getMirageModulo()          { return mirageModulo; }
     public Mirage getMirage()                     { return mirage; }
     public List<Enemigo> getEnemigos()            { return enemigos; }
     public NivelMirage getNivel()                 { return nivel; }

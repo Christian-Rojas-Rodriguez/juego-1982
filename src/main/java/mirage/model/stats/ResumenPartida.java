@@ -3,7 +3,7 @@ package mirage.model.stats;
 /**
  * DTO interno del módulo Mirage — snapshot de una partida finalizada.
  *
- * Creado por EstadisticasMirage.exportar() y usado por MirageModulo
+ * Creado por EstadisticasMirage.exportar() y usado por ModuloMirage
  * para construir el EstadisticasGenerales que recibe el HOME team.
  *
  * Es inmutable: todos los campos se asignan en el constructor.
