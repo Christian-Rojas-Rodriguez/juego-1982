@@ -41,15 +41,30 @@ public class ColisionDetector {
      *   - Si el enemigo muere: sumarPuntos en Mirage + registrarDerribo en estadisticas
      */
     public void detectarProyectilEnemigo(List<Proyectil> proyectiles, List<Enemigo> enemigos, Mirage mirage) {
-        // TODO: for Proyectil p : proyectiles (si p.isActivo()):
-        //         for Enemigo e : enemigos (si e.estaViva()):
-        //           if p.getHitBox().colisionaCon(e.getHitBox()):
-        //             e.recibirDanio(p.getDanio())
-        //             p.desactivar()
-        //             estadisticas.registrarDisparoAcertado()
-        //             if !e.estaViva():
-        //               mirage.sumarPuntos(e.getPuntos())
-        //               estadisticas.registrarDerribo(e.getTipo(), e.getPuntos())
+        for (Proyectil p : proyectiles) {
+            if (!p.isActivo()) {
+                continue;
+            }
+
+            for (Enemigo e : enemigos) {
+                if (!e.estaViva()) {
+                    continue;
+                }
+
+                if (p.getHitBox().colisionaCon(e.getHitBox())) {
+                    e.recibirDanio(p.getDanio());
+                    p.desactivar();
+                    estadisticas.registrarDisparoAcertado();
+
+                    if (!e.estaViva()) {
+                        mirage.sumarPuntos(e.getPuntos());
+                        estadisticas.registrarDerribo(e.getTipo(), e.getPuntos());
+                    }
+
+                    break;
+                }
+            }
+        }
     }
 
     /**

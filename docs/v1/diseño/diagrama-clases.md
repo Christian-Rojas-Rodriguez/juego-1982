@@ -136,13 +136,12 @@ classDiagram
         #y float
         #velocidad float
         #vida int
-        #hitBox HitBox
-        +update(sketch PApplet) void
-        +render(sketch PApplet) void
+        +update() void
         +recibirDanio(danio int) void
         +estaViva() bool
         +getX() float
         +getY() float
+        +getVida() int
         +getHitBox() HitBox
     }
 
@@ -161,9 +160,9 @@ classDiagram
         -moverAbajo bool
         -proyectiles List~Proyectil~
         -disparosTotales int
-        +update(sketch PApplet) void
+        +update() void
         +render(sketch PApplet) void
-        +disparar(sketch PApplet) void
+        +disparar() void
         +sumarPuntos(puntos int) void
         +setMoverIzquierda(v bool) void
         +setMoverDerecha(v bool) void
@@ -185,21 +184,25 @@ classDiagram
         +desactivar() void
         +isActivo() bool
         +getDanio() int
+        +getHitBox() HitBox
     }
 
     %% ── MODEL: ENEMIGOS ──────────────────────────────────────────
     class Enemigo {
         <<abstract>>
         #puntos int
-        +update(sketch PApplet) void
+        +update() void
         +render(sketch PApplet) void
-        #moverIA(sketch PApplet) void
+        #moverIA() void
         +getPuntos() int
         +getTipo() String
+        +getHitBox() HitBox
     }
 
     class HarrierEnemigo {
-        #moverIA(sketch PApplet) void
+        #moverIA() void
+        +render(sketch PApplet) void
+        +getHitBox() HitBox
         +getTipo() String
     }
 
@@ -311,6 +314,9 @@ classDiagram
 
     ColisionDetector --> HitBox
     ColisionDetector --> EstadisticasMirage
+    ColisionDetector ..> Proyectil
+    ColisionDetector ..> Enemigo
+    ColisionDetector ..> Mirage
 
     NivelMirage --> EnemySpawner
 

@@ -31,7 +31,8 @@ public class Proyectil extends Nave {
     public Proyectil(float x, float y, PApplet sketch) {
         super(x, y, 8f, 1);
         this.sketch = sketch;
-        // TODO: activo = true, danio = 1
+        activo = true; 
+        danio = 1;
     }
 
     @Override
@@ -46,13 +47,12 @@ public class Proyectil extends Nave {
     }
 
     public void desactivar() {
-        // TODO: activo = false
+        activo = false;
     }
 
     @Override
     public HitBox getHitBox() {
-        // TODO: return new HitBox(x - ANCHO/2, y - ALTO/2, ANCHO, ALTO)
-        return null;
+        return new HitBox(x - ANCHO/2f, y - ALTO/2f, ANCHO, ALTO);
     }
 
     // --- Getters ---
