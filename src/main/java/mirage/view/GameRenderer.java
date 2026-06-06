@@ -30,26 +30,29 @@ public class GameRenderer {
 
     // --- Renderizado principal ---
     public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles, PApplet sketch) {
-        // TODO: dibujarFondo(sketch)
-        // TODO: for proyectil : proyectiles → proyectil.render(sketch)
-        // TODO: for enemigo   : enemigos   → enemigo.render(sketch)
-        // TODO: mirage.render(sketch)
-        // TODO: dibujarHUD(sketch, mirage)
-        // TODO: si pantallaActual != null → pantallaActual.render(sketch)
+        dibujarFondo(sketch);
+        for (Proyectil p : proyectiles) p.render(sketch);
+        for (Enemigo e : enemigos) e.render(sketch);
+        mirage.render(sketch);
+        dibujarHUD(sketch, mirage);
+        if (pantallaActual != null) pantallaActual.render(sketch);
     }
 
     private void dibujarFondo(PApplet sketch) {
-        // TODO: sketch.background(10, 10, 30)  // azul oscuro de noche
-        // TODO: dibujar estrellas estáticas o con efecto de movimiento
+        sketch.background(10, 10, 30);  // azul oscuro de noche
     }
 
     private void dibujarHUD(PApplet sketch, Mirage mirage) {
-        // TODO: mostrar puntuación arriba a la izquierda
-        // TODO: mostrar vidas (íconos o número) arriba a la derecha
+        sketch.fill(255);
+        sketch.textSize(12);
+        sketch.textAlign(PApplet.LEFT, PApplet.TOP);
+        sketch.text("Puntos: " + mirage.getPuntuacion(), 10, 10);
+        sketch.textAlign(PApplet.RIGHT, PApplet.TOP);
+        sketch.text("Vidas: " + mirage.getVidas(), sketch.width - 10, 10);
     }
 
     // --- Cambiar pantalla superpuesta ---
     public void setPantalla(Pantalla pantalla) {
-        // TODO: this.pantallaActual = pantalla
+        this.pantallaActual = pantalla;
     }
 }

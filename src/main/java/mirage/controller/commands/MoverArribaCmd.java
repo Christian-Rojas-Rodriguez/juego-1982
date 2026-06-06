@@ -13,11 +13,11 @@ public class MoverArribaCmd implements Comando {
 
     @Override
     public void ejecutar(Mirage mirage) {
-        // TODO: mirage.setMoverArriba(true)
+        mirage.setMoverArriba(true);
     }
 
     @Override
     public void deshacer(Mirage mirage) {
-        // TODO: mirage.setMoverArriba(false)
+        mirage.setMoverArriba(false);
     }
 }

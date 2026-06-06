@@ -12,6 +12,7 @@ import contracts.ModuloEvento;
 import contracts.ModuloJuego;
 import contracts.NoIniciadoState;
 import contracts.PausadoState;
+import mirage.controller.GameController;
 import processing.core.PApplet;
 
 import java.util.ArrayList;
@@ -50,7 +51,8 @@ public class ModuloMirage implements ModuloJuego {
     /** Contexto provisto por el lobby (jugador + dimensiones de pantalla). */
     private ContextoJuego contexto;
 
-    // TODO: private GameController controller;  // game loop real (lazy en actualizar)
+    /** Game loop real (lazy-init en actualizar(), donde llega el PApplet vivo). */
+    private GameController controller;
 
     // ── Marcas de tiempo / métricas placeholder ───────────────────────────────
     private long tInicioCargaMs;
@@ -125,7 +127,11 @@ public class ModuloMirage implements ModuloJuego {
 
     @Override
     public void actualizar(PApplet app) {
-        // TODO: if (controller == null) { controller = new GameController(app, this); controller.init(); }
+        // Lazy-init headless-safe: solo crea el controller (no toca graphics).
+        if (controller == null) {
+            controller = new GameController(app, this);
+            controller.init();
+        }
         String estado = estadoActual.getNombre();
 
         if ("INICIANDO".equals(estado)) {
@@ -136,7 +142,7 @@ public class ModuloMirage implements ModuloJuego {
                 notificar(ModuloEvento.Tipo.INICIADO, "En ejecucion");
             }
         } else if ("EN_EJECUCION".equals(estado)) {
-            // TODO: controller.update();  — lógica de juego real
+            controller.update();  // lógica de juego real (no llama graphics)
             // Placeholder: el puntaje crece con el tiempo jugado.
             long ms = tAcumuladoMs + (System.currentTimeMillis() - tInicioJuegoMs);
             puntaje = (int) (ms / 100);
@@ -147,7 +153,14 @@ public class ModuloMirage implements ModuloJuego {
 
     @Override
     public void dibujar(PApplet app) {
-        // TODO: reemplazar este placeholder por controller.render() cuando exista.
+        String estado = estadoActual.getNombre();
+
+        // Gameplay real: delega el render al GameController (usa el PApplet vivo).
+        if ("EN_EJECUCION".equals(estado) && controller != null) {
+            controller.render();
+            return;
+        }
+
         app.background(8, 12, 24);
         app.textAlign(PApplet.CENTER, PApplet.CENTER);
 
@@ -158,7 +171,6 @@ public class ModuloMirage implements ModuloJuego {
         app.textSize(8);
         app.text(NOMBRE_AVION, app.width / 2f, app.height * 0.25f);
 
-        String estado = estadoActual.getNombre();
         app.fill(0, 200, 120);
         app.textSize(9);
         app.text("ESTADO: " + estado, app.width / 2f, app.height * 0.34f);
@@ -169,14 +181,6 @@ public class ModuloMirage implements ModuloJuego {
             app.fill(120, 200, 255);
             app.textSize(9);
             app.text("CARGANDO... " + (int) (p * 100) + "%", app.width / 2f, app.height * 0.5f);
-        } else if ("EN_EJECUCION".equals(estado)) {
-            app.fill(255);
-            app.textSize(12);
-            app.text("PUNTAJE: " + puntaje, app.width / 2f, app.height * 0.5f);
-            app.fill(90, 140, 180);
-            app.textSize(8);
-            app.text("[placeholder de gameplay]", app.width / 2f, app.height * 0.58f);
-            app.text("ESC: pausar   |   Q: finalizar", app.width / 2f, app.height * 0.9f);
         } else if ("PAUSADO".equals(estado)) {
             app.fill(255, 220, 0);
             app.textSize(16);
@@ -247,7 +251,7 @@ public class ModuloMirage implements ModuloJuego {
         estadoActual = new NoIniciadoState();
         puntaje = 0;
         tAcumuladoMs = 0;
-        // TODO: controller.init();  — recrea entidades/nivel desde cero
+        if (controller != null) controller.init();  // recrea entidades/nivel desde cero
         observers.clear();   // el lobby se re-registra en seleccionarModulo()
     }
 
@@ -256,10 +260,10 @@ public class ModuloMirage implements ModuloJuego {
     // maneja. Estos métodos existen SOLO para el runner standalone Juego1982.
 
     public void onKeyPressed(char key, int keyCode) {
-        // TODO: controller.onKeyPressed(key, keyCode) — movimiento + disparo.
+        if (controller != null) controller.onKeyPressed(key, keyCode);
     }
 
     public void onKeyReleased(char key, int keyCode) {
-        // TODO: controller.onKeyReleased(key, keyCode).
+        if (controller != null) controller.onKeyReleased(key, keyCode);
     }
 }

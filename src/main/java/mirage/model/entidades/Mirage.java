@@ -70,12 +70,12 @@ public class Mirage extends Nave {
 
     @Override
     public void update() {
-        // TODO: if (moverIzquierda) x -= velocidad
-        // TODO: if (moverDerecha)   x += velocidad
-        // TODO: if (moverArriba)    y -= velocidad
-        // TODO: if (moverAbajo)     y += velocidad
-        // TODO: x = PApplet.constrain(x, 0, sketch.width)
-        // TODO: y = PApplet.constrain(y, 0, sketch.height)
+        if (moverIzquierda) x -= velocidad;
+        if (moverDerecha)   x += velocidad;
+        if (moverArriba)    y -= velocidad;
+        if (moverAbajo)     y += velocidad;
+        x = PApplet.constrain(x, 0, sketch.width);
+        y = PApplet.constrain(y, 0, sketch.height);
         // TODO: if (cooldownActual > 0) cooldownActual--
         // TODO: if (invencible) { frameInvencible--; if (frameInvencible <= 0) invencible = false }
         // TODO: proyectiles.forEach(Proyectil::update)
@@ -84,8 +84,10 @@ public class Mirage extends Nave {
 
     public void render(PApplet sk) {
         // TODO: si invencible y sk.frameCount % 10 < 5 → no dibujar (efecto parpadeo)
-        // TODO: dibujar sprite del Mirage centrado en (x, y)
-        // TODO: for (Proyectil p : proyectiles) p.render(sk)
+        // Nave simple: triángulo apuntando hacia arriba, centrado en (x, y).
+        sk.fill(120, 200, 255);
+        sk.triangle(x, y - 15, x - 12, y + 12, x + 12, y + 12);
+        for (Proyectil p : proyectiles) p.render(sk);
     }
 
     // ── Disparo ──────────────────────────────────────────────────────────────
