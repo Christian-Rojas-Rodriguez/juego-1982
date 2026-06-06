@@ -28,11 +28,9 @@ public class EnemyFactory {
     }
 
     public static Enemigo crear(Tipo tipo, PApplet sketch, float x, float y) {
-        // TODO:
-        // switch (tipo) {
-        //     case HARRIER: return new HarrierEnemigo(sketch, x, y)
-        //     default: throw new IllegalArgumentException("Tipo desconocido: " + tipo)
-        // }
-        return null;
+        switch (tipo) {
+            case HARRIER: return new HarrierEnemigo(sketch, x, y);
+            default: throw new IllegalArgumentException("Tipo desconocido: " + tipo);
+        }
     }
 }

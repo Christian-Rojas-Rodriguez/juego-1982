@@ -33,7 +33,7 @@ public abstract class Enemigo extends Nave {
      */
     @Override
     public final void update() {
-        // TODO: moverIA()
+        moverIA();
     }
 
     /**

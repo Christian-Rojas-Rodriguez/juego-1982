@@ -39,12 +39,14 @@ public class EnemySpawner {
 
     /** Avanza el contador y genera una oleada cuando se alcanza el intervalo. */
     public void update() {
-        // TODO: frameCounter++
-        // TODO: if (frameCounter >= intervaloFrames):
-        //         for i in 0..tamanoOleada-1:
-        //           float x = sketch.random(20, sketch.width - 20)
-        //           nuevosEsteFrame.add(EnemyFactory.crear(EnemyFactory.Tipo.HARRIER, sketch, x, -20))
-        //         frameCounter = 0
+        frameCounter++;
+        if (frameCounter >= intervaloFrames) {
+            for (int i = 0; i < tamanoOleada; i++) {
+                float x = sketch.random(20, sketch.width - 20);
+                nuevosEsteFrame.add(EnemyFactory.crear(EnemyFactory.Tipo.HARRIER, sketch, x, -20));
+            }
+            frameCounter = 0;
+        }
     }
 
     /**
@@ -52,14 +54,13 @@ public class EnemySpawner {
      * Llamado por NivelMirage.getEnemigosNuevos() cada frame.
      */
     public List<Enemigo> getEnemigosNuevos() {
-        // TODO: List<Enemigo> resultado = new ArrayList<>(nuevosEsteFrame)
-        // TODO: nuevosEsteFrame.clear()
-        // TODO: return resultado
-        return new ArrayList<>();
+        List<Enemigo> resultado = new ArrayList<>(nuevosEsteFrame);
+        nuevosEsteFrame.clear();
+        return resultado;
     }
 
     /** Permite ajustar la cadencia en MVPs futuros (ConfiguradorDificultad). */
     public void setIntervalo(int nuevoIntervalo) {
-        // TODO: this.intervaloFrames = nuevoIntervalo
+        this.intervaloFrames = nuevoIntervalo;
     }
 }

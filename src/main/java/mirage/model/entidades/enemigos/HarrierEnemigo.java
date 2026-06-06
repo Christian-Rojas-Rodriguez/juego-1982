@@ -23,17 +23,18 @@ public class HarrierEnemigo extends Enemigo {
 
     @Override
     protected void moverIA() {
-        // TODO: x += velocidad
-        // TODO: y += 1.5f    (descenso lento hacia el Mirage)
-        // TODO: si x <= 15 o x >= sketch.width - 15 → velocidad *= -1 (rebote en bordes)
+        x += velocidad;
+        y += 1.5f;
+        if (x <= 15 || x >= sketch.width - 15) {
+            velocidad *= -1;
+        }
     }
 
     @Override
     public void render(PApplet sk) {
-        // TODO: dibujar sprite del Harrier centrado en (x, y)
-        // Placeholder pixel-art: triángulo rojo invertido
-        // sk.fill(220, 50, 50)
-        // sk.triangle(x, y + ALTO/2, x - ANCHO/2, y - ALTO/2, x + ANCHO/2, y - ALTO/2)
+        // Placeholder pixel-art: triángulo rojo invertido centrado en (x, y)
+        sk.fill(220, 50, 50);
+        sk.triangle(x, y + ALTO / 2f, x - ANCHO / 2f, y - ALTO / 2f, x + ANCHO / 2f, y - ALTO / 2f);
     }
 
     @Override
