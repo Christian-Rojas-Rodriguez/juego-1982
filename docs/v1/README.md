@@ -13,7 +13,7 @@
 
 ## Integración con HOME
 
-`MirageModulo` implementa la interfaz `ModuloJuego` del HOME team. Al registrar el módulo con `HomeJuego.registrarModulo(mirageModulo)`, el HOME puede:
+`ModuloMirage` implementa la interfaz `ModuloJuego` del HOME team. Al registrar el módulo con `HomeJuego.registrarModulo(mirageModulo)`, el HOME puede:
 - Controlar el ciclo de vida (`iniciar`, `pausar`, `reanudar`, `finalizar`)
 - Consultar estadísticas con `getEstadisticasGenerales()` → devuelve `EstadisticasGenerales`
 - Recibir notificaciones via `IModuloObserver` (se disparan en INICIADO, PAUSADO, FINALIZADO)
@@ -25,7 +25,7 @@ Ver `diseño/diagrama-clases.md` para el diagrama completo y `diseño/descripcio
 | Capa | Clases |
 |------|--------|
 | HOME (externas) | `ModuloJuego`, `IModuloObserver`, `EstadisticasGenerales`, `ModuloEvento` |
-| Facade | `MirageModulo` |
+| Facade | `ModuloMirage` |
 | Controller | `GameController`, `InputHandler`, `Comando`, 5 Commands |
 | State | `EstadoJuego`, `EstadoJugando`, `EstadoPausado`, `EstadoGameOver` |
 | Model | `Nave`, `Mirage`, `Proyectil`, `Enemigo`, `HarrierEnemigo` |

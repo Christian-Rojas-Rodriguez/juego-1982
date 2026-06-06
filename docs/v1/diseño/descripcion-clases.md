@@ -11,7 +11,7 @@ Estas interfaces y DTOs son **definidas por el HOME team** (repo `Modulo_1_Algor
 
 | Clase | Tipo | Rol en nuestro módulo |
 |-------|------|----------------------|
-| `ModuloJuego` | interface | Contrato que `MirageModulo` implementa. Define el ciclo de vida del módulo |
+| `ModuloJuego` | interface | Contrato que `ModuloMirage` implementa. Define el ciclo de vida del módulo |
 | `IModuloObserver` | interface | HOME registra su `HomeJuego` como observer. Recibe `ModuloEvento` cuando cambiamos estado |
 | `EstadisticasGenerales` | DTO (inmutable) | Lo construimos en `getEstadisticasGenerales()` con nuestros datos mapeados |
 | `ModuloEvento` | DTO | Lo creamos al disparar eventos (INICIADO, PAUSADO, FINALIZADO, ERROR) |
@@ -34,7 +34,7 @@ El avión que controla el jugador. Es el objeto más referenciado: `GameControll
 | `proyectiles` | `List<Proyectil>` | Proyectiles activos. `GameController` los consulta via `getProyectiles()` |
 | `disparosTotales` | `int` | Contador de disparos. Se incrementa en `disparar()` |
 | `vidas` | `int` | Arranca en 3, máximo 3, Game Over si llega a 0 |
-| `puntuacion` | `int` | Crece con `sumarPuntos()`. Lo consulta `MirageModulo` para el reporte |
+| `puntuacion` | `int` | Crece con `sumarPuntos()`. Lo consulta `ModuloMirage` para el reporte |
 | `invencible` | `bool` | Si `true`, `ColisionDetector` ignora colisiones con enemigos |
 | `frameInvencible` | `int` | Contador de frames desde que se activó la invencibilidad |
 | `DURACION_INVENCIBILIDAD` | `int` | Constante (120 frames = 2 seg a 60 fps) |
@@ -89,11 +89,11 @@ Recibe todos los eventos de Processing y coordina el resto del sistema. Es el du
 
 ---
 
-## 3. `MirageModulo` — El Facade hacia el HOME
+## 3. `ModuloMirage` — El Facade hacia el HOME
 
 **Paquete:** `mirage` · **Patrón:** Facade · **Implementa:** `ModuloJuego` (HOME)
 
-Único punto de contacto con el sistema externo. El HOME team instancia `MirageModulo`, lo registra en `HomeJuego` y llama a sus métodos de ciclo de vida.
+Único punto de contacto con el sistema externo. El HOME team instancia `ModuloMirage`, lo registra en `HomeJuego` y llama a sus métodos de ciclo de vida.
 
 ### Responsabilidades clave
 
@@ -116,7 +116,7 @@ Elimina el if-estado en cascada del `GameController`. Cada estado implementa su 
 |--------|-------------------------|
 | `EstadoJugando` | Mueve entidades, detecta colisiones, actualiza spawner, pide enemigos nuevos |
 | `EstadoPausado` | Solo renderiza. No actualiza física ni lógica |
-| `EstadoGameOver` | Muestra puntaje. Al entrar llama `MirageModulo.notificar(FINALIZADO)` |
+| `EstadoGameOver` | Muestra puntaje. Al entrar llama `ModuloMirage.notificar(FINALIZADO)` |
 
 ---
 

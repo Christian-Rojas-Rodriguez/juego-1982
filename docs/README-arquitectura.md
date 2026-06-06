@@ -8,7 +8,7 @@
 ## Visión general
 
 El módulo implementa el nivel del **Avión Mirage** como una unidad autocontenida que:
-- Se comunica con el HOME/Lobby a través de una interfaz estable (`MirageModulo` + `HomeFacade`)
+- Se comunica con el HOME/Lobby a través de una interfaz estable (`ModuloMirage` + `HomeFacade`)
 - Implementa el patrón **MVC** para separar datos, lógica y presentación
 - Aplica los principios **GRASP** y patrones de diseño vistos en clase
 
@@ -25,7 +25,7 @@ El módulo implementa el nivel del **Avión Mirage** como una unidad autoconteni
 
 ```
 mirage/
-├── MirageModulo.java          ← Facade: único punto de contacto con el HOME
+├── ModuloMirage.java          ← Facade: único punto de contacto con el HOME
 ├── HomeFacade.java            ← Interface que el HOME implementa (Protected Variations)
 │
 ├── controller/
@@ -60,12 +60,12 @@ mirage/
 
 ```
 Juego1982 (extends PApplet)       ← solo propaga eventos del framework
-    │  setup()  → MirageModulo.iniciar()
-    │  draw()   → MirageModulo.update() + .render()
-    │  keyPressed()   → MirageModulo.onKeyPressed(key, keyCode)
-    │  keyReleased()  → MirageModulo.onKeyReleased(key, keyCode)
+    │  setup()  → ModuloMirage.iniciar()
+    │  draw()   → ModuloMirage.update() + .render()
+    │  keyPressed()   → ModuloMirage.onKeyPressed(key, keyCode)
+    │  keyReleased()  → ModuloMirage.onKeyReleased(key, keyCode)
     ▼
-MirageModulo (Facade)             ← contrato con el HOME
+ModuloMirage (Facade)             ← contrato con el HOME
     │
     ▼
 GameController                    ← CONTROLLER: recibe input, orquesta
@@ -99,7 +99,7 @@ GameRenderer                      ← VIEW: solo lee el Model y llama sketch.xxx
 | **High Cohesion** | `GameRenderer`, `PowerupManager`, `ConfiguradorDificultad` | Cada clase hace exactamente una cosa |
 | **Polymorphism** | `EstadoJuego`, `Enemigo`, `Jefe` | Variaciones manejadas con herencia/interfaz, sin ifs en cascada |
 | **Pure Fabrication** | `InputHandler`, `SpriteLoader`, `EnemySpawner`, `PowerupManager`, `ConfiguradorDificultad` | Servicios que no representan dominio pero mejoran el diseño |
-| **Indirection** | `MirageModulo`, `HomeFacade` | Desacopla el módulo del contrato inter-grupos |
+| **Indirection** | `ModuloMirage`, `HomeFacade` | Desacopla el módulo del contrato inter-grupos |
 | **Protected Variations** | `Enemigo` abstracto + `moverIA()`, `HomeFacade` interface | Los puntos de variación están protegidos por jerarquía o interfaz |
 
 ---
@@ -108,7 +108,7 @@ GameRenderer                      ← VIEW: solo lee el Model y llama sketch.xxx
 
 | Patrón | Clase(s) | Por qué |
 |--------|----------|---------|
-| **Facade** | `MirageModulo`, `HomeFacade` | Contrato estable con el HOME; el interior puede evolucionar |
+| **Facade** | `ModuloMirage`, `HomeFacade` | Contrato estable con el HOME; el interior puede evolucionar |
 | **State** | `EstadoJuego` y subclases | Elimina el if-estado en cascada del GameController |
 | **Template Method** | `Enemigo.update()`, `Jefe.update()` | Ciclo de vida fijo; lógica de IA variable por subclase (`moverIA`, `ejecutarAtaqueEspecial`) |
 | **Factory** | `EntidadFactory` | Crea enemigos y bosses sin exponer el tipo concreto; centraliza el escalado de dificultad |
@@ -174,7 +174,7 @@ en esta jerarquía antes de propagarse.
 
 ## Orden recomendado de desarrollo
 
-1. `HomeFacade` + `MirageModulo` — definir el contrato con el HOME primero
+1. `HomeFacade` + `ModuloMirage` — definir el contrato con el HOME primero
 2. `HitBox` — implementar `colisionaCon()` y `moverA()` (están en TODO)
 3. `Nave` → `Mirage` → `Proyectil` — el Model central, con flags de movimiento
 4. `Enemigo` → `HarrierEnemigo`, `FragataEnemiga`, `EnemigoKamikaze` — enemigos normales
