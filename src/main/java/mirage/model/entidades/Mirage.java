@@ -77,13 +77,16 @@ public class Mirage extends Nave {
         x = PApplet.constrain(x, 0, sketch.width);
         y = PApplet.constrain(y, 0, sketch.height);
         if (cooldownActual > 0) cooldownActual--;
-        // TODO: if (invencible) { frameInvencible--; if (frameInvencible <= 0) invencible = false }
+        if (invencible) {
+            frameInvencible--;
+            if (frameInvencible <= 0) invencible = false;
+        }
         proyectiles.forEach(Proyectil::update);
         proyectiles.removeIf(p -> !p.isActivo());
     }
 
     public void render(PApplet sk) {
-        // TODO: si invencible y sk.frameCount % 10 < 5 → no dibujar (efecto parpadeo)
+        if (invencible && sk.frameCount % 10 < 5) return; // efecto parpadeo
         // Nave simple: triángulo apuntando hacia arriba, centrado en (x, y).
         sk.fill(120, 200, 255);
         sk.triangle(x, y - 15, x - 12, y + 12, x + 12, y + 12);
@@ -107,15 +110,27 @@ public class Mirage extends Nave {
 
     @Override
     public void recibirDanio(int danio) {
-        // TODO: if (invencible) return
-        // TODO: vidas = Math.max(0, vidas - danio)
-        // TODO: if (vidas > 0) { invencible = true; frameInvencible = DURACION_INVENCIBILIDAD }
+        if (invencible) return;
+        vidas = Math.max(0, vidas - danio);
+        if (vidas > 0) {
+            invencible = true;
+            frameInvencible = DURACION_INVENCIBILIDAD;
+        }
+    }
+
+    /**
+     * El Mirage usa su propio campo {@code vidas} (≠ {@code Nave.vida}).
+     * Se sobreescribe para que el estado de "vivo" refleje las vidas reales,
+     * permitiendo que EstadoJugando detecte el game over correctamente.
+     */
+    @Override
+    public boolean estaViva() {
+        return vidas > 0;
     }
 
     @Override
     public HitBox getHitBox() {
-        // TODO: return new HitBox(x - ANCHO_HITBOX/2, y - ALTO_HITBOX/2, ANCHO_HITBOX, ALTO_HITBOX)
-        return null;
+        return new HitBox(x - ANCHO_HITBOX / 2f, y - ALTO_HITBOX / 2f, ANCHO_HITBOX, ALTO_HITBOX);
     }
 
     // ── Setters de movimiento (llamados por Commands) ─────────────────────────
