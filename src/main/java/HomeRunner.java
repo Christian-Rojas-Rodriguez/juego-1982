@@ -55,4 +55,9 @@ public class HomeRunner extends PApplet {
     public void keyPressed() {
         home.manejarTecla(keyCode, key);
     }
+
+    @Override
+    public void keyReleased() {
+        home.manejarTeclaReleased(keyCode, key);
+    }
 }

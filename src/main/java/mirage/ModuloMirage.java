@@ -8,6 +8,7 @@ import contracts.EstadoJuego;
 import contracts.FinalizadoState;
 import contracts.IModuloObserver;
 import contracts.IniciandoState;
+import contracts.ModuloConInput;
 import contracts.ModuloEvento;
 import contracts.ModuloJuego;
 import contracts.NoIniciadoState;
@@ -33,7 +34,7 @@ import java.util.List;
  *
  * Patrón: Facade (oculta el interior) + State (ciclo de vida) + Observer (sujeto).
  */
-public class ModuloMirage implements ModuloJuego {
+public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     private static final String NOMBRE_MODULO = "Mirage";
     private static final String DESCRIPCION   =
