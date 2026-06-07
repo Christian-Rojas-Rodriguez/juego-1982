@@ -33,6 +33,7 @@ public class EstadoPausado implements EstadoJuego {
                 controller.getMirage(),
                 controller.getEnemigos(),
                 controller.getMirage().getProyectiles(),
+                controller.getEfectos(),
                 controller.getSketch()
         );
         // Overlay "PAUSA" centrado en pantalla.
