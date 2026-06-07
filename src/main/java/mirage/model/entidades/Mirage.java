@@ -1,7 +1,9 @@
 package mirage.model.entidades;
 
 import mirage.model.fisica.HitBox;
+import mirage.view.sprites.SpriteLoader;
 import processing.core.PApplet;
+import processing.core.PImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,7 @@ public class Mirage extends Nave {
     private static final int VIDAS_MAX               = 3;
     private static final int ANCHO_HITBOX            = 30;
     private static final int ALTO_HITBOX             = 30;
+    private static final int TAM_SPRITE              = 48;   // tamaño de dibujo del sprite
     private static final int COOLDOWN_BASE           = 15;  // frames entre disparos
 
     // ── Estado del jugador ───────────────────────────────────────────────────
@@ -87,9 +90,16 @@ public class Mirage extends Nave {
 
     public void render(PApplet sk) {
         if (invencible && sk.frameCount % 10 < 5) return; // efecto parpadeo
-        // Nave simple: triángulo apuntando hacia arriba, centrado en (x, y).
-        sk.fill(120, 200, 255);
-        sk.triangle(x, y - 15, x - 12, y + 12, x + 12, y + 12);
+        PImage sprite = SpriteLoader.get("player.png");
+        if (sprite != null) {
+            // Sprite Kenney (apunta hacia arriba), centrado en (x, y).
+            sk.imageMode(PApplet.CENTER);
+            sk.image(sprite, x, y, TAM_SPRITE, TAM_SPRITE);
+        } else {
+            // Respaldo: triángulo apuntando hacia arriba (modo headless / sin assets).
+            sk.fill(120, 200, 255);
+            sk.triangle(x, y - 15, x - 12, y + 12, x + 12, y + 12);
+        }
         for (Proyectil p : proyectiles) p.render(sk);
     }
 

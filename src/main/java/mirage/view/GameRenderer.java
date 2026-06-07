@@ -16,10 +16,12 @@
 package mirage.view;
 
 import processing.core.PApplet;
+import mirage.model.efectos.Explosion;
 import mirage.model.entidades.Mirage;
 import mirage.model.entidades.Proyectil;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.view.pantallas.Pantalla;
+import mirage.view.sprites.SpriteLoader;
 
 import java.util.List;
 
@@ -28,18 +30,32 @@ public class GameRenderer {
     // --- Atributos ---
     private Pantalla pantallaActual;
 
+    /** Precarga de sprites diferida al primer render (necesita el PApplet vivo). */
+    private boolean spritesListos;
+
+    /** Fondo de mar con islas (Guerra de Malvinas). */
+    private final FondoMar fondo = new FondoMar();
+
     // --- Renderizado principal ---
-    public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles, PApplet sketch) {
+    public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles,
+                       List<Explosion> efectos, PApplet sketch) {
+        if (!spritesListos) {
+            sketch.noSmooth();                    // nearest-neighbor → pixel art nítido
+            SpriteLoader.precargarTodos(sketch);
+            spritesListos = true;
+        }
         dibujarFondo(sketch);
         for (Proyectil p : proyectiles) p.render(sketch);
         for (Enemigo e : enemigos) e.render(sketch);
         mirage.render(sketch);
+        for (Explosion ex : efectos) ex.render(sketch);   // efectos por encima de las naves
         dibujarHUD(sketch, mirage);
         if (pantallaActual != null) pantallaActual.render(sketch);
     }
 
-    private void dibujarFondo(PApplet sketch) {
-        sketch.background(10, 10, 30);  // azul oscuro de noche
+    /** Fondo: mar del Atlántico Sur con islas que se desplazan (ver {@link FondoMar}). */
+    private void dibujarFondo(PApplet sk) {
+        fondo.render(sk);
     }
 
     private void dibujarHUD(PApplet sketch, Mirage mirage) {

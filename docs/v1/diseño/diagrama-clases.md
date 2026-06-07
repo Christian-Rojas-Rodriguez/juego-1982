@@ -74,6 +74,7 @@ classDiagram
         -estadoActual EstadoJuego
         -mirage Mirage
         -enemigos List~Enemigo~
+        -efectos List~Explosion~
         -nivel NivelMirage
         -colisionDetector ColisionDetector
         -estadisticas EstadisticasMirage
@@ -87,6 +88,7 @@ classDiagram
         +onKeyReleased(key char, keyCode int) void
         +getMirage() Mirage
         +getEnemigos() List~Enemigo~
+        +getEfectos() List~Explosion~
         +getEstadisticas() EstadisticasMirage
         +getSketch() PApplet
         +getNivel() NivelMirage
@@ -275,10 +277,32 @@ classDiagram
 
     %% ── VISTA ────────────────────────────────────────────────────
     class GameRenderer {
-        -spriteLoader SpriteLoader
-        +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, sketch PApplet) void
+        -spritesListos bool
+        -fondo FondoMar
+        +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, efectos List~Explosion~, sketch PApplet) void
         +setPantalla(p Pantalla) void
+        -dibujarFondo(sk PApplet) void
         -dibujarHUD(sketch PApplet, mirage Mirage) void
+    }
+
+    class FondoMar {
+        <<fondo estatico - mapa Malvinas>>
+        -MASK String[]$
+        -buffer PImage
+        +render(sk PApplet) void
+        -construir(sk PApplet) PImage
+        -esTierra(c int, r int) bool
+        -dibujarTileTierra(g PGraphics, c int, r int) void
+    }
+
+    class Explosion {
+        <<efecto efímero>>
+        -x float
+        -y float
+        -vida int
+        +update() void
+        +render(sk PApplet) void
+        +terminada() bool
     }
 
     class Pantalla {
@@ -308,6 +332,7 @@ classDiagram
 
     GameController --> EstadoJuego
     GameController --> Mirage
+    GameController --> Explosion
     GameController --> GameRenderer
     GameController --> InputHandler
     GameController --> NivelMirage
@@ -348,6 +373,9 @@ classDiagram
 
     GameRenderer --> Pantalla
     GameRenderer --> SpriteLoader
+    GameRenderer --> FondoMar
+    GameRenderer ..> Explosion
+    FondoMar --> SpriteLoader
     Pantalla <|.. PantallaJuego
     Pantalla <|.. PantallaGameOver
 ```
@@ -365,3 +393,6 @@ classDiagram
 | Movimiento suave | Flags booleanos en `Mirage` + `keyReleased` | `keyPressed()` se repite con OS key-repeat; flags permiten movimiento continuo en `draw()` |
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` |
 | Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
+| Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. Render con `noSmooth()` (pixel-perfect). Fallback a formas si falta el sprite → tests headless siguen en verde |
+| Fondo: las Malvinas | `FondoMar` dibuja un *land mask* del archipiélago con autotile de costa (Kenney) | Las dos islas principales separadas por el Estrecho de San Carlos. **Estático y cacheado** en un buffer (se dibuja una sola vez, no por frame), escalado preservando proporción y con capa oscura para legibilidad del HUD. Bordes/esquinas inferiores por volteo de los superiores; esquinas cóncavas para las entradas de costa |
+| Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |

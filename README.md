@@ -209,6 +209,12 @@ juego-1982/
 
 ---
 
+## Créditos de assets
+
+- **Gráficos:** [Kenney — Pixel Shmup](https://kenney.nl/assets/pixel-shmup) (CC0). Ver [`data/sprites/CREDITS.md`](data/sprites/CREDITS.md) y `LICENSE-kenney.txt`.
+
+---
+
 ## Integrantes
 
 | Nombre | Rol |
