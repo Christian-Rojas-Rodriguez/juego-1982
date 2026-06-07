@@ -76,6 +76,7 @@ public class GameController {
 
     public void update() {
         estadoActual.update(this);
+        // System.out.println(enemigos.size());
     }
 
     public void render() {

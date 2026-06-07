@@ -22,6 +22,7 @@ public class EstadoJugando implements EstadoJuego {
     @Override
     public void alEntrar(GameController controller) {
         // TODO: inicializar pantalla de juego si es necesario
+        // controller.getRenderer().setPantalla(controller.getRenderer().getPantalla());
     }
 
     @Override

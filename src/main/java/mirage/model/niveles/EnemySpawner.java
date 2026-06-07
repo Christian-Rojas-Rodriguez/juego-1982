@@ -47,6 +47,7 @@ public class EnemySpawner {
             }
             frameCounter = 0;
         }
+
     }
 
     /**
@@ -56,6 +57,7 @@ public class EnemySpawner {
     public List<Enemigo> getEnemigosNuevos() {
         List<Enemigo> resultado = new ArrayList<>(nuevosEsteFrame);
         nuevosEsteFrame.clear();
+        // System.out.println(resultado.size());
         return resultado;
     }
 

@@ -55,4 +55,8 @@ public class GameRenderer {
     public void setPantalla(Pantalla pantalla) {
         this.pantallaActual = pantalla;
     }
+
+    // public Pantalla getPantalla(){
+    //     return this.pantallaActual;
+    // }
 }
