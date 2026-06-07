@@ -1,6 +1,7 @@
 package lobby;
 
 import contracts.*;
+import contracts.ModuloConInput;
 import processing.core.*;
 import java.util.*;
 
@@ -146,7 +147,17 @@ public class HomeJuego implements IModuloObserver {
         if ("EN_EJECUCION".equals(estadoNombre) || "PAUSADO".equals(estadoNombre)) {
           try { moduloActual.finalizar(); } catch (EstadoInvalidoException e) { /* ignorar */ }
         }
+      } else if ("EN_EJECUCION".equals(estadoNombre) && moduloActual instanceof ModuloConInput) {
+        ((ModuloConInput) moduloActual).onKeyPressed(key, keyCode);
       }
+    }
+  }
+
+  public void manejarTeclaReleased(int keyCode, char key) {
+    if (controladorNav.getPantallaActual() == Pantalla.JUEGO && moduloActual != null
+        && "EN_EJECUCION".equals(moduloActual.getEstado().getNombre())
+        && moduloActual instanceof ModuloConInput) {
+      ((ModuloConInput) moduloActual).onKeyReleased(key, keyCode);
     }
   }
 
