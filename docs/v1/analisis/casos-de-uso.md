@@ -9,8 +9,8 @@
 
 ```mermaid
 flowchart LR
-    J["👤\nJugador"]
-    H["🏠\nHOME"]
+    J["👤<br/>Jugador"]
+    H["🏠<br/>HOME"]
 
     subgraph SM["Sistema Mirage"]
         direction TB
@@ -40,14 +40,14 @@ flowchart LR
 
 | ID | Nombre | Actor | Clases involucradas |
 |----|--------|-------|---------------------|
-| UC-01 | Mover el Mirage | Jugador | `InputHandler`, `MoverXCmd`, `Mirage` |
-| UC-02 | Disparar misil | Jugador | `InputHandler`, `DispararCmd`, `Mirage`, `Proyectil` |
-| UC-03 | Pausar / Reanudar | Jugador | `GameController`, `EstadoPausado`, `EstadoJugando` |
-| UC-04 | Proyectil destruye enemigo | Sistema | `ColisionDetector`, `Proyectil`, `HarrierEnemigo`, `Mirage`, `EstadisticasMirage` |
-| UC-05 | Enemigo impacta al Mirage | Sistema | `ColisionDetector`, `HarrierEnemigo`, `Mirage` |
-| UC-06 | Oleada de enemigos se activa | Sistema | `EnemySpawner`, `HarrierEnemigo`, `NivelMirage` |
-| UC-07 | Game Over | Sistema | `GameController`, `EstadoGameOver`, `ModuloMirage` |
-| UC-08 | Exportar estadísticas al HOME | Sistema / HOME | `ModuloMirage`, `EstadisticasMirage`, `EstadisticasGenerales`, `IModuloObserver` |
+| UC-01 | Mover el Mirage | Jugador | `Juego1982`, `ModuloMirage`, `GameController`, `EstadoJugando`, `InputHandler`, `MoverDerechaCmd`, `Mirage` |
+| UC-02 | Disparar misil | Jugador | `Juego1982`, `ModuloMirage`, `GameController`, `InputHandler`, `DispararCmd`, `Mirage`, `Proyectil` |
+| UC-03 | Pausar / Reanudar | Jugador | `Juego1982`, `ModuloMirage`, `GameController`, `EstadoJugando`, `EstadoPausado` |
+| UC-04 | Proyectil destruye enemigo | Sistema | `EstadoJugando`, `GameController`, `ColisionDetector`, `Mirage`, `Proyectil`, `HarrierEnemigo`, `HitBox`, `Explosion`, `EstadisticasMirage` |
+| UC-05 | Enemigo impacta al Mirage | Sistema | `EstadoJugando`, `ColisionDetector`, `HarrierEnemigo`, `HitBox`, `Mirage`, `GameController`, `EstadoGameOver` |
+| UC-06 | Oleada de enemigos se activa | Sistema | `EstadoJugando`, `NivelMirage`, `EnemySpawner`, `EnemyFactory`, `HarrierEnemigo`, `GameController` |
+| UC-07 | Game Over | Sistema | `GameController`, `EstadoGameOver`, `EstadisticasMirage`, `GameRenderer`, `PantallaGameOver`, `ModuloMirage`, `IModuloObserver` |
+| UC-08 | Exportar estadísticas al HOME | Sistema / HOME | `HomeJuego`, `ModuloMirage`, `GameController`, `EstadisticasMirage`, `Mirage`, `ResumenPartida`, `EstadisticasGenerales` |
 
 ---
 
@@ -61,29 +61,44 @@ flowchart LR
 sequenceDiagram
     actor Jugador
     participant Juego1982
+    participant ModuloMirage
     participant GameController
+    participant EstadoJugando
     participant InputHandler
     participant MoverDerechaCmd
     participant Mirage
 
-    Jugador->>+Juego1982: keyPressed(keyCode=RIGHT)
-    Juego1982->>+GameController: onKeyPressed(key, keyCode)
+    Jugador->>+Juego1982: keyPressed()
+    Note over Juego1982: callback de Processing (la tecla RIGHT viaja en keyCode; key == CODED)
+    Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
+    ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
+    GameController->>EstadoJugando: onKeyPressed(this, key, keyCode)
+    Note over EstadoJugando: solo reacciona a 'P' (pausa); ignora el movimiento
     GameController->>+InputHandler: onKeyPressed(keyCode, key, mirage)
-    InputHandler->>+MoverDerechaCmd: ejecutar(mirage)
-    MoverDerechaCmd->>Mirage: setMoverDerecha(true)
-    deactivate MoverDerechaCmd
+    Note over InputHandler: el comando se busca por keyCode (PApplet.RIGHT)
+    opt cmd != null
+        InputHandler->>+MoverDerechaCmd: ejecutar(mirage)
+        MoverDerechaCmd->>Mirage: setMoverDerecha(true)
+        deactivate MoverDerechaCmd
+    end
     deactivate InputHandler
     deactivate GameController
+    deactivate ModuloMirage
     deactivate Juego1982
 
     Note over Juego1982,Mirage: En el siguiente draw() frame
     activate Juego1982
-    Juego1982->>+GameController: actualizar()
-    GameController->>+Mirage: update(sketch)
+    Juego1982->>+ModuloMirage: actualizar(this)
+    ModuloMirage->>+GameController: update()
+    GameController->>+EstadoJugando: update(this)
+    EstadoJugando->>+Mirage: update()
     Mirage->>Mirage: x += velocidad (flag moverDerecha == true)
-    Mirage->>Mirage: constrain(x, 0, width)
+    Mirage->>Mirage: x = constrain(x, 0, sketch.width)
+    Mirage->>Mirage: y = constrain(y, 0, sketch.height)
     deactivate Mirage
+    deactivate EstadoJugando
     deactivate GameController
+    deactivate ModuloMirage
     deactivate Juego1982
 
     Note over Jugador,Mirage: keyReleased baja el flag → Mirage se detiene
@@ -101,23 +116,35 @@ sequenceDiagram
 sequenceDiagram
     actor Jugador
     participant Juego1982
+    participant ModuloMirage
     participant GameController
+    participant EstadoJugando
     participant InputHandler
     participant DispararCmd
     participant Mirage
 
-    Jugador->>+Juego1982: keyPressed(key=SPACE)
-    Juego1982->>+GameController: onKeyPressed(key, keyCode)
+    Jugador->>+Juego1982: keyPressed()
+    Note over Juego1982: callback de Processing (SPACE: key == ' ', keyCode == 32)
+    Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
+    ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
+    GameController->>EstadoJugando: onKeyPressed(this, key, keyCode)
+    Note over EstadoJugando: ignora SPACE (solo maneja 'P')
     GameController->>+InputHandler: onKeyPressed(keyCode, key, mirage)
-    InputHandler->>+DispararCmd: ejecutar(mirage)
-    DispararCmd->>+Mirage: disparar(sketch)
-    Mirage->>Mirage: cooldownActual = cooldownDisparo
-    Mirage->>Mirage: disparosTotales++
-    Mirage->>Mirage: proyectiles.add(new Proyectil(x, y))
-    deactivate Mirage
-    deactivate DispararCmd
+    Note over InputHandler: el comando se busca por keyCode (32 = SPACE)
+    opt cmd != null
+        InputHandler->>+DispararCmd: ejecutar(mirage)
+        DispararCmd->>+Mirage: disparar()
+        opt cooldownActual == 0
+            Mirage->>Mirage: proyectiles.add(new Proyectil(x, y - 20, sketch))
+            Mirage->>Mirage: disparosTotales++
+            Mirage->>Mirage: cooldownActual = cooldownDisparo
+        end
+        deactivate Mirage
+        deactivate DispararCmd
+    end
     deactivate InputHandler
     deactivate GameController
+    deactivate ModuloMirage
     deactivate Juego1982
 ```
 
@@ -133,19 +160,37 @@ sequenceDiagram
 sequenceDiagram
     actor Jugador
     participant Juego1982
+    participant ModuloMirage
     participant GameController
     participant EstadoJugando
     participant EstadoPausado
 
-    Jugador->>+Juego1982: keyPressed(key='P')
-    Juego1982->>+GameController: onKeyPressed('P', keyCode)
-    GameController->>+EstadoJugando: onKeyPressed(ctrl, 'P', keyCode)
-    EstadoJugando->>GameController: setEstado(new EstadoPausado())
-    deactivate EstadoJugando
-    activate EstadoPausado
-    Note over EstadoPausado: alEntrar(ctrl) — solo renderiza, no actualiza
-    deactivate EstadoPausado
+    Jugador->>+Juego1982: keyPressed()
+    Note over Juego1982: callback de Processing (la tecla 'P' viaja en key, no como argumento)
+    Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
+    ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
+
+    alt estadoActual == EstadoJugando (JUGANDO → PAUSADO)
+        GameController->>+EstadoJugando: onKeyPressed(this, 'P', keyCode)
+        EstadoJugando->>GameController: setEstado(new EstadoPausado())
+        deactivate EstadoJugando
+        GameController->>+EstadoPausado: alEntrar(this)
+        Note over EstadoPausado: alEntrar() está vacío
+        deactivate EstadoPausado
+        Note over EstadoPausado: el "congelar" (no actualiza, solo renderiza) vive en update()/render() de EstadoPausado
+    else estadoActual == EstadoPausado (PAUSADO → JUGANDO, reanudar)
+        GameController->>+EstadoPausado: onKeyPressed(this, 'P', keyCode)
+        EstadoPausado->>GameController: setEstado(new EstadoJugando())
+        deactivate EstadoPausado
+        GameController->>+EstadoJugando: alEntrar(this)
+        deactivate EstadoJugando
+    end
+
+    Note over GameController: setEstado() asigna estadoActual y luego invoca alEntrar() en el nuevo estado
+    GameController->>InputHandler: onKeyPressed(keyCode, key, mirage)
+    Note over InputHandler: 'P' no está registrada como comando → no hace nada
     deactivate GameController
+    deactivate ModuloMirage
     deactivate Juego1982
 ```
 
@@ -166,22 +211,23 @@ sequenceDiagram
     participant Proyectil
     participant HarrierEnemigo
     participant HitBox
+    participant Explosion
     participant EstadisticasMirage
 
-    EstadoJugando->>+GameController: getMirage()
-    GameController-->>-EstadoJugando: mirage
-    EstadoJugando->>+GameController: getEnemigos()
-    GameController-->>-EstadoJugando: enemigos
     EstadoJugando->>+GameController: getColisionDetector()
     GameController-->>-EstadoJugando: colisionDetector
+    EstadoJugando->>+GameController: getMirage()
+    GameController-->>-EstadoJugando: mirage
     EstadoJugando->>+Mirage: getProyectiles()
     Mirage-->>-EstadoJugando: proyectiles
+    EstadoJugando->>+GameController: getEnemigos()
+    GameController-->>-EstadoJugando: enemigos
 
     EstadoJugando->>+ColisionDetector: detectarProyectilEnemigo(proyectiles, enemigos, mirage)
     loop for (Proyectil p : proyectiles)
-        ColisionDetector->>Proyectil: p.isActivo()
+        Note over ColisionDetector: if (!p.isActivo()) continue;
         loop for (Enemigo e : enemigos)
-            ColisionDetector->>HarrierEnemigo: e.estaViva()
+            Note over ColisionDetector: if (!e.estaViva()) continue;
             ColisionDetector->>+Proyectil: p.getHitBox()
             Proyectil->>+HitBox: new HitBox(...)
             HitBox-->>-Proyectil: hitBoxP
@@ -201,24 +247,32 @@ sequenceDiagram
                 deactivate Proyectil
                 ColisionDetector->>+EstadisticasMirage: registrarDisparoAcertado()
                 deactivate EstadisticasMirage
-                ColisionDetector->>HarrierEnemigo: e.estaViva()
-                alt enemigo destruido
+                alt enemigo destruido (!e.estaViva())
                     ColisionDetector->>HarrierEnemigo: e.getPuntos()
                     HarrierEnemigo-->>ColisionDetector: puntos
-                    ColisionDetector->>HarrierEnemigo: e.getTipo()
-                    HarrierEnemigo-->>ColisionDetector: tipo
                     ColisionDetector->>+Mirage: sumarPuntos(puntos)
                     deactivate Mirage
+                    ColisionDetector->>HarrierEnemigo: e.getTipo()
+                    HarrierEnemigo-->>ColisionDetector: tipo
                     ColisionDetector->>+EstadisticasMirage: registrarDerribo(tipo, puntos)
                     deactivate EstadisticasMirage
                 end
+                Note over ColisionDetector: break (corta el loop de enemigos para este proyectil)
             end
         end
     end
     deactivate ColisionDetector
 
-    EstadoJugando->>GameController: enemigos.removeIf(!estaViva())
-    EstadoJugando->>Mirage: getProyectiles().removeIf(!isActivo())
+    Note over EstadoJugando,Explosion: De vuelta en EstadoJugando.update(), tras detectar colisiones
+    loop for (Enemigo e : enemigos)
+        alt !e.estaViva()
+            EstadoJugando->>+Explosion: new Explosion(e.getX(), e.getY())
+            deactivate Explosion
+            EstadoJugando->>GameController: getEfectos().add(explosion)
+        end
+    end
+    EstadoJugando->>GameController: getEnemigos().removeIf(enemigo -> !enemigo.estaViva())
+    EstadoJugando->>Mirage: getProyectiles().removeIf(proyectil -> !proyectil.isActivo())
 ```
 
 ---
@@ -234,19 +288,29 @@ sequenceDiagram
     participant EstadoJugando
     participant ColisionDetector
     participant HarrierEnemigo
+    participant HitBox
     participant Mirage
     participant GameController
 
     EstadoJugando->>+ColisionDetector: detectarEnemigoMirage(enemigos, mirage)
-    loop por cada enemigo activo (corta si mirage.isInvencible())
-        ColisionDetector->>+HarrierEnemigo: getHitBox()
-        deactivate HarrierEnemigo
+    loop for (Enemigo e : enemigos)
+        Note over ColisionDetector: if (!e.estaViva()) continue;
+        ColisionDetector->>+Mirage: isInvencible()
+        Mirage-->>-ColisionDetector: invencible
+        Note over ColisionDetector: if (mirage.isInvencible()) return;  ← aborta el método
+        ColisionDetector->>+HarrierEnemigo: e.getHitBox()
+        HarrierEnemigo->>+HitBox: new HitBox(...)
+        HitBox-->>-HarrierEnemigo: hitBoxE
+        HarrierEnemigo-->>-ColisionDetector: hitBoxE
         ColisionDetector->>+Mirage: getHitBox()
-        deactivate Mirage
-        ColisionDetector->>ColisionDetector: hitBoxE.colisionaCon(hitBoxM)?
+        Mirage->>+HitBox: new HitBox(...)
+        HitBox-->>-Mirage: hitBoxM
+        Mirage-->>-ColisionDetector: hitBoxM
+        ColisionDetector->>+HitBox: hitBoxE.colisionaCon(hitBoxM)
+        HitBox-->>-ColisionDetector: hayColision
         alt colisión
             ColisionDetector->>+Mirage: recibirDanio(1)
-            Note over Mirage: vidas-- · invencible=true · frameInvencible=DURACION
+            Note over Mirage: vidas-- · invencible=true · frameInvencible=DURACION_INVENCIBILIDAD
             deactivate Mirage
         end
     end
@@ -273,6 +337,7 @@ sequenceDiagram
     participant EstadoJugando
     participant NivelMirage
     participant EnemySpawner
+    participant EnemyFactory
     participant HarrierEnemigo
     participant GameController
 
@@ -281,16 +346,25 @@ sequenceDiagram
     EnemySpawner->>EnemySpawner: frameCounter++
     alt frameCounter >= intervaloFrames
         loop i = 0..tamanoOleada-1
-            EnemySpawner->>+HarrierEnemigo: new HarrierEnemigo(randomX, -20, sketch)
+            EnemySpawner->>EnemySpawner: x = sketch.random(20, sketch.width - 20)
+            EnemySpawner->>+EnemyFactory: crear(Tipo.HARRIER, sketch, x, -20)
+            EnemyFactory->>+HarrierEnemigo: new HarrierEnemigo(sketch, x, -20)
             deactivate HarrierEnemigo
+            EnemyFactory-->>-EnemySpawner: enemigo
+            EnemySpawner->>EnemySpawner: nuevosEsteFrame.add(enemigo)
         end
         EnemySpawner->>EnemySpawner: frameCounter = 0
     end
     deactivate EnemySpawner
-    NivelMirage->>+EnemySpawner: getEnemigosNuevos()
-    deactivate EnemySpawner
     deactivate NivelMirage
-    EstadoJugando->>GameController: enemigos.addAll(nuevos)
+
+    Note over EstadoJugando,GameController: getEnemigosNuevos() es una 2da llamada separada desde EstadoJugando.update()
+    EstadoJugando->>+NivelMirage: getEnemigosNuevos()
+    NivelMirage->>+EnemySpawner: getEnemigosNuevos()
+    Note over EnemySpawner: retorna copia del buffer y lo limpia
+    EnemySpawner-->>-NivelMirage: nuevos
+    NivelMirage-->>-EstadoJugando: nuevos
+    EstadoJugando->>GameController: getEnemigos().addAll(nuevos)
 ```
 
 ---
@@ -305,17 +379,38 @@ sequenceDiagram
 sequenceDiagram
     participant GameController
     participant EstadoGameOver
+    participant Mirage
+    participant EstadisticasMirage
+    participant GameRenderer
+    participant PantallaGameOver
     participant ModuloMirage
     participant IModuloObserver
 
     GameController->>+EstadoGameOver: alEntrar(controller)
-    EstadoGameOver->>+ModuloMirage: finalizar()
-    Note over ModuloMirage: internamente notifica FINALIZADO
-    loop por cada observer registrado
-        ModuloMirage->>+IModuloObserver: onEventoModulo(ModuloEvento(FINALIZADO))
-        deactivate IModuloObserver
+    EstadoGameOver->>+Mirage: getPuntuacion()
+    Mirage-->>-EstadoGameOver: puntaje
+    EstadoGameOver->>+EstadisticasMirage: getEnemigosDerribados()
+    EstadisticasMirage-->>-EstadoGameOver: derribados
+    EstadoGameOver->>+EstadisticasMirage: registrarFinPartida(puntaje)
+    Note over EstadisticasMirage: partidasJugadas++ · partidasPerdidas++ · actualiza puntajeMaximo
+    deactivate EstadisticasMirage
+
+    EstadoGameOver->>+GameRenderer: setPantalla(new PantallaGameOver(puntaje, derribados))
+    GameRenderer->>+PantallaGameOver: new PantallaGameOver(puntaje, derribados)
+    PantallaGameOver-->>-GameRenderer: pantalla
+    deactivate GameRenderer
+
+    alt try
+        EstadoGameOver->>+ModuloMirage: finalizar()
+        Note over ModuloMirage: internamente notifica FINALIZADO
+        loop por cada observer registrado
+            ModuloMirage->>+IModuloObserver: onEventoModulo(new ModuloEvento(FINALIZADO, "Mirage", mensaje))
+            deactivate IModuloObserver
+        end
+        deactivate ModuloMirage
+    else catch (EstadoInvalidoException)
+        Note over EstadoGameOver: ya finalizado / estado no válido → se ignora (el HOME maneja el ciclo de vida)
     end
-    deactivate ModuloMirage
     deactivate EstadoGameOver
 ```
 
@@ -331,17 +426,37 @@ sequenceDiagram
 sequenceDiagram
     participant HomeJuego
     participant ModuloMirage
+    participant GameController
     participant EstadisticasMirage
     participant Mirage
+    participant ResumenPartida
     participant EstadisticasGenerales
 
     HomeJuego->>+ModuloMirage: getEstadisticasGenerales()
-    ModuloMirage->>+EstadisticasMirage: exportar(mirage.getVidas(), mirage)
-    EstadisticasMirage->>+Mirage: getDisparosTotales()
-    deactivate Mirage
-    EstadisticasMirage->>EstadisticasMirage: calcular precision = acertados / totales
-    EstadisticasMirage-->>-ModuloMirage: datos internos
-    ModuloMirage->>+EstadisticasGenerales: new EstadisticasGenerales(nombreModulo, puntaje, ...)
-    deactivate EstadisticasGenerales
+    alt controller != null && controller.getMirage() != null
+        ModuloMirage->>+GameController: getEstadisticas()
+        GameController-->>-ModuloMirage: estadisticas
+        ModuloMirage->>+GameController: getMirage()
+        GameController-->>-ModuloMirage: mirage
+        ModuloMirage->>+GameController: getMirage().getVidas()
+        GameController-->>-ModuloMirage: vidas
+
+        ModuloMirage->>+EstadisticasMirage: exportar(vidas, mirage)
+        EstadisticasMirage->>+Mirage: getPuntuacion()
+        Mirage-->>-EstadisticasMirage: puntuacion
+        EstadisticasMirage->>EstadisticasMirage: getPrecision(mirage)
+        EstadisticasMirage->>+Mirage: getDisparosTotales()
+        Mirage-->>-EstadisticasMirage: disparosTotales
+        Note over EstadisticasMirage: precision = disparosAcertados / disparosTotales (0 si no disparó)
+        EstadisticasMirage->>+ResumenPartida: new ResumenPartida(puntuacion, derribados, vidas, duracion, precision, ...)
+        ResumenPartida-->>-EstadisticasMirage: resumen
+        EstadisticasMirage-->>-ModuloMirage: resumen (ResumenPartida)
+
+        ModuloMirage->>+EstadisticasGenerales: new EstadisticasGenerales("Mirage", r.getPuntajeFinal(), ...)
+        EstadisticasGenerales-->>-ModuloMirage: stats
+    else fallback (game loop aún no creado)
+        ModuloMirage->>+EstadisticasGenerales: new EstadisticasGenerales("Mirage", puntaje, 0, 0, 0, 0, enJuegoMs / 1000)
+        EstadisticasGenerales-->>-ModuloMirage: stats
+    end
     ModuloMirage-->>-HomeJuego: EstadisticasGenerales
 ```

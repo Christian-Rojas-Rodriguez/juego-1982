@@ -40,7 +40,9 @@ public class GameRenderer {
     public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles,
                        List<Explosion> efectos, PApplet sketch) {
         if (!spritesListos) {
-            sketch.noSmooth();                    // nearest-neighbor → pixel art nítido
+            // El pixel-art nítido (noSmooth/nearest-neighbor) se configura en
+            // settings() de los runners (Juego1982/HomeRunner): noSmooth() solo
+            // tiene efecto ahí. El buffer offscreen de FondoMar lo aplica aparte.
             SpriteLoader.precargarTodos(sketch);
             spritesListos = true;
         }

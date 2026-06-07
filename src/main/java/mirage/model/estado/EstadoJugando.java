@@ -49,6 +49,10 @@ public class EstadoJugando implements EstadoJuego {
             }
         }
         controller.getEnemigos().removeIf(enemigo -> !enemigo.estaViva());
+        // Enemigos que salieron por debajo de la pantalla: se descartan (sin sumar
+        // puntos). Evita la acumulacion indefinida de entidades fuera de vista.
+        float limiteY = controller.getSketch().height + 40;
+        controller.getEnemigos().removeIf(enemigo -> enemigo.getY() > limiteY);
         controller.getMirage().getProyectiles().removeIf(proyectil -> !proyectil.isActivo());
         controller.getEfectos().forEach(mirage.model.efectos.Explosion::update);
         controller.getEfectos().removeIf(mirage.model.efectos.Explosion::terminada);
