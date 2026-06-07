@@ -278,10 +278,18 @@ classDiagram
     %% ── VISTA ────────────────────────────────────────────────────
     class GameRenderer {
         -spritesListos bool
+        -fondo FondoMar
         +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, efectos List~Explosion~, sketch PApplet) void
         +setPantalla(p Pantalla) void
         -dibujarFondo(sk PApplet) void
         -dibujarHUD(sketch PApplet, mirage Mirage) void
+    }
+
+    class FondoMar {
+        <<fondo - islas deterministas>>
+        +render(sk PApplet) void
+        -dibujarIsla(sk PApplet, wx int, wy int, x float, y float) void
+        -hash(x int, y int) int
     }
 
     class Explosion {
@@ -362,7 +370,9 @@ classDiagram
 
     GameRenderer --> Pantalla
     GameRenderer --> SpriteLoader
+    GameRenderer --> FondoMar
     GameRenderer ..> Explosion
+    FondoMar --> SpriteLoader
     Pantalla <|.. PantallaJuego
     Pantalla <|.. PantallaGameOver
 ```
@@ -381,4 +391,5 @@ classDiagram
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` |
 | Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
 | Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. Render con `noSmooth()` (pixel-perfect). Fallback a formas si falta el sprite → tests headless siguen en verde |
-| Fondo y explosión | Procedurales (sin sprite) en `GameRenderer.dibujarFondo()` y `Explosion` | Mar del Atlántico Sur con oleaje desplazándose; explosión = ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |
+| Fondo de mar con islas | `FondoMar` tilea agua + islas con autotile de costa (Kenney) | Ambientación Guerra de Malvinas: mar con islas que se desplazan hacia abajo. Las islas se colocan deterministamente por hash de bloque (sin estado); los bordes inferiores se obtienen volteando los superiores |
+| Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |

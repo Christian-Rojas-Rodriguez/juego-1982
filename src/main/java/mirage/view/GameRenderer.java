@@ -33,6 +33,9 @@ public class GameRenderer {
     /** Precarga de sprites diferida al primer render (necesita el PApplet vivo). */
     private boolean spritesListos;
 
+    /** Fondo de mar con islas (Guerra de Malvinas). */
+    private final FondoMar fondo = new FondoMar();
+
     // --- Renderizado principal ---
     public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles,
                        List<Explosion> efectos, PApplet sketch) {
@@ -50,39 +53,9 @@ public class GameRenderer {
         if (pantallaActual != null) pantallaActual.render(sketch);
     }
 
-    /**
-     * Fondo procedural: mar del Atlántico Sur visto desde arriba.
-     * Olas y espuma que se desplazan hacia abajo dan la sensación de avance.
-     * Determinista por frameCount (mismo patrón en cada frame, sin azar).
-     */
+    /** Fondo: mar del Atlántico Sur con islas que se desplazan (ver {@link FondoMar}). */
     private void dibujarFondo(PApplet sk) {
-        sk.background(10, 30, 58);   // mar profundo (navy)
-        sk.noStroke();
-
-        float fc = sk.frameCount;
-
-        // Capa 1 (parallax lento): franjas anchas de azul medio.
-        sk.fill(18, 44, 78);
-        int pasoF = 70;
-        float despF = (fc * 0.6f) % pasoF;
-        for (float y = -pasoF + despF; y < sk.height; y += pasoF) {
-            sk.rect(0, y, sk.width, 26);
-        }
-
-        // Capa 2 (parallax rápido): espuma — guiones claros dispersos por fila.
-        int pasoE = 38;
-        float despE = (fc * 1.6f) % pasoE;
-        int fila = 0;
-        for (float y = -pasoE + despE; y < sk.height; y += pasoE, fila++) {
-            sk.fill(150, 185, 210, 150);
-            // Posiciones pseudo-aleatorias pero deterministas (hash de la fila).
-            for (int k = 0; k < 5; k++) {
-                int h = (fila * 131 + k * 977) & 0x7fffffff;
-                float fx = (h % 100) / 100f * sk.width;
-                float fw = 6 + (h % 3) * 4;
-                sk.rect(fx, y, fw, 2);
-            }
-        }
+        fondo.render(sk);
     }
 
     private void dibujarHUD(PApplet sketch, Mirage mirage) {

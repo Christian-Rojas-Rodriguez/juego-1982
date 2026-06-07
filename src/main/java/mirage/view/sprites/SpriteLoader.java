@@ -48,8 +48,16 @@ public class SpriteLoader {
 
     // --- Precargar todos los sprites del módulo ---
     public static void precargarTodos(PApplet sketch) {
-        cargar("player.png", sketch);         // Kenney Ships/ship_0000.png
+        cargar("player.png", sketch);         // Kenney Ships/ship_0012.png (nave gris)
         cargar("enemy-harrier.png", sketch);  // Kenney Ships/ship_0001.png
         cargar("bullet.png", sketch);         // Kenney Tiles/tile_0000.png
+        // Fondo de mar con islas (Kenney Tiles/) — autotile de costa.
+        cargar("agua.png", sketch);           // tile_0042 (mar)
+        cargar("isla-centro.png", sketch);    // tile_0050 (césped sólido)
+        cargar("isla-borde-sup.png", sketch); // tile_0038
+        cargar("isla-borde-izq.png", sketch); // tile_0049
+        cargar("isla-borde-der.png", sketch); // tile_0051
+        cargar("isla-esq-sup-izq.png", sketch); // tile_0037
+        cargar("isla-esq-sup-der.png", sketch); // tile_0039
     }
 }
