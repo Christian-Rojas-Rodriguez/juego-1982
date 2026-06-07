@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class NivelMirage extends Nivel {
 
-    private static final int INTERVALO_INICIAL = 380; // frames (3 seg a 60 fps)
+    private static final int INTERVALO_INICIAL = 180; // frames (3 seg a 60 fps)
     private static final int TAMANO_OLEADA     = 3;
 
     private final EnemySpawner spawner;
