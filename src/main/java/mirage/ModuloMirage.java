@@ -141,7 +141,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
             if (System.currentTimeMillis() - tInicioCargaMs >= CARGA_MS) {
                 estadoActual = new EnEjecucionState();
                 tInicioJuegoMs = System.currentTimeMillis();
-                notificar(ModuloEvento.Tipo.INICIADO, "En ejecucion");
+                // INICIADO ya se notificó en iniciar(); no se reemite aquí.
             }
         } else if ("EN_EJECUCION".equals(estado)) {
             controller.update();  // lógica de juego real (no llama graphics)
@@ -215,12 +215,14 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
                     (long) r.getDuracionSegundos()
             );
         }
-        // Fallback (aún no se creó el game loop): DTO no-null basado en el placeholder.
+        // Fallback (aún no se creó el game loop): DTO no-null sin partidas ficticias.
+        // partidasJugadas/Perdidas en 0 para no registrar una derrota inexistente si
+        // el HOME consulta antes de que haya empezado una partida real.
         long enJuegoMs = tAcumuladoMs;
         if ("EN_EJECUCION".equals(estadoActual.getNombre())) {
             enJuegoMs += System.currentTimeMillis() - tInicioJuegoMs;
         }
-        return new EstadisticasGenerales(NOMBRE_MODULO, puntaje, 1, 0, 1, 0, enJuegoMs / 1000);
+        return new EstadisticasGenerales(NOMBRE_MODULO, puntaje, 0, 0, 0, 0, enJuegoMs / 1000);
     }
 
     // ── Observer ──────────────────────────────────────────────────────────────
