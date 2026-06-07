@@ -31,3 +31,4 @@ data/output/*.csv
 data/output/*.json
 # Estadísticas que el lobby (HomeJuego) persiste al correr el harness
 estadisticas/
+.vscode/
