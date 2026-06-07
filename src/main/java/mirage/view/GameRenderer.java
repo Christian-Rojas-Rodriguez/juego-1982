@@ -20,6 +20,7 @@ import mirage.model.entidades.Mirage;
 import mirage.model.entidades.Proyectil;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.view.pantallas.Pantalla;
+import mirage.view.sprites.SpriteLoader;
 
 import java.util.List;
 
@@ -28,8 +29,16 @@ public class GameRenderer {
     // --- Atributos ---
     private Pantalla pantallaActual;
 
+    /** Precarga de sprites diferida al primer render (necesita el PApplet vivo). */
+    private boolean spritesListos;
+
     // --- Renderizado principal ---
     public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles, PApplet sketch) {
+        if (!spritesListos) {
+            sketch.noSmooth();                    // nearest-neighbor → pixel art nítido
+            SpriteLoader.precargarTodos(sketch);
+            spritesListos = true;
+        }
         dibujarFondo(sketch);
         for (Proyectil p : proyectiles) p.render(sketch);
         for (Enemigo e : enemigos) e.render(sketch);
