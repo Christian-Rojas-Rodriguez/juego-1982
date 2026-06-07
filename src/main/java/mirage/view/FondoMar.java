@@ -2,65 +2,76 @@ package mirage.view;
 
 import mirage.view.sprites.SpriteLoader;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PImage;
 
 /**
- * Fondo: el mar del Atlántico Sur visto desde arriba, con islas dispersas
- * (ambientación Guerra de Malvinas). Se desplaza hacia abajo para dar la
- * sensación de que el Mirage avanza hacia el norte.
+ * Fondo: el mar del Atlántico Sur con islas dispersas (ambientación Guerra de
+ * Malvinas). Es ESTÁTICO: se construye una sola vez en un buffer y cada frame
+ * solo se copia ese buffer (una operación), en vez de re-tilear ~200 tiles por
+ * frame. Eso mantiene el costo del fondo parejo con el del resto del juego.
  *
- * Las islas se colocan de forma DETERMINISTA (sin estado ni azar guardado):
- * el mundo se divide en bloques de BW×BH tiles y un hash de las coordenadas
- * del bloque decide si hay isla, su tamaño y su posición dentro del bloque.
- * Así el mismo tramo de mar se ve igual siempre que vuelve a pantalla, y no
- * hace falta almacenar nada.
+ * Sobre el mar se dibuja una capa oscura semitransparente para dar ambiente y,
+ * sobre todo, para que el HUD (puntaje / vidas, en blanco) se lea con contraste.
  *
- * Las islas se dibujan con autotile de costa (Kenney): esquinas y bordes
- * superiores reales; los bordes inferiores se obtienen volteando los
- * superiores en vertical (la costa es simétrica).
+ * Las islas se colocan de forma DETERMINISTA: el mundo se divide en bloques de
+ * BW×BH tiles y un hash de las coordenadas del bloque decide si hay isla, su
+ * tamaño y su posición. Autotile de costa (Kenney): esquinas y bordes superiores
+ * reales; los inferiores se obtienen volteando los superiores en vertical.
  *
  * Tolerante a fallos: si falta el sprite de agua (modo headless / sin assets)
- * pinta un azul sólido y no dibuja islas.
+ * pinta un azul oscuro sólido y no dibuja islas.
  */
 public class FondoMar {
 
     private static final int TS = 32;     // tamaño de tile en pantalla (px)
     private static final int BW = 5;      // ancho de bloque (tiles)
     private static final int BH = 6;      // alto de bloque (tiles)
-    private static final float VEL = 0.7f; // px por frame que baja el mar
+
+    /** Buffer con el mar+islas ya dibujado (se construye una sola vez). */
+    private PImage buffer;
 
     public void render(PApplet sk) {
-        PImage agua = SpriteLoader.get("agua.png");
-        if (agua == null) {                // sin assets: azul de respaldo
-            sk.background(20, 80, 130);
+        if (SpriteLoader.get("agua.png") == null) {  // sin assets: azul de respaldo
+            sk.background(8, 22, 40);
             return;
         }
-        sk.background(40, 120, 170);       // azul por debajo del agua palida
+        if (buffer == null) buffer = construir(sk);
+
         sk.imageMode(PApplet.CORNER);
+        sk.image(buffer, 0, 0);
 
-        float scrollPx = sk.frameCount * VEL;
-        int scrollTiles = PApplet.floor(scrollPx / TS);
-        float offY = scrollPx - scrollTiles * TS;   // desfase sub-tile (0..TS)
-
-        int cols = PApplet.ceil(sk.width / (float) TS) + 1;
-        int rows = PApplet.ceil(sk.height / (float) TS) + 2;
-
-        for (int sr = -1; sr < rows; sr++) {
-            // worldRow decrece con el tiempo → el contenido entra por arriba y baja.
-            int worldRow = sr - scrollTiles;
-            float y = sr * TS - offY;
-            for (int sc = 0; sc < cols; sc++) {
-                float x = sc * TS;
-                sk.image(agua, x, y, TS, TS);      // mar
-                dibujarIsla(sk, sc, worldRow, x, y); // isla encima (si corresponde)
-            }
-        }
+        // Capa oscura para ambiente + contraste del HUD (puntaje/vidas en blanco).
+        sk.noStroke();
+        sk.fill(6, 18, 38, 120);
+        sk.rect(0, 0, sk.width, sk.height);
     }
 
-    /** Dibuja el tile de isla correspondiente a la celda de mundo (wx,wy), o nada si es mar. */
-    private void dibujarIsla(PApplet sk, int wx, int wy, float x, float y) {
-        int bc = Math.floorDiv(wx, BW);
-        int br = Math.floorDiv(wy, BH);
+    /** Dibuja el mar con islas una sola vez en un buffer del tamaño de la pantalla. */
+    private PImage construir(PApplet sk) {
+        PGraphics g = sk.createGraphics(sk.width, sk.height);
+        g.noSmooth();
+        g.beginDraw();
+        g.imageMode(PApplet.CORNER);
+        g.background(40, 120, 170);   // azul por debajo del agua pálida
+
+        PImage agua = SpriteLoader.get("agua.png");
+        int cols = PApplet.ceil(sk.width / (float) TS);
+        int rows = PApplet.ceil(sk.height / (float) TS);
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                g.image(agua, c * TS, r * TS, TS, TS);   // mar
+                dibujarIsla(g, c, r);                    // isla encima (si corresponde)
+            }
+        }
+        g.endDraw();
+        return g;
+    }
+
+    /** Dibuja el tile de isla correspondiente a la celda (cx,cy), o nada si es mar. */
+    private void dibujarIsla(PGraphics g, int cx, int cy) {
+        int bc = Math.floorDiv(cx, BW);
+        int br = Math.floorDiv(cy, BH);
         int h  = hash(bc, br);
 
         if (h % 100 >= 65) return;          // ~65% de los bloques tienen isla
@@ -70,10 +81,10 @@ public class FondoMar {
         int ox = (h >> 11) % (BW - w + 1);  // posición dentro del bloque (cabe entero)
         int oy = (h >> 15) % (BH - hh + 1);
 
-        int ix0 = bc * BW + ox;             // esquina sup-izq de la isla (mundo)
+        int ix0 = bc * BW + ox;             // esquina sup-izq de la isla
         int iy0 = br * BH + oy;
-        int lx = wx - ix0;                  // posición local dentro de la isla
-        int ly = wy - iy0;
+        int lx = cx - ix0;                  // posición local dentro de la isla
+        int ly = cy - iy0;
         if (lx < 0 || lx >= w || ly < 0 || ly >= hh) return; // fuera de la isla → mar
 
         boolean top = ly == 0, bot = ly == hh - 1, lft = lx == 0, rgt = lx == w - 1;
@@ -91,14 +102,15 @@ public class FondoMar {
 
         PImage img = SpriteLoader.get(tile);
         if (img == null) return;
+        float x = cx * TS, y = cy * TS;
         if (!flipV) {
-            sk.image(img, x, y, TS, TS);
+            g.image(img, x, y, TS, TS);
         } else {
-            sk.pushMatrix();
-            sk.translate(x, y + TS);
-            sk.scale(1, -1);
-            sk.image(img, 0, 0, TS, TS);
-            sk.popMatrix();
+            g.pushMatrix();
+            g.translate(x, y + TS);
+            g.scale(1, -1);
+            g.image(img, 0, 0, TS, TS);
+            g.popMatrix();
         }
     }
 

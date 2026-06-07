@@ -286,9 +286,11 @@ classDiagram
     }
 
     class FondoMar {
-        <<fondo - islas deterministas>>
+        <<fondo estatico - islas deterministas>>
+        -buffer PImage
         +render(sk PApplet) void
-        -dibujarIsla(sk PApplet, wx int, wy int, x float, y float) void
+        -construir(sk PApplet) PImage
+        -dibujarIsla(g PGraphics, cx int, cy int) void
         -hash(x int, y int) int
     }
 
@@ -391,5 +393,5 @@ classDiagram
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` |
 | Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
 | Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. Render con `noSmooth()` (pixel-perfect). Fallback a formas si falta el sprite → tests headless siguen en verde |
-| Fondo de mar con islas | `FondoMar` tilea agua + islas con autotile de costa (Kenney) | Ambientación Guerra de Malvinas: mar con islas que se desplazan hacia abajo. Las islas se colocan deterministamente por hash de bloque (sin estado); los bordes inferiores se obtienen volteando los superiores |
+| Fondo de mar con islas | `FondoMar` tilea agua + islas con autotile de costa (Kenney) | Ambientación Guerra de Malvinas. **Estático y cacheado** en un buffer (se dibuja una sola vez, no por frame) con capa oscura para legibilidad del HUD. Islas deterministas por hash de bloque; los bordes inferiores se obtienen volteando los superiores |
 | Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |

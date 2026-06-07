@@ -31,8 +31,10 @@ no hacen falta tiles propios para ellos.
 | `isla-esq-sup-der.png` | `Tiles/tile_0039.png` | Esquina sup-der (y, volteada, la inf-der) |
 
 Las islas se colocan de forma **determinista** (`mirage.view.FondoMar`): un hash de
-las coordenadas de bloque decide presencia, tamaño y posición de cada isla, y el mar
-se desplaza hacia abajo para simular el avance del Mirage hacia el norte.
+las coordenadas de bloque decide presencia, tamaño y posición de cada isla. El fondo
+es **estático** — se construye una sola vez en un buffer y cada frame solo se copia
+(en vez de re-tilear ~200 tiles por frame), y lleva una capa oscura semitransparente
+encima para ambiente y para que el HUD (puntaje/vidas, en blanco) se lea con contraste.
 
 ## Explosión (procedural, sin sprite)
 
