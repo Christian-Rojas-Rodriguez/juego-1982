@@ -59,5 +59,9 @@ public class SpriteLoader {
         cargar("isla-borde-der.png", sketch); // tile_0051
         cargar("isla-esq-sup-izq.png", sketch); // tile_0037
         cargar("isla-esq-sup-der.png", sketch); // tile_0039
+        cargar("isla-concava-sup-izq.png", sketch); // tile_0053 (entrada de costa)
+        cargar("isla-concava-sup-der.png", sketch); // tile_0052
+        cargar("isla-concava-inf-izq.png", sketch); // tile_0041
+        cargar("isla-concava-inf-der.png", sketch); // tile_0040
     }
 }
