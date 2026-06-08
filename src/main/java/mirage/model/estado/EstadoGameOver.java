@@ -36,9 +36,12 @@ public class EstadoGameOver implements EstadoJuego {
 
     @Override
     public void onKeyPressed(GameController controller, char key, int keyCode) {
-        // R reinicia. ESC lo intercepta el HOME; no se maneja acá.
         if (key == 'r' || key == 'R') {
             controller.getMirageModulo().reset();
+        } else if (keyCode == 27) { // ESC → volver al HOME
+            try {
+                controller.getMirageModulo().finalizar();
+            } catch (contracts.EstadoInvalidoException e) { /* ignorar */ }
         }
     }
 }

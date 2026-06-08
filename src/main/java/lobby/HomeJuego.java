@@ -139,7 +139,14 @@ public class HomeJuego implements IModuloObserver {
       if (keyCode == PApplet.ESC) {
         app.key = 0;
         if ("EN_EJECUCION".equals(estadoNombre)) {
-          try { moduloActual.pausar(); } catch (EstadoInvalidoException e) { /* ignorar */ }
+          // Reenviar ESC al módulo primero: Game Over puede interceptarlo para finalizar.
+          if (moduloActual instanceof ModuloConInput) {
+            ((ModuloConInput) moduloActual).onKeyPressed(key, keyCode);
+          }
+          // Solo pausar si el módulo sigue en ejecución (no finalizó por Game Over).
+          if (moduloActual != null && "EN_EJECUCION".equals(moduloActual.getEstado().getNombre())) {
+            try { moduloActual.pausar(); } catch (EstadoInvalidoException e) { /* ignorar */ }
+          }
         } else if ("PAUSADO".equals(estadoNombre)) {
           try { moduloActual.reanudar(); } catch (EstadoInvalidoException e) { /* ignorar */ }
         }
