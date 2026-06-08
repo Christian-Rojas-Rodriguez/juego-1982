@@ -146,7 +146,7 @@ sequenceDiagram
         InputHandler->>+DispararCmd: ejecutar(mirage)
         DispararCmd->>+Mirage: disparar()
         opt cooldownActual == 0
-            Mirage->>+Proyectil: new Proyectil(x, y - 20, sketch)
+            Mirage->>+Proyectil: new Proyectil(x, y - 20)
             Proyectil-->>-Mirage: proyectil
             Mirage->>Mirage: proyectiles.add(proyectil)
             Mirage->>Mirage: disparosTotales++
