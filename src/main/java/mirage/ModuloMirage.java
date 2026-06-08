@@ -137,8 +137,8 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
     public void dibujar(PApplet app) {
         String estado = estadoActual.getNombre();
 
-        // Gameplay real: delega el render al GameController (usa el PApplet vivo).
-        if ("EN_EJECUCION".equals(estado) && controller != null) {
+        // Gameplay real y Game Over: delega el render al GameController.
+        if (controller != null && ("EN_EJECUCION".equals(estado) || "FINALIZADO".equals(estado))) {
             controller.render();
             return;
         }
