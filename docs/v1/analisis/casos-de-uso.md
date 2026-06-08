@@ -132,6 +132,7 @@ sequenceDiagram
     participant InputHandler
     participant DispararCmd
     participant Mirage
+    participant Proyectil
 
     Note over Jugador,ModuloMirage: keyPressed() en HomeRunner → HomeJuego.manejarTecla() → reenvía vía ModuloConInput
     Jugador->>+ModuloMirage: onKeyPressed(key, keyCode)
@@ -145,7 +146,9 @@ sequenceDiagram
         InputHandler->>+DispararCmd: ejecutar(mirage)
         DispararCmd->>+Mirage: disparar()
         opt cooldownActual == 0
-            Mirage->>Mirage: proyectiles.add(new Proyectil(x, y - 20, sketch))
+            Mirage->>+Proyectil: new Proyectil(x, y - 20, sketch)
+            Proyectil-->>-Mirage: proyectil
+            Mirage->>Mirage: proyectiles.add(proyectil)
             Mirage->>Mirage: disparosTotales++
             Mirage->>Mirage: cooldownActual = cooldownDisparo
         end
@@ -228,9 +231,13 @@ sequenceDiagram
 
     EstadoJugando->>+ColisionDetector: detectarProyectilEnemigo(proyectiles, enemigos, mirage)
     loop for (Proyectil p : proyectiles)
-        Note over ColisionDetector: Si el proyectil no esta activo, se omite
-        loop for (Enemigo e : enemigos)
-            Note over ColisionDetector: Si el enemigo no esta vivo, se omite
+        opt !p.isActivo()    
+            Note over ColisionDetector, Proyectil: Se omite el proyectil (continue)
+        end
+        loop for (Enemigo e : enemigos) 
+            opt !e.estaViva()
+                Note over ColisionDetector, HarrierEnemigo: Si omite el enemigo (continue)
+            end
             ColisionDetector->>+Proyectil: p.getHitBox()
             Proyectil->>+HitBox: new HitBox(...)
             HitBox-->>-Proyectil: hitBoxP
@@ -241,7 +248,7 @@ sequenceDiagram
             HarrierEnemigo-->>-ColisionDetector: hitBoxE
             ColisionDetector->>+HitBox: hitBoxP.colisionaCon(hitBoxE)
             HitBox-->>-ColisionDetector: hayColision: boolean
-            alt hayColision == true
+            opt hayColision
                 ColisionDetector->>+Proyectil: p.getDanio()
                 Proyectil-->>-ColisionDetector: danio
                 ColisionDetector->>+HarrierEnemigo: e.recibirDanio(danio)
@@ -250,7 +257,7 @@ sequenceDiagram
                 deactivate Proyectil
                 ColisionDetector->>+EstadisticasMirage: registrarDisparoAcertado()
                 deactivate EstadisticasMirage
-                alt enemigo destruido (!e.estaViva())
+                opt !e.estaViva()
                     ColisionDetector->>HarrierEnemigo: e.getPuntos()
                     HarrierEnemigo-->>ColisionDetector: puntos
                     ColisionDetector->>+Mirage: sumarPuntos(puntos)
@@ -268,7 +275,7 @@ sequenceDiagram
 
     Note over EstadoJugando,Explosion: De vuelta en EstadoJugando.update(), tras detectar colisiones
     loop for (Enemigo e : enemigos)
-        alt !e.estaViva()
+        opt !e.estaViva()
             EstadoJugando->>+Explosion: new Explosion(e.getX(), e.getY())
             deactivate Explosion
             EstadoJugando->>GameController: getEfectos().add(explosion)
@@ -290,19 +297,26 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
+    participant GameController
     participant EstadoJugando
     participant ColisionDetector
     participant HarrierEnemigo
     participant HitBox
     participant Mirage
-    participant GameController
 
+    activate GameController
+    GameController->>+EstadoJugando: update(this)
+    Note over EstadoJugando: EstadoJugando usa el GameController como contexto del State
     EstadoJugando->>+ColisionDetector: detectarEnemigoMirage(enemigos, mirage)
     loop for (Enemigo e : enemigos)
-        Note over ColisionDetector: if (!e.estaViva()) continue;
+        opt !e.estaViva()
+            Note over ColisionDetector, Mirage: continue, se omite este enemigo
+        end
         ColisionDetector->>+Mirage: isInvencible()
-        Mirage-->>-ColisionDetector: invencible
-        Note over ColisionDetector: if (mirage.isInvencible()) return  ← aborta el método
+        Mirage-->>-ColisionDetector: invencible: boolean
+        opt invencible
+            Note over ColisionDetector, Mirage: return, aborta detectarEnemigoMirage()
+        end
         ColisionDetector->>+HarrierEnemigo: e.getHitBox()
         HarrierEnemigo->>+HitBox: new HitBox(...)
         HitBox-->>-HarrierEnemigo: hitBoxE
@@ -312,8 +326,8 @@ sequenceDiagram
         HitBox-->>-Mirage: hitBoxM
         Mirage-->>-ColisionDetector: hitBoxM
         ColisionDetector->>+HitBox: hitBoxE.colisionaCon(hitBoxM)
-        HitBox-->>-ColisionDetector: hayColision
-        alt colisión
+        HitBox-->>-ColisionDetector: hayColision: boolean
+        opt hayColision
             ColisionDetector->>+Mirage: recibirDanio(1)
             Note over Mirage: vidas-- · invencible=true · frameInvencible=DURACION_INVENCIBILIDAD
             deactivate Mirage
@@ -321,12 +335,14 @@ sequenceDiagram
     end
     deactivate ColisionDetector
 
-    Note over EstadoJugando,GameController: La transición a Game Over la decide EstadoJugando, que es quien tiene el controller (el ColisionDetector solo aplica daño)
+    Note over GameController, Mirage: La transición a Game Over la decide EstadoJugando, que es quien tiene el controller (el ColisionDetector solo aplica daño)
     EstadoJugando->>+Mirage: estaViva()
-    Mirage-->>-EstadoJugando: vidas > 0 ?
-    alt !mirage.estaViva()
+    Mirage-->>-EstadoJugando: vidas > 0 : boolean
+    opt !mirage.estaViva()
         EstadoJugando->>GameController: setEstado(new EstadoGameOver())
     end
+    deactivate EstadoJugando
+    deactivate GameController
 ```
 
 ---
@@ -349,12 +365,12 @@ sequenceDiagram
     EstadoJugando->>+NivelMirage: update()
     NivelMirage->>+EnemySpawner: update()
     EnemySpawner->>EnemySpawner: frameCounter++
-    alt frameCounter >= intervaloFrames
+    opt frameCounter >= intervaloFrames
         loop i = 0..tamanoOleada-1
             EnemySpawner->>EnemySpawner: x = sketch.random(20, sketch.width - 20)
             EnemySpawner->>+EnemyFactory: crear(Tipo.HARRIER, sketch, x, -20)
             EnemyFactory->>+HarrierEnemigo: new HarrierEnemigo(sketch, x, -20)
-            deactivate HarrierEnemigo
+            HarrierEnemigo-->>-EnemyFactory: enemigo: Enemigo
             EnemyFactory-->>-EnemySpawner: enemigo
             EnemySpawner->>EnemySpawner: nuevosEsteFrame.add(enemigo)
         end
@@ -369,7 +385,7 @@ sequenceDiagram
     Note over EnemySpawner: retorna copia del buffer y lo limpia
     EnemySpawner-->>-NivelMirage: nuevos
     NivelMirage-->>-EstadoJugando: nuevos
-    EstadoJugando->>GameController: getEnemigos().addAll(nuevos)
+    EstadoJugando->>+GameController: getEnemigos().addAll(nuevos)
 ```
 
 ---
@@ -452,10 +468,9 @@ sequenceDiagram
         EstadisticasMirage->>EstadisticasMirage: getPrecision(mirage)
         EstadisticasMirage->>+Mirage: getDisparosTotales()
         Mirage-->>-EstadisticasMirage: disparosTotales
-        Note over EstadisticasMirage: precision = disparosAcertados / disparosTotales (0 si no disparó)
         EstadisticasMirage->>+ResumenPartida: new ResumenPartida(puntuacion, derribados, vidas, duracion, precision, ...)
         ResumenPartida-->>-EstadisticasMirage: resumen
-        EstadisticasMirage-->>-ModuloMirage: resumen (ResumenPartida)
+        EstadisticasMirage-->>-ModuloMirage: resumen: ResumenPartida
 
         ModuloMirage->>+EstadisticasGenerales: new EstadisticasGenerales("Mirage", r.getPuntajeFinal(), ...)
         EstadisticasGenerales-->>-ModuloMirage: stats
