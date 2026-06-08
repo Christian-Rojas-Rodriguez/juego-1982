@@ -7,19 +7,6 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Genera oleadas de enemigos a intervalos regulares de frames de Processing.
- *
- * Cada vez que frameCounter alcanza intervaloFrames, crea un batch de tamanoOleada
- * enemigos en posiciones X aleatorias fuera de la pantalla (y = -20).
- *
- * Los enemigos nuevos se acumulan en nuevosEsteFrame; getEnemigosNuevos()
- * los retorna y limpia el buffer. GameController los agrega a su lista activa.
- *
- * En MVP 2 recibirá ConfiguradorDificultad para escalar vida y velocidad.
- *
- * Patrón: GRASP Pure Fabrication
- */
 public class EnemySpawner {
 
     private final PApplet sketch;
@@ -59,10 +46,5 @@ public class EnemySpawner {
         nuevosEsteFrame.clear();
         // System.out.println(resultado.size());
         return resultado;
-    }
-
-    /** Permite ajustar la cadencia en MVPs futuros (ConfiguradorDificultad). */
-    public void setIntervalo(int nuevoIntervalo) {
-        this.intervaloFrames = nuevoIntervalo;
     }
 }

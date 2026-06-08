@@ -25,6 +25,7 @@ public class HomeRunner extends PApplet {
     @Override
     public void settings() {
         size(800, 600);
+        pixelDensity(displayDensity());
         noSmooth();   // pixel-art nitido (nearest-neighbor); solo aplica en settings()
     }
 

@@ -33,10 +33,8 @@ Ver `diseño/diagrama-clases.md` para el diagrama completo y `diseño/descripcio
 | Física | `HitBox`, `ColisionDetector` |
 | Niveles | `Nivel`, `NivelMirage`, `EnemySpawner` |
 | Stats | `EstadisticasMirage`, `ResumenPartida` |
-| Vista | `GameRenderer`, `FondoMar`, `Pantalla`, `PantallaJuego`, `PantallaGameOver`, `SpriteLoader` |
+| Vista | `GameRenderer`, `Pantalla`, `PantallaJuego`, `PantallaGameOver`, `SpriteLoader` |
 | Efectos | `Explosion` |
-
-> `Animacion` (vista) y la jerarquía `mirage.excepciones.JuegoException` existen como andamiaje pero **no se usan en v1** (la explosión es procedural; las excepciones que se usan son las del HOME, `contracts.*`).
 
 ## Casos de uso (8)
 

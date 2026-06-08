@@ -20,20 +20,6 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Módulo Mirage: implementación del contrato real del HOME (contracts.ModuloJuego).
- *
- * Es el único punto de contacto entre el lobby y la lógica interna del módulo.
- * Gestiona el ciclo de vida con la máquina de estados del HOME
- * (NO_INICIADO → INICIANDO → EN_EJECUCION ↔ PAUSADO → FINALIZADO),
- * notifica eventos a los observers y devuelve estadísticas no nulas.
- *
- * Estado actual: integración funcional con gameplay PLACEHOLDER. La máquina de
- * estados, observers y stats están completos y se ejercitan con el lobby; la
- * lógica de juego real (GameController + entidades) se cablea donde están los TODO.
- *
- * Patrón: Facade (oculta el interior) + State (ciclo de vida) + Observer (sujeto).
- */
 public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     private static final String NOMBRE_MODULO = "Mirage";
@@ -50,13 +36,10 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
     /** Observers registrados por el HOME (normalmente solo HomeJuego). */
     private final List<IModuloObserver> observers = new ArrayList<>();
 
-    /** Contexto provisto por el lobby (jugador + dimensiones de pantalla). */
-    private ContextoJuego contexto;
-
     /** Game loop real (lazy-init en actualizar(), donde llega el PApplet vivo). */
     private GameController controller;
 
-    // ── Marcas de tiempo / métricas placeholder ───────────────────────────────
+    // ── Marcas de tiempo y puntaje para las stats del HOME ────────────────────
     private long tInicioCargaMs;
     private long tInicioJuegoMs;
     private long tAcumuladoMs;       // tiempo jugado acumulado (para stats)
@@ -81,10 +64,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     @Override
     public void inicializarContexto(ContextoJuego ctx) {
-        this.contexto = ctx;
-        // El PApplet vivo llega recién en actualizar/dibujar; el GameController se
-        // crea perezosamente ahí. Las dimensiones están en ctx.getAncho/AltoPantalla().
-        // TODO: precargar recursos que no necesiten PApplet.
+        // contrato HOME — v1 no necesita datos del contexto
     }
 
     // ── Ciclo de vida (valida en el estado actual, luego transiciona) ─────────
@@ -148,7 +128,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
             // Placeholder: el puntaje crece con el tiempo jugado.
             long ms = tAcumuladoMs + (System.currentTimeMillis() - tInicioJuegoMs);
             puntaje = (int) (ms / 100);
-            // TODO: si fin de partida (vidas == 0) → finalizar() automáticamente.
+            // finalizar() se invoca desde EstadoGameOver.alEntrar() vía State pattern.
         }
         // PAUSADO/FINALIZADO: no se actualiza lógica.
     }

@@ -1,10 +1,3 @@
-// ============================================================
-// MoverAbajoCmd — Comando: mover el Mirage hacia abajo
-// ============================================================
-// GRASP : Low Coupling
-// Patrón: Command (implementación concreta)
-// ============================================================
-
 package mirage.controller.commands;
 
 import mirage.model.entidades.Mirage;

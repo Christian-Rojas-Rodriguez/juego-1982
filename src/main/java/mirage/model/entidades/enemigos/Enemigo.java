@@ -4,18 +4,6 @@ import mirage.model.entidades.Nave;
 import mirage.model.fisica.HitBox;
 import processing.core.PApplet;
 
-/**
- * Clase abstracta base para todos los enemigos del módulo Mirage.
- *
- * Implementa el patrón Template Method: update() define el ciclo de vida fijo
- * (delega en moverIA()), y cada subclase sobreescribe moverIA() con su
- * patrón de movimiento propio.
- *
- * Agregar un nuevo tipo de enemigo = 1 subclase que sobreescribe moverIA()
- * y getTipo(). GameController y ColisionDetector no necesitan cambios.
- *
- * Patrón: Template Method
- */
 public abstract class Enemigo extends Nave {
 
     protected int puntos;

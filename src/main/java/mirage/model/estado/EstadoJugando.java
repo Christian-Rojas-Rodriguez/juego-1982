@@ -1,18 +1,3 @@
-// ============================================================
-// EstadoJugando — Estado activo: el juego corre normalmente
-// ============================================================
-// GRASP : Polymorphism, High Cohesion
-// Patrón: State (estado concreto)
-// ============================================================
-// Qué implementar:
-//   - update(): pedir al nivel nuevos enemigos y agregarlos,
-//               actualizar mirage / enemigos / proyectiles,
-//               llamar colisionDetector, limpiar entidades inactivas
-//   - render(): delegar al GameRenderer
-//   - alEntrar(): inicializar lo necesario al entrar en este estado
-//   - onKeyPressed(): tecla P → setEstado(new EstadoPausado())
-// ============================================================
-
 package mirage.model.estado;
 
 import mirage.controller.GameController;
@@ -21,8 +6,11 @@ public class EstadoJugando implements EstadoJuego {
 
     @Override
     public void alEntrar(GameController controller) {
+<<<<<<< HEAD
         // TODO: inicializar pantalla de juego si es necesario
         // controller.getRenderer().setPantalla(controller.getRenderer().getPantalla());
+=======
+>>>>>>> a3ad4a18749fb15c45036ff4ef4b61b16c77d6f5
     }
 
     @Override
@@ -60,7 +48,6 @@ public class EstadoJugando implements EstadoJuego {
         if (!controller.getMirage().estaViva()) {
             controller.setEstado(new EstadoGameOver());
         }
-        // TODO: si nivel.isTerminado() → finalizar módulo
     }
 
     @Override

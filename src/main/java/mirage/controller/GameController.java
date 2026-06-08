@@ -20,17 +20,6 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Orquestador central del módulo Mirage.
- *
- * Recibe todos los eventos de Processing (via ModuloMirage) y coordina
- * Model y View. Aplica el patrón State: delega update/render al estado activo.
- *
- * Los proyectiles son propiedad de Mirage; GameController los consulta
- * via mirage.getProyectiles() para colisionar y limpiar.
- *
- * Patrón: GRASP Controller + State
- */
 public class GameController {
 
     private final PApplet sketch;

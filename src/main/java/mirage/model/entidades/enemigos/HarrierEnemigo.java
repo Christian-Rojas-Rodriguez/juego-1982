@@ -5,14 +5,6 @@ import mirage.view.sprites.SpriteLoader;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-/**
- * Avión Harrier enemigo — único tipo de enemigo en MVP 1.
- *
- * Patrón de movimiento (moverIA): zigzag horizontal + descenso lento.
- * Al alcanzar un borde de pantalla invierte la dirección horizontal.
- *
- * Patrón: Template Method (sobreescribe moverIA de Enemigo)
- */
 public class HarrierEnemigo extends Enemigo {
 
     private static final int ANCHO       = 30;

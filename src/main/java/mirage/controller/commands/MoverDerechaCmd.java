@@ -1,10 +1,3 @@
-// ============================================================
-// MoverDerechaCmd — Comando: mover el Mirage hacia la derecha
-// ============================================================
-// GRASP : Low Coupling
-// Patrón: Command (implementación concreta)
-// ============================================================
-
 package mirage.controller.commands;
 
 import mirage.model.entidades.Mirage;

@@ -6,14 +6,6 @@ import mirage.model.entidades.Mirage;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Traduce códigos de teclado a Commands y los ejecuta sobre el Mirage.
- *
- * Mantiene un mapa keyCode → Comando. GameController registra los comandos
- * en init() via registrarComando() y luego propaga los eventos de Processing.
- *
- * Patrón: GRASP Pure Fabrication + Command
- */
 public class InputHandler {
 
     /** Mapa keyCode → Comando. Se configura en GameController.init(). */
