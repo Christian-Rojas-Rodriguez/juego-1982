@@ -69,11 +69,11 @@ sequenceDiagram
     participant Mirage
 
     Jugador->>+Juego1982: keyPressed()
-    Note over Juego1982: callback de Processing (la tecla RIGHT viaja en keyCode; key == CODED)
+    Note over Juego1982: callback de Processing (la tecla RIGHT viaja en keyCode, key == CODED)
     Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
     ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
     GameController->>EstadoJugando: onKeyPressed(this, key, keyCode)
-    Note over EstadoJugando: solo reacciona a 'P' (pausa); ignora el movimiento
+    Note over EstadoJugando: solo reacciona a 'P' (pausa), ignora el movimiento
     GameController->>+InputHandler: onKeyPressed(keyCode, key, mirage)
     Note over InputHandler: el comando se busca por keyCode (PApplet.RIGHT)
     opt cmd != null
@@ -204,8 +204,8 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant EstadoJugando
     participant GameController
+    participant EstadoJugando
     participant ColisionDetector
     participant Mirage
     participant Proyectil
@@ -214,20 +214,16 @@ sequenceDiagram
     participant Explosion
     participant EstadisticasMirage
 
-    EstadoJugando->>+GameController: getColisionDetector()
-    GameController-->>-EstadoJugando: colisionDetector
-    EstadoJugando->>+GameController: getMirage()
-    GameController-->>-EstadoJugando: mirage
-    EstadoJugando->>+Mirage: getProyectiles()
-    Mirage-->>-EstadoJugando: proyectiles
-    EstadoJugando->>+GameController: getEnemigos()
-    GameController-->>-EstadoJugando: enemigos
+    activate GameController
+    GameController->>+EstadoJugando: update(this)
+    Note over EstadoJugando,GameController: EstadoJugando usa el GameController como contexto del State
+    Note over EstadoJugando: Obtiene del contexto colisionDetector, mirage, proyectiles y enemigos
 
     EstadoJugando->>+ColisionDetector: detectarProyectilEnemigo(proyectiles, enemigos, mirage)
     loop for (Proyectil p : proyectiles)
-        Note over ColisionDetector: if (!p.isActivo()) continue;
+        Note over ColisionDetector: Si el proyectil no esta activo, se omite
         loop for (Enemigo e : enemigos)
-            Note over ColisionDetector: if (!e.estaViva()) continue;
+            Note over ColisionDetector: Si el enemigo no esta vivo, se omite
             ColisionDetector->>+Proyectil: p.getHitBox()
             Proyectil->>+HitBox: new HitBox(...)
             HitBox-->>-Proyectil: hitBoxP
@@ -237,8 +233,8 @@ sequenceDiagram
             HitBox-->>-HarrierEnemigo: hitBoxE
             HarrierEnemigo-->>-ColisionDetector: hitBoxE
             ColisionDetector->>+HitBox: hitBoxP.colisionaCon(hitBoxE)
-            HitBox-->>-ColisionDetector: hayColision
-            alt colision
+            HitBox-->>-ColisionDetector: hayColision: boolean
+            alt hayColision == true
                 ColisionDetector->>+Proyectil: p.getDanio()
                 Proyectil-->>-ColisionDetector: danio
                 ColisionDetector->>+HarrierEnemigo: e.recibirDanio(danio)
@@ -273,6 +269,8 @@ sequenceDiagram
     end
     EstadoJugando->>GameController: getEnemigos().removeIf(enemigo -> !enemigo.estaViva())
     EstadoJugando->>Mirage: getProyectiles().removeIf(proyectil -> !proyectil.isActivo())
+    deactivate EstadoJugando
+    deactivate GameController
 ```
 
 ---
@@ -297,7 +295,7 @@ sequenceDiagram
         Note over ColisionDetector: if (!e.estaViva()) continue;
         ColisionDetector->>+Mirage: isInvencible()
         Mirage-->>-ColisionDetector: invencible
-        Note over ColisionDetector: if (mirage.isInvencible()) return;  ← aborta el método
+        Note over ColisionDetector: if (mirage.isInvencible()) return  ← aborta el método
         ColisionDetector->>+HarrierEnemigo: e.getHitBox()
         HarrierEnemigo->>+HitBox: new HitBox(...)
         HitBox-->>-HarrierEnemigo: hitBoxE
