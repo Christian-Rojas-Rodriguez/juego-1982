@@ -1,16 +1,3 @@
-// ============================================================
-// Proyectil — Misil disparado por el Mirage o por enemigos
-// ============================================================
-// GRASP : Information Expert
-// ============================================================
-// Qué implementar:
-//   - update(): mover hacia arriba (y -= velocidad)
-//               si sale de pantalla → desactivar()
-//   - render(sketch): dibujar el proyectil (rectángulo o imagen)
-//   - desactivar(): activo = false (el Controller lo elimina de la lista)
-//   - getHitBox(): hitbox pequeña centrada en (x, y)
-// ============================================================
-
 package mirage.model.entidades;
 
 import processing.core.PApplet;
@@ -18,20 +5,18 @@ import processing.core.PImage;
 import mirage.model.fisica.HitBox;
 import mirage.view.sprites.SpriteLoader;
 
+/** Misil disparado por el Mirage: sube hasta salir de pantalla y se desactiva. */
 public class Proyectil extends Nave {
 
-    // --- Constantes ---
     private static final int ANCHO = 4;
     private static final int ALTO  = 12;
     private static final int SPRITE_ANCHO = 10;  // tamaño de dibujo del sprite
     private static final int SPRITE_ALTO  = 18;
 
-    // --- Atributos ---
     private boolean activo;
     private final int danio;
     private final PApplet sketch;
 
-    // --- Constructor ---
     public Proyectil(float x, float y, PApplet sketch) {
         super(x, y, 8f, 1);
         this.sketch = sketch;
@@ -66,7 +51,6 @@ public class Proyectil extends Nave {
         return new HitBox(x - ANCHO/2f, y - ALTO/2f, ANCHO, ALTO);
     }
 
-    // --- Getters ---
     public boolean isActivo() { return activo; }
     public int getDanio()     { return danio; }
 }

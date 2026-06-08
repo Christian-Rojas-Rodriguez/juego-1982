@@ -1,18 +1,3 @@
-// ============================================================
-// GameRenderer — Renderiza el estado del Model en pantalla
-// ============================================================
-// GRASP : High Cohesion (solo dibuja, nunca modifica estado)
-// ============================================================
-// Qué implementar:
-//   - render(): dibujar fondo, luego entidades, luego HUD
-//               Orden: fondo → proyectiles → enemigos → mirage → HUD
-//   - dibujarFondo(sketch): fondo negro + estrellas (efecto parallax opcional)
-//   - dibujarHUD(sketch, mirage): mostrar vidas y puntuación
-//   - setPantalla(): cambiar la pantalla activa (para Game Over, etc.)
-// REGLA: este archivo NO modifica ningún campo del Model.
-//        Solo llama métodos de lectura (get...) y render(sketch).
-// ============================================================
-
 package mirage.view;
 
 import processing.core.PApplet;
@@ -26,15 +11,17 @@ import processing.core.PImage;
 
 import java.util.List;
 
+/**
+ * Dibuja el estado del Model en pantalla, en orden fondo → proyectiles →
+ * enemigos → mirage → efectos → HUD. Solo lee el Model (get...), nunca lo modifica.
+ */
 public class GameRenderer {
 
-    // --- Atributos ---
     private Pantalla pantallaActual;
 
     /** Precarga de sprites diferida al primer render (necesita el PApplet vivo). */
     private boolean spritesListos;
 
-    // --- Renderizado principal ---
     public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles,
                        List<Explosion> efectos, PApplet sketch) {
         if (!spritesListos) {
@@ -80,7 +67,6 @@ public class GameRenderer {
         sketch.text("Vidas: " + mirage.getVidas(), sketch.width - 10, 10);
     }
 
-    // --- Cambiar pantalla superpuesta ---
     public void setPantalla(Pantalla pantalla) {
         this.pantallaActual = pantalla;
     }

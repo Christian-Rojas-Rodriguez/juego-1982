@@ -1,23 +1,13 @@
-// ============================================================
-// PantallaGameOver — Pantalla de fin de partida
-// ============================================================
-// Qué implementar:
-//   - render(sketch): mostrar "GAME OVER", puntaje final, vidas restantes
-//                     instrucciones: R para reiniciar, ESC para volver al HOME
-//   - update(): animación opcional (fade in, texto parpadeante, etc.)
-// ============================================================
-
 package mirage.view.pantallas;
 
 import processing.core.PApplet;
 
+/** Overlay de fin de partida: "GAME OVER", puntaje, derribos e instrucciones. */
 public class PantallaGameOver implements Pantalla {
 
-    // --- Atributos ---
     private final int puntajeFinal;
     private final int enemigosDerribados;
 
-    // --- Constructor ---
     public PantallaGameOver(int puntajeFinal, int enemigosDerribados) {
         this.puntajeFinal       = puntajeFinal;
         this.enemigosDerribados = enemigosDerribados;
@@ -50,6 +40,5 @@ public class PantallaGameOver implements Pantalla {
 
     @Override
     public void update() {
-        // TODO: animación opcional (ej: fade in del overlay)
     }
 }

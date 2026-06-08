@@ -28,9 +28,9 @@ import java.util.List;
  * (NO_INICIADO → INICIANDO → EN_EJECUCION ↔ PAUSADO → FINALIZADO),
  * notifica eventos a los observers y devuelve estadísticas no nulas.
  *
- * Estado actual: integración funcional con gameplay PLACEHOLDER. La máquina de
- * estados, observers y stats están completos y se ejercitan con el lobby; la
- * lógica de juego real (GameController + entidades) se cablea donde están los TODO.
+ * El gameplay real corre dentro del GameController (lazy-init en actualizar(),
+ * cuando llega el PApplet vivo); la máquina de estados, los observers y las stats
+ * se ejercitan con el lobby.
  *
  * Patrón: Facade (oculta el interior) + State (ciclo de vida) + Observer (sujeto).
  */
@@ -56,7 +56,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
     /** Game loop real (lazy-init en actualizar(), donde llega el PApplet vivo). */
     private GameController controller;
 
-    // ── Marcas de tiempo / métricas placeholder ───────────────────────────────
+    // ── Marcas de tiempo y puntaje para las stats del HOME ────────────────────
     private long tInicioCargaMs;
     private long tInicioJuegoMs;
     private long tAcumuladoMs;       // tiempo jugado acumulado (para stats)
@@ -84,7 +84,6 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
         this.contexto = ctx;
         // El PApplet vivo llega recién en actualizar/dibujar; el GameController se
         // crea perezosamente ahí. Las dimensiones están en ctx.getAncho/AltoPantalla().
-        // TODO: precargar recursos que no necesiten PApplet.
     }
 
     // ── Ciclo de vida (valida en el estado actual, luego transiciona) ─────────

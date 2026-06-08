@@ -15,8 +15,8 @@ import java.util.List;
  * entre sí — la regla de negocio está reforzada por diseño, no por lógica.
  *
  * Cada método maneja un par específico:
- *   1. Proyectil del jugador vs. Enemigo/Jefe
- *   2. Enemigo/Jefe vs. Mirage
+ *   1. Proyectil del jugador vs. Enemigo
+ *   2. Enemigo vs. Mirage
  *
  * Al detectar un impacto, aplica daño, notifica a EstadisticasMirage y
  * desactiva/destruye las entidades correspondientes.

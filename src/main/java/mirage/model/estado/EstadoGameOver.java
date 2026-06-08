@@ -21,7 +21,6 @@ public class EstadoGameOver implements EstadoJuego {
         int derribados = controller.getEstadisticas().getEnemigosDerribados();
 
         controller.getEstadisticas().registrarFinPartida(puntaje);
-        // TODO(UC-08): controller.getEstadisticas().guardar() — persistencia a CSV fuera de v1.
 
         controller.getRenderer()
                   .setPantalla(new mirage.view.pantallas.PantallaGameOver(puntaje, derribados));

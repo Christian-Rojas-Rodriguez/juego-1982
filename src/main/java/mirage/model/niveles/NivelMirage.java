@@ -8,10 +8,8 @@ import java.util.List;
 /**
  * Nivel concreto del módulo Mirage — MVP 1: oleadas infinitas de HarrierEnemigo.
  *
- * Gestiona el spawner de enemigos. No tiene condición de nivel completado en MVP 1:
+ * Gestiona el spawner de enemigos. No tiene condición de nivel completado:
  * la partida termina solo por Game Over (vidas = 0).
- *
- * En MVP 5 se agregará la secuencia de bosses y la condición de nivel completado.
  *
  * Patrón: Template Method (extiende Nivel abstracto)
  */
@@ -40,10 +38,7 @@ public class NivelMirage extends Nivel {
         return spawner.getEnemigosNuevos();
     }
 
-    /**
-     * En MVP 1 el nivel nunca termina — la partida finaliza por Game Over.
-     * En MVP 5 retornará true cuando se venzan los 4 bosses.
-     */
+    /** El nivel nunca termina en v1: la partida finaliza solo por Game Over. */
     @Override
     public boolean isTerminado() {
         return false;
