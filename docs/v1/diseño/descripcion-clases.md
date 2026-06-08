@@ -357,23 +357,21 @@ Solo lee el modelo y llama a los métodos de Processing. **Nunca modifica estado
 |----------|------|-----|
 | `pantallaActual` | `Pantalla` | Overlay activo (ej: `PantallaGameOver`). `null` durante el juego normal |
 | `spritesListos` | `boolean` | Flag de precarga diferida de sprites |
-| `fondo` | `FondoMar` | Fondo de mar con las islas Malvinas |
 
 ### Métodos
 
 | Método | Qué hace |
 |--------|---------|
 | `render(mirage, enemigos, proyectiles, efectos, sketch)` | En el primer render dispara `SpriteLoader.precargarTodos(sketch)` (carga diferida). Luego dibuja: fondo → proyectiles → enemigos → mirage → efectos → HUD → overlay |
+| `dibujarFondo(sketch)` | Dibuja `data/sprites/fondo.png` escalado para cubrir la pantalla; si falta, usa un azul oscuro de respaldo |
 | `dibujarHUD(sketch, mirage)` | Puntaje (izquierda) y vidas (derecha) |
 | `setPantalla(pantalla)` | Setea el overlay activo (lo usa `EstadoGameOver` para mostrar la `PantallaGameOver`) |
 
 ---
 
-## 19. `FondoMar`
+## 19. Fondo del juego (asset)
 
-**Paquete:** `mirage.view`
-
-Dibuja las Islas Malvinas vistas desde arriba a partir de un "land mask" autotileado con las piezas de costa del pack Kenney. Es estático: se construye una sola vez en un buffer (`PImage`) y cada frame se copia. Si falta el sprite de agua (headless / sin assets) pinta un azul de respaldo. `GameRenderer` lo posee y llama `render(sk)` cada frame.
+El fondo ya no tiene una clase propia: `GameRenderer` obtiene `fondo.png` desde `SpriteLoader` y lo dibuja cada frame escalado para cubrir toda la pantalla. Si el asset falta (headless / sin assets), pinta un azul oscuro de respaldo.
 
 ---
 
@@ -414,7 +412,7 @@ Caché estática de `PImage` (servicio no instanciable). **La carga es diferida*
 |--------|---------|
 | `cargar(nombre, sketch)` | Carga la imagen desde `sprites/` y la cachea (una sola vez) |
 | `get(nombre)` | Retorna la `PImage` cacheada o `null` |
-| `precargarTodos(sketch)` | Carga todos los sprites del módulo (player, enemigo, bala, tiles del fondo) |
+| `precargarTodos(sketch)` | Carga todos los sprites del módulo (player, enemigo, bala y fondo) |
 
 ---
 
