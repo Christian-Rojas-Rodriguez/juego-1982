@@ -46,7 +46,7 @@ flowchart LR
 | UC-04 | Proyectil destruye enemigo | Sistema | `EstadoJugando`, `GameController`, `ColisionDetector`, `Mirage`, `Proyectil`, `HarrierEnemigo`, `HitBox`, `Explosion`, `EstadisticasMirage` |
 | UC-05 | Enemigo impacta al Mirage | Sistema | `EstadoJugando`, `ColisionDetector`, `HarrierEnemigo`, `HitBox`, `Mirage`, `GameController`, `EstadoGameOver` |
 | UC-06 | Oleada de enemigos se activa | Sistema | `EstadoJugando`, `NivelMirage`, `EnemySpawner`, `EnemyFactory`, `HarrierEnemigo`, `GameController` |
-| UC-07 | Game Over | Sistema | `GameController`, `EstadoGameOver`, `EstadisticasMirage`, `GameRenderer`, `PantallaGameOver`, `ModuloMirage`, `IModuloObserver` |
+| UC-07 | Game Over | Sistema | `GameController`, `EstadoGameOver`, `EstadisticasMirage`, `GameRenderer`, `PantallaGameOver` |
 | UC-08 | Exportar estadísticas al HOME | Sistema / HOME | `HomeJuego`, `ModuloMirage`, `GameController`, `EstadisticasMirage`, `Mirage`, `ResumenPartida`, `EstadisticasGenerales` |
 
 ---
@@ -404,8 +404,6 @@ sequenceDiagram
     participant EstadisticasMirage
     participant GameRenderer
     participant PantallaGameOver
-    participant ModuloMirage
-    participant IModuloObserver
 
     GameController->>+EstadoGameOver: alEntrar(controller)
     EstadoGameOver->>+Mirage: getPuntuacion()
@@ -421,17 +419,7 @@ sequenceDiagram
     PantallaGameOver-->>-GameRenderer: pantalla
     deactivate GameRenderer
 
-    alt try
-        EstadoGameOver->>+ModuloMirage: finalizar()
-        Note over ModuloMirage: internamente notifica FINALIZADO
-        loop por cada observer registrado
-            ModuloMirage->>+IModuloObserver: onEventoModulo(new ModuloEvento(FINALIZADO, "Mirage", mensaje))
-            deactivate IModuloObserver
-        end
-        deactivate ModuloMirage
-    else catch (EstadoInvalidoException)
-        Note over EstadoGameOver: ya finalizado / estado no válido → se ignora (el HOME maneja el ciclo de vida)
-    end
+    Note over EstadoGameOver: finalizar() lo invoca el HOME cuando el jugador presiona ESC
     deactivate EstadoGameOver
 ```
 

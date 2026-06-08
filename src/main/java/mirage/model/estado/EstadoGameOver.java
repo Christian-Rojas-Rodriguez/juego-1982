@@ -13,12 +13,8 @@ public class EstadoGameOver implements EstadoJuego {
 
         controller.getRenderer()
                   .setPantalla(new mirage.view.pantallas.PantallaGameOver(puntaje, derribados));
-
-        try {
-            controller.getMirageModulo().finalizar();   // notifica FINALIZADO al HOME
-        } catch (contracts.EstadoInvalidoException e) {
-            // Ya finalizado o estado no válido: el HOME maneja el ciclo de vida.
-        }
+        // finalizar() lo llama el HOME cuando el jugador presiona ESC.
+        // No lo llamamos aquí para que la pantalla de Game Over sea visible.
     }
 
     @Override
