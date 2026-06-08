@@ -97,7 +97,22 @@ sequenceDiagram
     deactivate GameController
     deactivate ModuloMirage
 
-    Note over Jugador,Mirage: keyReleased: HomeJuego.manejarTeclaReleased() → ModuloMirage.onKeyReleased() → baja el flag → Mirage se detiene
+    Note over Jugador,ModuloMirage: keyReleased() en HomeRunner → HomeJuego.manejarTeclaReleased() → reenvía vía ModuloConInput
+    Jugador->>+ModuloMirage: onKeyReleased(key, keyCode)
+    Note over ModuloMirage: key == CODED, keyCode == PApplet.RIGHT
+    ModuloMirage->>+GameController: onKeyReleased(key, keyCode)
+    GameController->>+InputHandler: onKeyReleased(keyCode, key, mirage)
+    Note over InputHandler: el comando se busca por keyCode (PApplet.RIGHT)
+    opt cmd != null
+        InputHandler->>+MoverDerechaCmd: deshacer(mirage)
+        MoverDerechaCmd->>Mirage: setMoverDerecha(false)
+        deactivate MoverDerechaCmd
+    end
+    deactivate InputHandler
+    deactivate GameController
+    deactivate ModuloMirage
+
+    Note over Jugador,Mirage: En el siguiente draw() frame — Mirage.update() ya no suma velocidad (flag moverDerecha == false)
 ```
 
 ---
