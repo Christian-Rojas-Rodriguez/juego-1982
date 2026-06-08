@@ -36,8 +36,6 @@ Ver `diseño/diagrama-clases.md` para el diagrama completo y `diseño/descripcio
 | Vista | `GameRenderer`, `Pantalla`, `PantallaJuego`, `PantallaGameOver`, `SpriteLoader` |
 | Efectos | `Explosion` |
 
-> `Animacion` (vista) y la jerarquía `mirage.excepciones.JuegoException` existen como andamiaje pero **no se usan en v1** (la explosión es procedural; las excepciones que se usan son las del HOME, `contracts.*`).
-
 ## Casos de uso (8)
 
 Ver `analisis/casos-de-uso.md`

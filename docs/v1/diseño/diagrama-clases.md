@@ -68,6 +68,9 @@ classDiagram
         -observers List~IModuloObserver~
         -contexto ContextoJuego
         -controller GameController
+        -tInicioCargaMs long
+        -tInicioJuegoMs long
+        -tAcumuladoMs long
         -puntaje int
         +getNombreModulo() String
         +getDescripcion() String
@@ -171,7 +174,6 @@ classDiagram
         +recibirDanio(danio int) void
         +getX() float
         +getY() float
-        +getVida() int
     }
 
     class Mirage {
@@ -247,7 +249,6 @@ classDiagram
         -ancho float
         -alto float
         +colisionaCon(otro HitBox) bool
-        +moverA(x float, y float) void
         +getX() float
         +getY() float
         +getAncho() float
@@ -285,7 +286,6 @@ classDiagram
         -nuevosEsteFrame List~Enemigo~
         +update() void
         +getEnemigosNuevos() List~Enemigo~
-        +setIntervalo(nuevoIntervalo int) void
     }
 
     class EnemyFactory {
@@ -308,14 +308,11 @@ classDiagram
         +registrarFinPartida(puntajeFinal int) void
         +getPrecision(mirage Mirage) float
         +exportar(vidasRestantes int, mirage Mirage) ResumenPartida
-        +guardar() void
         +cargar() void
         +getEnemigosDerribados() int
-        +getPuntajeMaximo() int
         +getPartidasJugadas() int
         +getPartidasGanadas() int
         +getPartidasPerdidas() int
-        +getPorTipo() Map~String,Integer~
     }
 
     class ResumenPartida {
@@ -376,29 +373,14 @@ classDiagram
         +precargarTodos(sketch PApplet) void$
     }
 
-    %% ── EXCEPCIONES ──────────────────────────────────────────────
-    %% Hay DOS jerarquias de excepcion distintas:
-    %%   - contracts.JuegoException        (abstract, definida por el HOME)
-    %%   - mirage.excepciones.JuegoException (concreta, raiz del modulo Mirage)
+    %% ── EXCEPCIONES (HOME) ───────────────────────────────────────
+    %% El modulo usa la jerarquia de excepciones del HOME (contracts.*).
     class JuegoExceptionContracts {
         <<abstract - HOME>>
     }
     class EstadoInvalidoException {
         <<contracts.HOME>>
         +EstadoInvalidoException(mensaje String)
-    }
-    class JuegoExceptionMirage {
-        <<checked - Mirage>>
-    }
-    class ColisionException {
-        <<mirage.excepciones>>
-        +ColisionException(mensaje String)
-    }
-    class RecursoNoEncontradoException {
-        <<mirage.excepciones>>
-        -recurso String
-        +RecursoNoEncontradoException(recurso String)
-        +getRecurso() String
     }
 
     %% ── RELACIONES ───────────────────────────────────────────────
@@ -458,13 +440,9 @@ classDiagram
     Pantalla <|.. PantallaGameOver
 
     JuegoExceptionContracts <|-- EstadoInvalidoException
-    JuegoExceptionMirage <|-- ColisionException
-    JuegoExceptionMirage <|-- RecursoNoEncontradoException
 
     ModuloMirage ..> EstadoInvalidoException : <<throws>>
     EstadoGameOver ..> EstadoInvalidoException : <<catches>>
-    ColisionDetector ..> ColisionException : <<throws>>
-    SpriteLoader ..> RecursoNoEncontradoException : <<throws>>
 ```
 
 ---
@@ -481,9 +459,9 @@ classDiagram
 | Movimiento suave | Flags booleanos en `Mirage` + `keyReleased` | `keyPressed()` se repite con OS key-repeat; flags permiten movimiento continuo en `draw()` |
 | Niveles | `Nivel` abstracto + `NivelMirage` | `Nivel` define el contrato (`update`, `isTerminado`, `getEnemigosNuevos`). En MVP 1 `isTerminado()` siempre es `false`: la partida solo termina por Game Over |
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` y `getTipo()` |
-| Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner`. `setIntervalo()` permite escalar la cadencia en MVPs futuros |
+| Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
 | Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. `precargarTodos()` se llama una vez en el primer render. Fallback a formas si falta el sprite → tests headless siguen en verde |
 | Fondo | `GameRenderer` dibuja `data/sprites/fondo.png` cargado por `SpriteLoader` | El fondo se carga una sola vez junto con el resto de sprites y se escala para cubrir la pantalla. Si falta el asset, `GameRenderer` usa un azul oscuro de respaldo |
 | Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |
-| Estadísticas | `EstadisticasMirage` (en vivo) → `ResumenPartida` (snapshot) → `EstadisticasGenerales` (DTO HOME) | Information Expert: `EstadisticasMirage` registra; `exportar()` arma el `ResumenPartida` (8 campos); `ModuloMirage` lo mapea al DTO del HOME. `guardar()/cargar()` son no-op en v1 (persistencia CSV fuera de v1) |
-| Excepciones | Dos jerarquías: `contracts.JuegoException` (abstract, HOME) y `mirage.excepciones.JuegoException` (concreta, módulo) | `EstadoInvalidoException` (HOME) la lanzan los métodos de ciclo de vida en `ModuloMirage` y la atrapa `EstadoGameOver`. `ColisionException` y `RecursoNoEncontradoException` (Mirage) están definidas para `ColisionDetector` y `SpriteLoader` respectivamente |
+| Estadísticas | `EstadisticasMirage` (en vivo) → `ResumenPartida` (snapshot) → `EstadisticasGenerales` (DTO HOME) | Information Expert: `EstadisticasMirage` registra; `exportar()` arma el `ResumenPartida` (8 campos); `ModuloMirage` lo mapea al DTO del HOME. `cargar()` es no-op en v1 (persistencia CSV fuera de v1) |
+| Excepciones | Jerarquía del HOME (`contracts.JuegoException`) | `EstadoInvalidoException` (HOME) la lanzan los métodos de ciclo de vida en `ModuloMirage` y la atrapa `EstadoGameOver` |

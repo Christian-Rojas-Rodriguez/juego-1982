@@ -114,7 +114,7 @@ Recibe los eventos del game loop (via `ModuloMirage`) y coordina el resto del si
 | I/O Processing | `actualizar(app)` y `dibujar(app)` son los puntos de entrada del game loop. El `GameController` se crea perezosamente en `actualizar()` |
 | Input standalone | `onKeyPressed/onKeyReleased` (de `ModuloConInput`) propagan teclas al `GameController` para el runner standalone |
 
-> `inicializarContexto(ctx)` solo guarda el `ContextoJuego` (queda un TODO de precarga). No crea el `GameController` ni carga sprites.
+> `inicializarContexto(ctx)` solo guarda el `ContextoJuego`. No crea el `GameController` ni carga sprites.
 
 ---
 
@@ -153,7 +153,7 @@ Define los atributos y comportamientos comunes: posición (`x`, `y`), `velocidad
 | `getHitBox()` | Abstracto: cada subclase construye su `HitBox` |
 | `estaViva()` | `vida > 0` por defecto (`Mirage` lo sobreescribe para usar `vidas`) |
 | `recibirDanio(danio)` | Resta a `vida` (`Mirage` lo sobreescribe para usar `vidas` + invencibilidad) |
-| `getX()`, `getY()`, `getVida()` | Getters de lectura |
+| `getX()`, `getY()` | Getters de lectura |
 
 ---
 
@@ -213,7 +213,6 @@ Rectángulo AABB (axis-aligned bounding box). Cada entidad construye la suya en 
 | Método | Qué hace |
 |--------|---------|
 | `colisionaCon(otro)` | Retorna `true` si los rectángulos se solapan (AABB check) |
-| `moverA(x, y)` | Actualiza la posición del rectángulo. Existe en la clase pero **no se usa** en v1: `Nave.update()` es abstracto y las entidades crean una `HitBox` nueva en cada `getHitBox()` en vez de mover una persistente |
 | `getX/Y/Ancho/Alto()` | Getters de lectura |
 
 ---
@@ -290,7 +289,7 @@ Genera oleadas a intervalos regulares de frames. En MVP 1 crea `HarrierEnemigo` 
 | Atributo | Rol |
 |----------|-----|
 | `frameCounter` | Cuenta frames desde la última oleada |
-| `intervaloFrames` | Frames entre oleadas (180 = 3 seg a 60 fps). Ajustable con `setIntervalo()` |
+| `intervaloFrames` | Frames entre oleadas (180 = 3 seg a 60 fps) |
 | `tamanoOleada` | Cantidad de enemigos por oleada |
 | `nuevosEsteFrame` | Buffer de enemigos generados; `getEnemigosNuevos()` lo retorna y lo limpia |
 
@@ -304,7 +303,7 @@ Centraliza la creación de los tipos de `Enemigo`. En MVP 1 solo crea `HARRIER`.
 
 | Miembro | Detalle |
 |---------|---------|
-| `enum Tipo` | `HARRIER` (en MVPs futuros: `FRAGATA`, `KAMIKAZE`) |
+| `enum Tipo` | `HARRIER` (único tipo en v1) |
 | `crear(tipo, sketch, x, y)` | Retorna el `Enemigo` concreto según `tipo`; lanza `IllegalArgumentException` si es desconocido |
 
 ---
@@ -333,7 +332,7 @@ Recolecta métricas durante la partida y mantiene un historial acumulado entre p
 | `registrarFinPartida(puntajeFinal)` | Suma a `partidasJugadas`/`partidasPerdidas` y actualiza `puntajeMaximo`. Lo llama `EstadoGameOver.alEntrar()` |
 | `getPrecision(mirage)` | `disparosAcertados / mirage.getDisparosTotales()`. Protege división por cero |
 | `exportar(vidasRestantes, mirage)` | Construye y devuelve un `ResumenPartida` (puntaje, derribos, duración, precisión, contadores del historial) |
-| `guardar()` / `cargar()` | No-op en v1 (persistencia CSV fuera de alcance) |
+| `cargar()` | No-op en v1 (persistencia CSV fuera de alcance) |
 
 ---
 
@@ -397,7 +396,7 @@ La interfaz `Pantalla` declara `render(sketch)` y `update()`. `GameRenderer` dib
 
 | Clase | Qué muestra |
 |-------|------------|
-| `PantallaJuego` | Overlay del juego activo (oleada, power-ups, etc.). Placeholder con TODOs en MVP 1 |
+| `PantallaJuego` | Overlay del juego activo. Vacío en v1: el HUD lo dibuja `GameRenderer` |
 | `PantallaGameOver` | "GAME OVER", puntaje final y enemigos derribados, instrucciones (R reinicia, ESC vuelve al menú) |
 
 ---
@@ -413,14 +412,3 @@ Caché estática de `PImage` (servicio no instanciable). **La carga es diferida*
 | `cargar(nombre, sketch)` | Carga la imagen desde `sprites/` y la cachea (una sola vez) |
 | `get(nombre)` | Retorna la `PImage` cacheada o `null` |
 | `precargarTodos(sketch)` | Carga todos los sprites del módulo (player, enemigo, bala y fondo) |
-
----
-
-## Clases auxiliares / no usadas en v1
-
-Estas clases existen en el código pero **no participan del flujo de v1**:
-
-| Clase | Paquete | Estado |
-|-------|---------|--------|
-| `Animacion` | `mirage.view.sprites` | Esqueleto/placeholder (métodos con TODO, no se referencia desde ninguna entidad). Las explosiones usan dibujo procedural, no animación por frames |
-| `JuegoException` y jerarquía | `mirage.excepciones` | Código no usado en v1. La jerarquía de excepciones que el módulo realmente usa es la del HOME (`contracts.*`, p. ej. `contracts.EstadoInvalidoException`) |
