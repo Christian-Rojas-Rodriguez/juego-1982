@@ -344,23 +344,10 @@ classDiagram
     class GameRenderer {
         -pantallaActual Pantalla
         -spritesListos bool
-        -fondo FondoMar
         +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, efectos List~Explosion~, sketch PApplet) void
         +setPantalla(pantalla Pantalla) void
         -dibujarFondo(sk PApplet) void
         -dibujarHUD(sketch PApplet, mirage Mirage) void
-    }
-
-    class FondoMar {
-        <<fondo estatico - mapa Malvinas>>
-        -TS int$
-        -MASK String[]$
-        -buffer PImage
-        +render(sk PApplet) void
-        -construir(sk PApplet) PImage
-        -esTierra(c int, r int) bool
-        -dibujarTileTierra(g PGraphics, c int, r int) void
-        -dibujar(g PGraphics, nombre String, c int, r int, flipV bool) void
     }
 
     class Explosion {
@@ -466,9 +453,7 @@ classDiagram
 
     GameRenderer --> Pantalla
     GameRenderer --> SpriteLoader
-    GameRenderer --> FondoMar
     GameRenderer ..> Explosion
-    FondoMar --> SpriteLoader
     Pantalla <|.. PantallaJuego
     Pantalla <|.. PantallaGameOver
 
@@ -498,7 +483,7 @@ classDiagram
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` y `getTipo()` |
 | Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner`. `setIntervalo()` permite escalar la cadencia en MVPs futuros |
 | Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. `precargarTodos()` se llama una vez en el primer render. Fallback a formas si falta el sprite → tests headless siguen en verde |
-| Fondo: las Malvinas | `FondoMar` dibuja un *land mask* del archipiélago con autotile de costa (Kenney) | Las dos islas principales separadas por el Estrecho de San Carlos. **Estático y cacheado** en un buffer (se dibuja una sola vez, no por frame), escalado preservando proporción y con capa oscura para legibilidad del HUD. Bordes/esquinas inferiores por volteo de los superiores; esquinas cóncavas para las entradas de costa |
+| Fondo | `GameRenderer` dibuja `data/sprites/fondo.png` cargado por `SpriteLoader` | El fondo se carga una sola vez junto con el resto de sprites y se escala para cubrir la pantalla. Si falta el asset, `GameRenderer` usa un azul oscuro de respaldo |
 | Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |
 | Estadísticas | `EstadisticasMirage` (en vivo) → `ResumenPartida` (snapshot) → `EstadisticasGenerales` (DTO HOME) | Information Expert: `EstadisticasMirage` registra; `exportar()` arma el `ResumenPartida` (8 campos); `ModuloMirage` lo mapea al DTO del HOME. `guardar()/cargar()` son no-op en v1 (persistencia CSV fuera de v1) |
 | Excepciones | Dos jerarquías: `contracts.JuegoException` (abstract, HOME) y `mirage.excepciones.JuegoException` (concreta, módulo) | `EstadoInvalidoException` (HOME) la lanzan los métodos de ciclo de vida en `ModuloMirage` y la atrapa `EstadoGameOver`. `ColisionException` y `RecursoNoEncontradoException` (Mirage) están definidas para `ColisionDetector` y `SpriteLoader` respectivamente |
