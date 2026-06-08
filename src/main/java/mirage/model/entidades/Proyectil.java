@@ -14,13 +14,17 @@
 package mirage.model.entidades;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 import mirage.model.fisica.HitBox;
+import mirage.view.sprites.SpriteLoader;
 
 public class Proyectil extends Nave {
 
     // --- Constantes ---
     private static final int ANCHO = 4;
     private static final int ALTO  = 12;
+    private static final int SPRITE_ANCHO = 10;  // tamaño de dibujo del sprite
+    private static final int SPRITE_ALTO  = 18;
 
     // --- Atributos ---
     private boolean activo;
@@ -42,8 +46,15 @@ public class Proyectil extends Nave {
     }
 
     public void render(PApplet sk) {
-        sk.fill(255, 255, 0); // amarillo pixel-art
-        sk.rect(x - ANCHO / 2f, y - ALTO / 2f, ANCHO, ALTO);
+        PImage sprite = SpriteLoader.get("bullet.png");
+        if (sprite != null) {
+            sk.imageMode(PApplet.CENTER);
+            sk.image(sprite, x, y, SPRITE_ANCHO, SPRITE_ALTO);
+        } else {
+            // Respaldo: rectángulo amarillo (modo headless / sin assets).
+            sk.fill(255, 255, 0);
+            sk.rect(x - ANCHO / 2f, y - ALTO / 2f, ANCHO, ALTO);
+        }
     }
 
     public void desactivar() {

@@ -8,7 +8,7 @@ import processing.core.PApplet;
  * Clase abstracta base para todos los enemigos del módulo Mirage.
  *
  * Implementa el patrón Template Method: update() define el ciclo de vida fijo
- * (moverIA + hitBox sync), y cada subclase sobreescribe moverIA() con su
+ * (delega en moverIA()), y cada subclase sobreescribe moverIA() con su
  * patrón de movimiento propio.
  *
  * Agregar un nuevo tipo de enemigo = 1 subclase que sobreescribe moverIA()

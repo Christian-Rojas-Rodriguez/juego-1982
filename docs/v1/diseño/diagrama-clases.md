@@ -9,20 +9,30 @@
 classDiagram
     direction TB
 
-    %% ── INTERFACES HOME (externas — definidas por el HOME team) ──
+    %% ── INTERFACES / DTOs HOME (externas — definidas por el HOME team) ──
     class ModuloJuego {
         <<interface - HOME>>
-        +inicializarContexto() void
+        +getNombreModulo() String
+        +getDescripcion() String
+        +getNombreAvion() String
+        +inicializarContexto(ctx ContextoJuego) void
         +iniciar() void
         +pausar() void
         +reanudar() void
         +finalizar() void
-        +actualizar() void
-        +dibujar() void
+        +getEstado() EstadoJuego
         +getEstadisticasGenerales() EstadisticasGenerales
-        +agregarObserver(obs IModuloObserver) void
-        +removerObserver(obs IModuloObserver) void
+        +agregarObserver(observer IModuloObserver) void
+        +removerObserver(observer IModuloObserver) void
+        +actualizar(app PApplet) void
+        +dibujar(app PApplet) void
         +reset() void
+    }
+
+    class ModuloConInput {
+        <<interface - HOME>>
+        +onKeyPressed(key char, keyCode int) void
+        +onKeyReleased(key char, keyCode int) void
     }
 
     class IModuloObserver {
@@ -38,42 +48,60 @@ classDiagram
         -partidasGanadas int
         -partidasPerdidas int
         -enemigosDestruidos int
-        -tiempoJugadoSegundos double
+        -tiempoJugadoSegundos long
     }
 
     class ModuloEvento {
         <<DTO - HOME>>
-        -tipo TipoEvento
+        -tipo Tipo
         -nombreModulo String
         -mensaje String
     }
 
+    %% NOTA: iniciar/pausar/reanudar/finalizar de ModuloJuego declaran
+    %% throws EstadoInvalidoException (omitido en el diagrama por brevedad).
+
     %% ── FACADE ───────────────────────────────────────────────────
     class ModuloMirage {
-        <<Facade - implements ModuloJuego>>
-        -controller GameController
+        <<Facade - implements ModuloJuego, ModuloConInput>>
+        -estadoActual EstadoJuego
         -observers List~IModuloObserver~
-        +inicializarContexto() void
+        -contexto ContextoJuego
+        -controller GameController
+        -puntaje int
+        +getNombreModulo() String
+        +getDescripcion() String
+        +getNombreAvion() String
+        +inicializarContexto(ctx ContextoJuego) void
         +iniciar() void
         +pausar() void
         +reanudar() void
         +finalizar() void
-        +actualizar() void
-        +dibujar() void
+        +actualizar(app PApplet) void
+        +dibujar(app PApplet) void
+        +getEstado() EstadoJuego
         +getEstadisticasGenerales() EstadisticasGenerales
-        +agregarObserver(obs IModuloObserver) void
-        +removerObserver(obs IModuloObserver) void
+        +agregarObserver(observer IModuloObserver) void
+        +removerObserver(observer IModuloObserver) void
         +reset() void
-        -notificar(tipo TipoEvento) void
+        +onKeyPressed(key char, keyCode int) void
+        +onKeyReleased(key char, keyCode int) void
+        -notificar(tipo Tipo, mensaje String) void
     }
+
+    %% NOTA: iniciar/pausar/reanudar/finalizar throws EstadoInvalidoException.
+    %% El estadoActual es del ciclo de vida del HOME (contracts.EstadoJuego),
+    %% NO confundir con mirage.model.estado.EstadoJuego (State del gameplay).
 
     %% ── CONTROLLER ───────────────────────────────────────────────
     class GameController {
         <<Controller>>
         -sketch PApplet
+        -mirageModulo ModuloMirage
         -estadoActual EstadoJuego
         -mirage Mirage
         -enemigos List~Enemigo~
+        -efectos List~Explosion~
         -nivel NivelMirage
         -colisionDetector ColisionDetector
         -estadisticas EstadisticasMirage
@@ -82,23 +110,24 @@ classDiagram
         +init() void
         +update() void
         +render() void
-        +setEstado(estado EstadoJuego) void
+        +setEstado(nuevoEstado EstadoJuego) void
         +onKeyPressed(key char, keyCode int) void
         +onKeyReleased(key char, keyCode int) void
+        +getSketch() PApplet
+        +getMirageModulo() ModuloMirage
         +getMirage() Mirage
         +getEnemigos() List~Enemigo~
-        +getEstadisticas() EstadisticasMirage
-        +getSketch() PApplet
+        +getEfectos() List~Explosion~
         +getNivel() NivelMirage
         +getColisionDetector() ColisionDetector
+        +getEstadisticas() EstadisticasMirage
         +getRenderer() GameRenderer
-        +getMirageModulo() ModuloMirage
     }
 
     class InputHandler {
         <<Pure Fabrication>>
-        -comandosPorKeyCode Map~Integer,Comando~
-        +registrarComando(keyCode int, cmd Comando) void
+        -comandos Map~Integer,Comando~
+        +registrarComando(keyCode int, comando Comando) void
         +onKeyPressed(keyCode int, key char, mirage Mirage) void
         +onKeyReleased(keyCode int, key char, mirage Mirage) void
     }
@@ -116,18 +145,18 @@ classDiagram
 
     class DispararCmd { +ejecutar(mirage Mirage) void +deshacer(mirage Mirage) void }
 
-    %% ── STATE ────────────────────────────────────────────────────
+    %% ── STATE (gameplay — mirage.model.estado) ──────────────────
     class EstadoJuego {
         <<interface>>
-        +update(ctrl GameController) void
-        +render(ctrl GameController) void
-        +alEntrar(ctrl GameController) void
-        +onKeyPressed(ctrl GameController, key char, keyCode int) void
+        +update(controller GameController) void
+        +render(controller GameController) void
+        +alEntrar(controller GameController) void
+        +onKeyPressed(controller GameController, key char, keyCode int) void
     }
 
-    class EstadoJugando         { <<State>> }
-    class EstadoPausado         { <<State>> }
-    class EstadoGameOver        { <<State>> -puntajeFinal int }
+    class EstadoJugando  { <<State>> }
+    class EstadoPausado  { <<State>> }
+    class EstadoGameOver { <<State>> }
 
     %% ── MODEL: ENTIDADES ─────────────────────────────────────────
     class Nave {
@@ -136,13 +165,13 @@ classDiagram
         #y float
         #velocidad float
         #vida int
-        +update() void
-        +recibirDanio(danio int) void
+        +update()* void
+        +getHitBox()* HitBox
         +estaViva() bool
+        +recibirDanio(danio int) void
         +getX() float
         +getY() float
         +getVida() int
-        +getHitBox() HitBox
     }
 
     class Mirage {
@@ -150,8 +179,8 @@ classDiagram
         -puntuacion int
         -invencible bool
         -frameInvencible int
-        -DURACION_INVENCIBILIDAD int
-        -VIDAS_MAX int
+        -DURACION_INVENCIBILIDAD int$
+        -VIDAS_MAX int$
         -cooldownDisparo int
         -cooldownActual int
         -moverIzquierda bool
@@ -160,9 +189,13 @@ classDiagram
         -moverAbajo bool
         -proyectiles List~Proyectil~
         -disparosTotales int
+        -sketch PApplet
         +update() void
-        +render(sketch PApplet) void
+        +render(sk PApplet) void
         +disparar() void
+        +recibirDanio(danio int) void
+        +estaViva() bool
+        +getHitBox() HitBox
         +sumarPuntos(puntos int) void
         +setMoverIzquierda(v bool) void
         +setMoverDerecha(v bool) void
@@ -170,40 +203,39 @@ classDiagram
         +setMoverAbajo(v bool) void
         +getVidas() int
         +getPuntuacion() int
+        +isInvencible() bool
         +getProyectiles() List~Proyectil~
         +getDisparosTotales() int
-        +isInvencible() bool
-        +estaViva() bool
-        +getHitBox() HitBox
     }
 
     class Proyectil {
         -activo bool
         -danio int
-        -velocidadY float
+        -sketch PApplet
         +update() void
-        +render(sketch PApplet) void
+        +render(sk PApplet) void
         +desactivar() void
+        +getHitBox() HitBox
         +isActivo() bool
         +getDanio() int
-        +getHitBox() HitBox
     }
 
     %% ── MODEL: ENEMIGOS ──────────────────────────────────────────
     class Enemigo {
         <<abstract>>
         #puntos int
+        #sketch PApplet
         +update() void
-        +render(sketch PApplet) void
-        #moverIA() void
+        +render(sk PApplet)* void
+        #moverIA()* void
+        +getHitBox()* HitBox
+        +getTipo()* String
         +getPuntos() int
-        +getTipo() String
-        +getHitBox() HitBox
     }
 
     class HarrierEnemigo {
         #moverIA() void
-        +render(sketch PApplet) void
+        +render(sk PApplet) void
         +getHitBox() HitBox
         +getTipo() String
     }
@@ -216,6 +248,10 @@ classDiagram
         -alto float
         +colisionaCon(otro HitBox) bool
         +moverA(x float, y float) void
+        +getX() float
+        +getY() float
+        +getAncho() float
+        +getAlto() float
     }
 
     class ColisionDetector {
@@ -226,20 +262,30 @@ classDiagram
     }
 
     %% ── NIVELES ──────────────────────────────────────────────────
+    class Nivel {
+        <<abstract>>
+        +update()* void
+        +isTerminado()* bool
+        +getEnemigosNuevos()* List~Enemigo~
+    }
+
     class NivelMirage {
         -spawner EnemySpawner
         +update() void
+        +isTerminado() bool
         +getEnemigosNuevos() List~Enemigo~
     }
 
     class EnemySpawner {
         <<Pure Fabrication>>
         -sketch PApplet
-        -frameCounter int
         -intervaloFrames int
         -tamanoOleada int
+        -frameCounter int
+        -nuevosEsteFrame List~Enemigo~
         +update() void
         +getEnemigosNuevos() List~Enemigo~
+        +setIntervalo(nuevoIntervalo int) void
     }
 
     class EnemyFactory {
@@ -253,11 +299,23 @@ classDiagram
         -enemigosDerribados int
         -enemigosPorTipo Map~String,Integer~
         -tiempoInicioMs long
+        -puntajeMaximo int
+        -partidasJugadas int
+        -partidasGanadas int
+        -partidasPerdidas int
         +registrarDisparoAcertado() void
         +registrarDerribo(tipo String, puntos int) void
-        +registrarFinPartida(puntaje int) void
-        +exportar(vidasRestantes int, mirage Mirage) ResumenPartida
+        +registrarFinPartida(puntajeFinal int) void
         +getPrecision(mirage Mirage) float
+        +exportar(vidasRestantes int, mirage Mirage) ResumenPartida
+        +guardar() void
+        +cargar() void
+        +getEnemigosDerribados() int
+        +getPuntajeMaximo() int
+        +getPartidasJugadas() int
+        +getPartidasGanadas() int
+        +getPartidasPerdidas() int
+        +getPorTipo() Map~String,Integer~
     }
 
     class ResumenPartida {
@@ -267,18 +325,52 @@ classDiagram
         -vidasRestantes int
         -duracionSegundos float
         -precision float
+        -partidasJugadas int
+        -partidasGanadas int
+        -partidasPerdidas int
+        -moduloNombre String
         +getPuntajeFinal() int
         +getEnemigosDerribados() int
         +getVidasRestantes() int
+        +getDuracionSegundos() float
         +getPrecision() float
+        +getPartidasJugadas() int
+        +getPartidasGanadas() int
+        +getPartidasPerdidas() int
+        +getModuloNombre() String
     }
 
     %% ── VISTA ────────────────────────────────────────────────────
     class GameRenderer {
-        -spriteLoader SpriteLoader
-        +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, sketch PApplet) void
-        +setPantalla(p Pantalla) void
+        -pantallaActual Pantalla
+        -spritesListos bool
+        -fondo FondoMar
+        +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, efectos List~Explosion~, sketch PApplet) void
+        +setPantalla(pantalla Pantalla) void
+        -dibujarFondo(sk PApplet) void
         -dibujarHUD(sketch PApplet, mirage Mirage) void
+    }
+
+    class FondoMar {
+        <<fondo estatico - mapa Malvinas>>
+        -TS int$
+        -MASK String[]$
+        -buffer PImage
+        +render(sk PApplet) void
+        -construir(sk PApplet) PImage
+        -esTierra(c int, r int) bool
+        -dibujarTileTierra(g PGraphics, c int, r int) void
+        -dibujar(g PGraphics, nombre String, c int, r int, flipV bool) void
+    }
+
+    class Explosion {
+        <<efecto efimero>>
+        -x float
+        -y float
+        -vida int
+        +update() void
+        +terminada() bool
+        +render(sk PApplet) void
     }
 
     class Pantalla {
@@ -288,26 +380,49 @@ classDiagram
     }
 
     class PantallaJuego    { }
-    class PantallaGameOver { -puntaje int -mensaje String }
+    class PantallaGameOver { -puntajeFinal int -enemigosDerribados int }
 
     class SpriteLoader {
         <<Pure Fabrication>>
         +cargar(nombre String, sketch PApplet) void$
         +get(nombre String) PImage$
+        +precargarTodos(sketch PApplet) void$
+    }
+
+    class Animacion {
+        <<esqueleto - sin uso en MVP 1>>
+        -nombresFrames List~String~
+        -velocidad int
+        -frameActual int
+        +update() void
+        +getFrameActual() PImage
+        +isTerminada() bool
+        +reset() void
     }
 
     %% ── EXCEPCIONES ──────────────────────────────────────────────
-    class JuegoException { <<checked>> }
+    %% Hay DOS jerarquias de excepcion distintas:
+    %%   - contracts.JuegoException        (abstract, definida por el HOME)
+    %%   - mirage.excepciones.JuegoException (concreta, raiz del modulo Mirage)
+    class JuegoExceptionContracts {
+        <<abstract - HOME>>
+    }
+    class JuegoExceptionMirage {
+        <<checked - Mirage>>
+    }
 
     %% ── RELACIONES ───────────────────────────────────────────────
     ModuloMirage ..|> ModuloJuego
+    ModuloMirage ..|> ModuloConInput
     ModuloMirage --> GameController
     ModuloMirage --> IModuloObserver
     ModuloMirage ..> ModuloEvento
     ModuloMirage ..> EstadisticasGenerales
 
+    GameController --> ModuloMirage
     GameController --> EstadoJuego
     GameController --> Mirage
+    GameController --> Explosion
     GameController --> GameRenderer
     GameController --> InputHandler
     GameController --> NivelMirage
@@ -339,17 +454,22 @@ classDiagram
     ColisionDetector ..> Enemigo
     ColisionDetector ..> Mirage
 
+    Nivel <|-- NivelMirage
     NivelMirage --> EnemySpawner
     EnemySpawner ..> EnemyFactory
     EnemyFactory ..> HarrierEnemigo
 
-    EstadisticasMirage ..> EstadisticasGenerales
     EstadisticasMirage ..> ResumenPartida
 
     GameRenderer --> Pantalla
     GameRenderer --> SpriteLoader
+    GameRenderer --> FondoMar
+    GameRenderer ..> Explosion
+    FondoMar --> SpriteLoader
     Pantalla <|.. PantallaJuego
     Pantalla <|.. PantallaGameOver
+
+    JuegoExceptionContracts <|-- EstadoInvalidoException
 ```
 
 ---
@@ -358,10 +478,18 @@ classDiagram
 
 | Decisión | Elección | Justificación |
 |----------|----------|---------------|
-| Contrato con HOME | `ModuloMirage implements ModuloJuego` | HOME define la interfaz; nosotros la implementamos. No hay `HomeFacade` propia |
-| Notificación al HOME | Observer: `List<IModuloObserver>` en `ModuloMirage` | HOME registra su `HomeJuego` como observer; lo notificamos en cambios de estado |
-| Proyectiles | `Mirage` dueño de `List<Proyectil>` | `DispararCmd` solo llama `mirage.disparar()` — sin acoplamiento a listas externas |
+| Contrato con HOME | `ModuloMirage implements ModuloJuego, ModuloConInput` | HOME define las interfaces; nosotros las implementamos. No hay `HomeFacade` propia. `ModuloConInput` reenvía las teclas que el HOME no intercepta |
+| Notificación al HOME | Observer: `List<IModuloObserver>` en `ModuloMirage` | HOME registra su `HomeJuego` como observer; lo notificamos en cambios de estado vía `ModuloEvento` |
+| Ciclo de vida | `estadoActual` de tipo `contracts.EstadoJuego` (State del HOME) | NO confundir con `mirage.model.estado.EstadoJuego` (State del gameplay). Son dos jerarquías State distintas, en paquetes distintos |
+| Proyectiles | `Mirage` dueño de `List<Proyectil>` | `DispararCmd` solo llama `mirage.disparar()` — sin acoplamiento a listas externas. El proyectil hereda `velocidad` de `Nave` (no tiene `velocidadY` propio) |
 | Contador de disparos | `Mirage.disparosTotales` | Information Expert: quien dispara, cuenta |
 | Movimiento suave | Flags booleanos en `Mirage` + `keyReleased` | `keyPressed()` se repite con OS key-repeat; flags permiten movimiento continuo en `draw()` |
-| Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` |
-| Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
+| Niveles | `Nivel` abstracto + `NivelMirage` | `Nivel` define el contrato (`update`, `isTerminado`, `getEnemigosNuevos`). En MVP 1 `isTerminado()` siempre es `false`: la partida solo termina por Game Over |
+| Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` y `getTipo()` |
+| Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner`. `setIntervalo()` permite escalar la cadencia en MVPs futuros |
+| Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. `precargarTodos()` se llama una vez en el primer render. Fallback a formas si falta el sprite → tests headless siguen en verde |
+| Fondo: las Malvinas | `FondoMar` dibuja un *land mask* del archipiélago con autotile de costa (Kenney) | Las dos islas principales separadas por el Estrecho de San Carlos. **Estático y cacheado** en un buffer (se dibuja una sola vez, no por frame), escalado preservando proporción y con capa oscura para legibilidad del HUD. Bordes/esquinas inferiores por volteo de los superiores; esquinas cóncavas para las entradas de costa |
+| Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |
+| Estadísticas | `EstadisticasMirage` (en vivo) → `ResumenPartida` (snapshot) → `EstadisticasGenerales` (DTO HOME) | Information Expert: `EstadisticasMirage` registra; `exportar()` arma el `ResumenPartida` (8 campos); `ModuloMirage` lo mapea al DTO del HOME. `guardar()/cargar()` son no-op en v1 (persistencia CSV fuera de v1) |
+| Excepciones | Dos jerarquías: `contracts.JuegoException` (abstract, HOME) y `mirage.excepciones.JuegoException` (concreta, módulo) | La del HOME es la raíz de su ciclo de vida (`EstadoInvalidoException`, etc.); la del módulo agrupa los errores propios de Mirage. Son independientes |
+| `Animacion` | Esqueleto incluido pero **sin uso en MVP 1** | La explosión es procedural (no usa frames). `Animacion` queda como andamiaje para sprites animados en MVPs futuros; sus métodos están con `TODO` |

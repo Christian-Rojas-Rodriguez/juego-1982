@@ -42,8 +42,21 @@ public class EstadoJugando implements EstadoJuego {
                 controller.getEnemigos(),
                 controller.getMirage()
         );
+        // Explosión al destruir un enemigo: spawnear efecto antes de removerlo.
+        for (mirage.model.entidades.enemigos.Enemigo e : controller.getEnemigos()) {
+            if (!e.estaViva()) {
+                controller.getEfectos().add(
+                        new mirage.model.efectos.Explosion(e.getX(), e.getY()));
+            }
+        }
         controller.getEnemigos().removeIf(enemigo -> !enemigo.estaViva());
+        // Enemigos que salieron por debajo de la pantalla: se descartan (sin sumar
+        // puntos). Evita la acumulacion indefinida de entidades fuera de vista.
+        float limiteY = controller.getSketch().height + 40;
+        controller.getEnemigos().removeIf(enemigo -> enemigo.getY() > limiteY);
         controller.getMirage().getProyectiles().removeIf(proyectil -> !proyectil.isActivo());
+        controller.getEfectos().forEach(mirage.model.efectos.Explosion::update);
+        controller.getEfectos().removeIf(mirage.model.efectos.Explosion::terminada);
         if (!controller.getMirage().estaViva()) {
             controller.setEstado(new EstadoGameOver());
         }
@@ -56,6 +69,7 @@ public class EstadoJugando implements EstadoJuego {
                 controller.getMirage(),
                 controller.getEnemigos(),
                 controller.getMirage().getProyectiles(),
+                controller.getEfectos(),
                 controller.getSketch()
         );
     }

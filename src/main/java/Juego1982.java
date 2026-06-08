@@ -32,6 +32,7 @@ public class Juego1982 extends PApplet {
     public void settings() {
         size(ANCHO, ALTO);
         pixelDensity(displayDensity());
+        noSmooth();   // pixel-art nitido (nearest-neighbor); solo aplica en settings()
     }
 
     @Override

@@ -16,24 +16,27 @@
 `ModuloMirage` implementa la interfaz `ModuloJuego` del HOME team. Al registrar el módulo con `HomeJuego.registrarModulo(mirageModulo)`, el HOME puede:
 - Controlar el ciclo de vida (`iniciar`, `pausar`, `reanudar`, `finalizar`)
 - Consultar estadísticas con `getEstadisticasGenerales()` → devuelve `EstadisticasGenerales`
-- Recibir notificaciones via `IModuloObserver` (se disparan en INICIADO, PAUSADO, FINALIZADO)
+- Recibir notificaciones via `IModuloObserver` (se disparan en INICIADO, PAUSADO, REANUDADO, FINALIZADO)
+- Reenviar teclas al módulo via `ModuloConInput` (las que el HOME no intercepta)
 
-## Clases introducidas (26)
+## Clases
 
 Ver `diseño/diagrama-clases.md` para el diagrama completo y `diseño/descripcion-clases.md` para la descripción de cada clase.
 
 | Capa | Clases |
 |------|--------|
-| HOME (externas) | `ModuloJuego`, `IModuloObserver`, `EstadisticasGenerales`, `ModuloEvento` |
-| Facade | `ModuloMirage` |
-| Controller | `GameController`, `InputHandler`, `Comando`, 5 Commands |
-| State | `EstadoJuego`, `EstadoJugando`, `EstadoPausado`, `EstadoGameOver` |
-| Model | `Nave`, `Mirage`, `Proyectil`, `Enemigo`, `HarrierEnemigo` |
+| HOME (externas) | `ModuloJuego`, `ModuloConInput`, `IModuloObserver`, `EstadisticasGenerales`, `ModuloEvento`, `ContextoJuego` (+ máquina de estados y excepciones del ciclo de vida) |
+| Facade | `ModuloMirage` (implementa `ModuloJuego` + `ModuloConInput`) |
+| Controller | `GameController`, `InputHandler`, `Comando`, 5 Commands (`MoverIzquierda/Derecha/Arriba/Abajo`, `Disparar`) |
+| State (gameplay) | `EstadoJuego`, `EstadoJugando`, `EstadoPausado`, `EstadoGameOver` |
+| Model | `Nave`, `Mirage`, `Proyectil`, `Enemigo`, `HarrierEnemigo`, `EnemyFactory` |
 | Física | `HitBox`, `ColisionDetector` |
-| Niveles | `NivelMirage`, `EnemySpawner` |
-| Stats | `EstadisticasMirage` |
-| Vista | `GameRenderer`, `Pantalla`, `PantallaJuego`, `PantallaGameOver`, `SpriteLoader` |
-| Excepciones | `JuegoException` |
+| Niveles | `Nivel`, `NivelMirage`, `EnemySpawner` |
+| Stats | `EstadisticasMirage`, `ResumenPartida` |
+| Vista | `GameRenderer`, `FondoMar`, `Pantalla`, `PantallaJuego`, `PantallaGameOver`, `SpriteLoader` |
+| Efectos | `Explosion` |
+
+> `Animacion` (vista) y la jerarquía `mirage.excepciones.JuegoException` existen como andamiaje pero **no se usan en v1** (la explosión es procedural; las excepciones que se usan son las del HOME, `contracts.*`).
 
 ## Casos de uso (8)
 

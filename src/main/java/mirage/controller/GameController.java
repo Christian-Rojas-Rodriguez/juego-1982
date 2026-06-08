@@ -8,6 +8,7 @@ import mirage.controller.commands.MoverDerechaCmd;
 import mirage.controller.commands.MoverIzquierdaCmd;
 import mirage.model.estado.EstadoJuego;
 import mirage.model.estado.EstadoJugando;
+import mirage.model.efectos.Explosion;
 import mirage.model.entidades.Mirage;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.model.fisica.ColisionDetector;
@@ -38,6 +39,7 @@ public class GameController {
     private EstadoJuego estadoActual;
     private Mirage mirage;
     private List<Enemigo> enemigos;
+    private List<Explosion> efectos;
 
     private NivelMirage nivel;
     private ColisionDetector colisionDetector;
@@ -57,6 +59,7 @@ public class GameController {
     public void init() {
         mirage           = new Mirage(sketch);
         enemigos         = new ArrayList<>();
+        efectos          = new ArrayList<>();
         estadisticas     = new EstadisticasMirage();
         colisionDetector = new ColisionDetector(estadisticas);
         nivel            = new NivelMirage(sketch);
@@ -111,6 +114,7 @@ public class GameController {
     public ModuloMirage getMirageModulo()          { return mirageModulo; }
     public Mirage getMirage()                     { return mirage; }
     public List<Enemigo> getEnemigos()            { return enemigos; }
+    public List<Explosion> getEfectos()           { return efectos; }
     public NivelMirage getNivel()                 { return nivel; }
     public ColisionDetector getColisionDetector() { return colisionDetector; }
     public EstadisticasMirage getEstadisticas()   { return estadisticas; }

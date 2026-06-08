@@ -45,6 +45,7 @@ public class EstadoGameOver implements EstadoJuego {
                 controller.getMirage(),
                 controller.getEnemigos(),
                 controller.getMirage().getProyectiles(),
+                controller.getEfectos(),
                 controller.getSketch()
         );
     }
