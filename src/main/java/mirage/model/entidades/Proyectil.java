@@ -15,11 +15,9 @@ public class Proyectil extends Nave {
 
     private boolean activo;
     private final int danio;
-    private final PApplet sketch;
 
-    public Proyectil(float x, float y, PApplet sketch) {
+    public Proyectil(float x, float y) {
         super(x, y, 8f, 1);
-        this.sketch = sketch;
         this.activo = true;
         this.danio  = 1;
     }

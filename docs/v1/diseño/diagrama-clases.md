@@ -58,6 +58,16 @@ classDiagram
         -mensaje String
     }
 
+    class ContextoJuego {
+        <<DTO - HOME>>
+        -nombreJugador String
+        -anchoPantalla int
+        -altoPantalla int
+        +getNombreJugador() String
+        +getAnchoPantalla() int
+        +getAltoPantalla() int
+    }
+
     %% NOTA: iniciar/pausar/reanudar/finalizar de ModuloJuego declaran
     %% throws EstadoInvalidoException (omitido en el diagrama por brevedad).
 
@@ -66,7 +76,6 @@ classDiagram
         <<Facade - implements ModuloJuego, ModuloConInput>>
         -estadoActual EstadoJuego
         -observers List~IModuloObserver~
-        -contexto ContextoJuego
         -controller GameController
         -tInicioCargaMs long
         -tInicioJuegoMs long
@@ -213,7 +222,6 @@ classDiagram
     class Proyectil {
         -activo bool
         -danio int
-        -sketch PApplet
         +update() void
         +render(sk PApplet) void
         +desactivar() void
@@ -390,6 +398,7 @@ classDiagram
     ModuloMirage --> IModuloObserver
     ModuloMirage ..> ModuloEvento
     ModuloMirage ..> EstadisticasGenerales
+    ModuloJuego ..> ContextoJuego
 
     GameController --> ModuloMirage
     GameController --> EstadoJuego

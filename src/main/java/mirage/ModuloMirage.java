@@ -50,9 +50,6 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
     /** Observers registrados por el HOME (normalmente solo HomeJuego). */
     private final List<IModuloObserver> observers = new ArrayList<>();
 
-    /** Contexto provisto por el lobby (jugador + dimensiones de pantalla). */
-    private ContextoJuego contexto;
-
     /** Game loop real (lazy-init en actualizar(), donde llega el PApplet vivo). */
     private GameController controller;
 
@@ -81,9 +78,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     @Override
     public void inicializarContexto(ContextoJuego ctx) {
-        this.contexto = ctx;
-        // El PApplet vivo llega recién en actualizar/dibujar; el GameController se
-        // crea perezosamente ahí. Las dimensiones están en ctx.getAncho/AltoPantalla().
+        // contrato HOME — v1 no necesita datos del contexto
     }
 
     // ── Ciclo de vida (valida en el estado actual, luego transiciona) ─────────

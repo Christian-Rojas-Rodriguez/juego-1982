@@ -111,7 +111,7 @@ public class Mirage extends Nave {
      */
     public void disparar() {
         if (cooldownActual > 0) return;
-        proyectiles.add(new Proyectil(x, y - 20, sketch));
+        proyectiles.add(new Proyectil(x, y - 20));
         disparosTotales++;
         cooldownActual = cooldownDisparo;
     }
