@@ -148,7 +148,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
             // Placeholder: el puntaje crece con el tiempo jugado.
             long ms = tAcumuladoMs + (System.currentTimeMillis() - tInicioJuegoMs);
             puntaje = (int) (ms / 100);
-            // TODO: si fin de partida (vidas == 0) → finalizar() automáticamente.
+            // finalizar() se invoca desde EstadoGameOver.alEntrar() vía State pattern.
         }
         // PAUSADO/FINALIZADO: no se actualiza lógica.
     }
