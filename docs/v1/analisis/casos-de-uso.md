@@ -40,9 +40,9 @@ flowchart LR
 
 | ID | Nombre | Actor | Clases involucradas |
 |----|--------|-------|---------------------|
-| UC-01 | Mover el Mirage | Jugador | `Juego1982`, `ModuloMirage`, `GameController`, `EstadoJugando`, `InputHandler`, `MoverDerechaCmd`, `Mirage` |
-| UC-02 | Disparar misil | Jugador | `Juego1982`, `ModuloMirage`, `GameController`, `InputHandler`, `DispararCmd`, `Mirage`, `Proyectil` |
-| UC-03 | Pausar / Reanudar | Jugador | `Juego1982`, `ModuloMirage`, `GameController`, `EstadoJugando`, `EstadoPausado` |
+| UC-01 | Mover el Mirage | Jugador | `HomeRunner`, `HomeJuego`, `ModuloMirage`, `GameController`, `EstadoJugando`, `InputHandler`, `MoverDerechaCmd`, `Mirage` |
+| UC-02 | Disparar misil | Jugador | `HomeRunner`, `HomeJuego`, `ModuloMirage`, `GameController`, `InputHandler`, `DispararCmd`, `Mirage`, `Proyectil` |
+| UC-03 | Pausar / Reanudar | Jugador | `HomeRunner`, `HomeJuego`, `ModuloMirage`, `GameController`, `EstadoJugando`, `EstadoPausado` |
 | UC-04 | Proyectil destruye enemigo | Sistema | `EstadoJugando`, `GameController`, `ColisionDetector`, `Mirage`, `Proyectil`, `HarrierEnemigo`, `HitBox`, `Explosion`, `EstadisticasMirage` |
 | UC-05 | Enemigo impacta al Mirage | Sistema | `EstadoJugando`, `ColisionDetector`, `HarrierEnemigo`, `HitBox`, `Mirage`, `GameController`, `EstadoGameOver` |
 | UC-06 | Oleada de enemigos se activa | Sistema | `EstadoJugando`, `NivelMirage`, `EnemySpawner`, `EnemyFactory`, `HarrierEnemigo`, `GameController` |
@@ -60,7 +60,6 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     actor Jugador
-    participant Juego1982
     participant ModuloMirage
     participant GameController
     participant EstadoJugando
@@ -68,9 +67,9 @@ sequenceDiagram
     participant MoverDerechaCmd
     participant Mirage
 
-    Jugador->>+Juego1982: keyPressed()
-    Note over Juego1982: callback de Processing (la tecla RIGHT viaja en keyCode, key == CODED)
-    Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
+    Note over Jugador,ModuloMirage: keyPressed() en HomeRunner → HomeJuego.manejarTecla() → reenvía vía ModuloConInput
+    Jugador->>+ModuloMirage: onKeyPressed(key, keyCode)
+    Note over ModuloMirage: key == CODED, keyCode == PApplet.RIGHT
     ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
     GameController->>EstadoJugando: onKeyPressed(this, key, keyCode)
     Note over EstadoJugando: solo reacciona a 'P' (pausa), ignora el movimiento
@@ -84,11 +83,9 @@ sequenceDiagram
     deactivate InputHandler
     deactivate GameController
     deactivate ModuloMirage
-    deactivate Juego1982
 
-    Note over Juego1982,Mirage: En el siguiente draw() frame
-    activate Juego1982
-    Juego1982->>+ModuloMirage: actualizar(this)
+    Note over Jugador,Mirage: En el siguiente draw() frame — HomeRunner.draw() → HomeJuego.dibujar() → ModuloMirage.actualizar(app)
+    activate ModuloMirage
     ModuloMirage->>+GameController: update()
     GameController->>+EstadoJugando: update(this)
     EstadoJugando->>+Mirage: update()
@@ -99,9 +96,8 @@ sequenceDiagram
     deactivate EstadoJugando
     deactivate GameController
     deactivate ModuloMirage
-    deactivate Juego1982
 
-    Note over Jugador,Mirage: keyReleased baja el flag → Mirage se detiene
+    Note over Jugador,Mirage: keyReleased: HomeJuego.manejarTeclaReleased() → ModuloMirage.onKeyReleased() → baja el flag → Mirage se detiene
 ```
 
 ---
@@ -115,7 +111,6 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor Jugador
-    participant Juego1982
     participant ModuloMirage
     participant GameController
     participant EstadoJugando
@@ -123,9 +118,9 @@ sequenceDiagram
     participant DispararCmd
     participant Mirage
 
-    Jugador->>+Juego1982: keyPressed()
-    Note over Juego1982: callback de Processing (SPACE: key == ' ', keyCode == 32)
-    Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
+    Note over Jugador,ModuloMirage: keyPressed() en HomeRunner → HomeJuego.manejarTecla() → reenvía vía ModuloConInput
+    Jugador->>+ModuloMirage: onKeyPressed(key, keyCode)
+    Note over ModuloMirage: key == ' ', keyCode == 32 (SPACE)
     ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
     GameController->>EstadoJugando: onKeyPressed(this, key, keyCode)
     Note over EstadoJugando: ignora SPACE (solo maneja 'P')
@@ -145,7 +140,6 @@ sequenceDiagram
     deactivate InputHandler
     deactivate GameController
     deactivate ModuloMirage
-    deactivate Juego1982
 ```
 
 ---
@@ -159,15 +153,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor Jugador
-    participant Juego1982
     participant ModuloMirage
     participant GameController
     participant EstadoJugando
     participant EstadoPausado
 
-    Jugador->>+Juego1982: keyPressed()
-    Note over Juego1982: callback de Processing (la tecla 'P' viaja en key, no como argumento)
-    Juego1982->>+ModuloMirage: onKeyPressed(key, keyCode)
+    Note over Jugador,ModuloMirage: keyPressed() en HomeRunner → HomeJuego.manejarTecla() → reenvía vía ModuloConInput
+    Jugador->>+ModuloMirage: onKeyPressed(key, keyCode)
+    Note over ModuloMirage: key == 'P'
     ModuloMirage->>+GameController: onKeyPressed(key, keyCode)
 
     alt estadoActual == EstadoJugando (JUGANDO → PAUSADO)
@@ -191,7 +184,6 @@ sequenceDiagram
     Note over InputHandler: 'P' no está registrada como comando → no hace nada
     deactivate GameController
     deactivate ModuloMirage
-    deactivate Juego1982
 ```
 
 ---

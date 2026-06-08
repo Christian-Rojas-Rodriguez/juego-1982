@@ -389,17 +389,6 @@ classDiagram
         +precargarTodos(sketch PApplet) void$
     }
 
-    class Animacion {
-        <<esqueleto - sin uso en MVP 1>>
-        -nombresFrames List~String~
-        -velocidad int
-        -frameActual int
-        +update() void
-        +getFrameActual() PImage
-        +isTerminada() bool
-        +reset() void
-    }
-
     %% ── EXCEPCIONES ──────────────────────────────────────────────
     %% Hay DOS jerarquias de excepcion distintas:
     %%   - contracts.JuegoException        (abstract, definida por el HOME)
@@ -407,8 +396,22 @@ classDiagram
     class JuegoExceptionContracts {
         <<abstract - HOME>>
     }
+    class EstadoInvalidoException {
+        <<contracts.HOME>>
+        +EstadoInvalidoException(mensaje String)
+    }
     class JuegoExceptionMirage {
         <<checked - Mirage>>
+    }
+    class ColisionException {
+        <<mirage.excepciones>>
+        +ColisionException(mensaje String)
+    }
+    class RecursoNoEncontradoException {
+        <<mirage.excepciones>>
+        -recurso String
+        +RecursoNoEncontradoException(recurso String)
+        +getRecurso() String
     }
 
     %% ── RELACIONES ───────────────────────────────────────────────
@@ -470,6 +473,13 @@ classDiagram
     Pantalla <|.. PantallaGameOver
 
     JuegoExceptionContracts <|-- EstadoInvalidoException
+    JuegoExceptionMirage <|-- ColisionException
+    JuegoExceptionMirage <|-- RecursoNoEncontradoException
+
+    ModuloMirage ..> EstadoInvalidoException : <<throws>>
+    EstadoGameOver ..> EstadoInvalidoException : <<catches>>
+    ColisionDetector ..> ColisionException : <<throws>>
+    SpriteLoader ..> RecursoNoEncontradoException : <<throws>>
 ```
 
 ---
@@ -491,5 +501,4 @@ classDiagram
 | Fondo: las Malvinas | `FondoMar` dibuja un *land mask* del archipiélago con autotile de costa (Kenney) | Las dos islas principales separadas por el Estrecho de San Carlos. **Estático y cacheado** en un buffer (se dibuja una sola vez, no por frame), escalado preservando proporción y con capa oscura para legibilidad del HUD. Bordes/esquinas inferiores por volteo de los superiores; esquinas cóncavas para las entradas de costa |
 | Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |
 | Estadísticas | `EstadisticasMirage` (en vivo) → `ResumenPartida` (snapshot) → `EstadisticasGenerales` (DTO HOME) | Information Expert: `EstadisticasMirage` registra; `exportar()` arma el `ResumenPartida` (8 campos); `ModuloMirage` lo mapea al DTO del HOME. `guardar()/cargar()` son no-op en v1 (persistencia CSV fuera de v1) |
-| Excepciones | Dos jerarquías: `contracts.JuegoException` (abstract, HOME) y `mirage.excepciones.JuegoException` (concreta, módulo) | La del HOME es la raíz de su ciclo de vida (`EstadoInvalidoException`, etc.); la del módulo agrupa los errores propios de Mirage. Son independientes |
-| `Animacion` | Esqueleto incluido pero **sin uso en MVP 1** | La explosión es procedural (no usa frames). `Animacion` queda como andamiaje para sprites animados en MVPs futuros; sus métodos están con `TODO` |
+| Excepciones | Dos jerarquías: `contracts.JuegoException` (abstract, HOME) y `mirage.excepciones.JuegoException` (concreta, módulo) | `EstadoInvalidoException` (HOME) la lanzan los métodos de ciclo de vida en `ModuloMirage` y la atrapa `EstadoGameOver`. `ColisionException` y `RecursoNoEncontradoException` (Mirage) están definidas para `ColisionDetector` y `SpriteLoader` respectivamente |
