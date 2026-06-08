@@ -183,7 +183,7 @@ sequenceDiagram
 
     alt estadoActual == EstadoJugando (JUGANDO → PAUSADO)
         GameController->>+EstadoJugando: onKeyPressed(this, 'P', keyCode)
-        EstadoJugando->>GameController: setEstado(new EstadoPausado())
+        EstadoJugando-->>GameController: setEstado(new EstadoPausado())
         deactivate EstadoJugando
         GameController->>+EstadoPausado: alEntrar(this)
         Note over EstadoPausado: alEntrar() está vacío
@@ -191,7 +191,7 @@ sequenceDiagram
         Note over EstadoPausado: el "congelar" (no actualiza, solo renderiza) vive en update()/render() de EstadoPausado
     else estadoActual == EstadoPausado (PAUSADO → JUGANDO, reanudar)
         GameController->>+EstadoPausado: onKeyPressed(this, 'P', keyCode)
-        EstadoPausado->>GameController: setEstado(new EstadoJugando())
+        EstadoPausado-->>GameController: setEstado(new EstadoJugando())
         deactivate EstadoPausado
         GameController->>+EstadoJugando: alEntrar(this)
         deactivate EstadoJugando
@@ -278,10 +278,10 @@ sequenceDiagram
         opt !e.estaViva()
             EstadoJugando->>+Explosion: new Explosion(e.getX(), e.getY())
             deactivate Explosion
-            EstadoJugando->>GameController: getEfectos().add(explosion)
+            EstadoJugando-->>GameController: getEfectos().add(explosion)
         end
     end
-    EstadoJugando->>GameController: getEnemigos().removeIf(enemigo -> !enemigo.estaViva())
+    EstadoJugando-->>GameController: getEnemigos().removeIf(enemigo -> !enemigo.estaViva())
     EstadoJugando->>Mirage: getProyectiles().removeIf(proyectil -> !proyectil.isActivo())
     deactivate EstadoJugando
     deactivate GameController
@@ -339,7 +339,7 @@ sequenceDiagram
     EstadoJugando->>+Mirage: estaViva()
     Mirage-->>-EstadoJugando: vidas > 0 : boolean
     opt !mirage.estaViva()
-        EstadoJugando->>GameController: setEstado(new EstadoGameOver())
+        EstadoJugando-->>GameController: setEstado(new EstadoGameOver())
     end
     deactivate EstadoJugando
     deactivate GameController
