@@ -2,7 +2,6 @@ package mirage.model.estado;
 
 import mirage.controller.GameController;
 
-/** Estado activo: el juego corre, actualiza entidades y resuelve colisiones cada frame. */
 public class EstadoJugando implements EstadoJuego {
 
     @Override

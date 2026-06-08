@@ -5,18 +5,6 @@ import mirage.model.entidades.Mirage;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Recolecta métricas de la partida en tiempo real.
- *
- * ColisionDetector la llama para registrar aciertos y derribos.
- * Al finalizar la partida, exportar() construye un ResumenPartida interno
- * que ModuloMirage.getEstadisticasGenerales() mapea al DTO del HOME team.
- *
- * disparosTotales NO se almacena aquí: es responsabilidad de Mirage (quien dispara).
- * Para calcular precisión se consulta mirage.getDisparosTotales() en exportar().
- *
- * Patrón: GRASP Information Expert (quien registra sabe qué registrar)
- */
 public class EstadisticasMirage {
 
     // ── Métricas de la partida actual ────────────────────────────────────────

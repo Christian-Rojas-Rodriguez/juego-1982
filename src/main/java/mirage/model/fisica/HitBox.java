@@ -1,6 +1,5 @@
 package mirage.model.fisica;
 
-/** Caja de colisión rectangular (AABB). */
 public class HitBox {
 
     private float x;

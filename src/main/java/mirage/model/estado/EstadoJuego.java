@@ -2,10 +2,6 @@ package mirage.model.estado;
 
 import mirage.controller.GameController;
 
-/**
- * Estado del juego (patrón State). Cada método recibe el GameController para
- * acceder al model sin que el estado se acople a él en el constructor.
- */
 public interface EstadoJuego {
 
     void update(GameController controller);

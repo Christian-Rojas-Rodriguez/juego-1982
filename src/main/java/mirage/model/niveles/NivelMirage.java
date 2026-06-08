@@ -5,14 +5,6 @@ import processing.core.PApplet;
 
 import java.util.List;
 
-/**
- * Nivel concreto del módulo Mirage — MVP 1: oleadas infinitas de HarrierEnemigo.
- *
- * Gestiona el spawner de enemigos. No tiene condición de nivel completado:
- * la partida termina solo por Game Over (vidas = 0).
- *
- * Patrón: Template Method (extiende Nivel abstracto)
- */
 public class NivelMirage extends Nivel {
 
     private static final int INTERVALO_INICIAL = 180; // frames (3 seg a 60 fps)

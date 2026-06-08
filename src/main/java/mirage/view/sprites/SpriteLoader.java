@@ -6,13 +6,6 @@ import processing.core.PImage;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Carga y cachea los sprites de data/sprites/ para no recargarlos cada frame:
- * precargarTodos() una vez con el PApplet vivo, luego get(nombre) en cada render().
- *
- * Tolerante a fallos: si una imagen no se encuentra, get() devuelve null y las
- * entidades dibujan su forma de respaldo. Así los tests headless siguen en verde.
- */
 public class SpriteLoader {
 
     /** Carpeta base dentro de data/ (Processing resuelve loadImage desde ahí). */

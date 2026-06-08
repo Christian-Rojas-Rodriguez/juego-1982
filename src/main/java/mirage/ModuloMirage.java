@@ -20,20 +20,6 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Módulo Mirage: implementación del contrato real del HOME (contracts.ModuloJuego).
- *
- * Es el único punto de contacto entre el lobby y la lógica interna del módulo.
- * Gestiona el ciclo de vida con la máquina de estados del HOME
- * (NO_INICIADO → INICIANDO → EN_EJECUCION ↔ PAUSADO → FINALIZADO),
- * notifica eventos a los observers y devuelve estadísticas no nulas.
- *
- * El gameplay real corre dentro del GameController (lazy-init en actualizar(),
- * cuando llega el PApplet vivo); la máquina de estados, los observers y las stats
- * se ejercitan con el lobby.
- *
- * Patrón: Facade (oculta el interior) + State (ciclo de vida) + Observer (sujeto).
- */
 public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     private static final String NOMBRE_MODULO = "Mirage";

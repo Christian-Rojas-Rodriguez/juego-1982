@@ -2,17 +2,6 @@ package mirage.model.efectos;
 
 import processing.core.PApplet;
 
-/**
- * Efecto visual transitorio: explosión al destruir un enemigo.
- *
- * Es un efecto procedural en estilo pixel (sin sprite): una ráfaga de
- * partículas cuadradas que se expande desde el centro y se desvanece a lo
- * largo de {@link #DURACION} frames. No afecta la lógica del juego — solo
- * se dibuja. GameController las posee; EstadoJugando las crea al morir un
- * enemigo y descarta las terminadas.
- *
- * Patrón: efecto efímero (spawn → update → terminada → descarte).
- */
 public class Explosion {
 
     /** Vida total del efecto, en frames (~1/3 seg a 60 fps). */

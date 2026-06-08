@@ -5,7 +5,6 @@ import processing.core.PImage;
 import mirage.model.fisica.HitBox;
 import mirage.view.sprites.SpriteLoader;
 
-/** Misil disparado por el Mirage: sube hasta salir de pantalla y se desactiva. */
 public class Proyectil extends Nave {
 
     private static final int ANCHO = 4;

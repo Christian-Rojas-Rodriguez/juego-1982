@@ -8,21 +8,6 @@ import processing.core.PImage;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * El avión Mirage controlado por el jugador.
- *
- * Es el objeto más referenciado del sistema: GameController lo actualiza,
- * ColisionDetector lo consulta, Commands le setean flags de movimiento.
- *
- * Movimiento con flags booleanos: keyPressed activa el flag, keyReleased lo baja.
- * update() lee los flags cada frame → movimiento suave, independiente del OS key-repeat.
- *
- * Dueño de sus proyectiles: disparar() los agrega a la lista interna.
- * GameController accede via getProyectiles() para colisionar y limpiar.
- * disparosTotales se incrementa aquí; EstadisticasMirage lo consulta al exportar.
- *
- * Patrón: Information Expert (posee proyectiles y contador de disparos)
- */
 public class Mirage extends Nave {
 
     // ── Constantes ───────────────────────────────────────────────────────────

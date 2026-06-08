@@ -11,10 +11,6 @@ import processing.core.PImage;
 
 import java.util.List;
 
-/**
- * Dibuja el estado del Model en pantalla, en orden fondo → proyectiles →
- * enemigos → mirage → efectos → HUD. Solo lee el Model (get...), nunca lo modifica.
- */
 public class GameRenderer {
 
     private Pantalla pantallaActual;

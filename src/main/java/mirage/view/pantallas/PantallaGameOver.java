@@ -2,7 +2,6 @@ package mirage.view.pantallas;
 
 import processing.core.PApplet;
 
-/** Overlay de fin de partida: "GAME OVER", puntaje, derribos e instrucciones. */
 public class PantallaGameOver implements Pantalla {
 
     private final int puntajeFinal;

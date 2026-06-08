@@ -7,22 +7,6 @@ import mirage.model.stats.EstadisticasMirage;
 
 import java.util.List;
 
-/**
- * Detecta y resuelve colisiones entre entidades del módulo Mirage.
- *
- * Solo expone 2 métodos en MVP 1. La ausencia de un método genérico
- * enemigo↔enemigo garantiza estructuralmente que los enemigos no colisionan
- * entre sí — la regla de negocio está reforzada por diseño, no por lógica.
- *
- * Cada método maneja un par específico:
- *   1. Proyectil del jugador vs. Enemigo
- *   2. Enemigo vs. Mirage
- *
- * Al detectar un impacto, aplica daño, notifica a EstadisticasMirage y
- * desactiva/destruye las entidades correspondientes.
- *
- * Patrón: GRASP Pure Fabrication + Information Expert (usa HitBox de cada entidad)
- */
 public class ColisionDetector {
 
     private final EstadisticasMirage estadisticas;

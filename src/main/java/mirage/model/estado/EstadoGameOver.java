@@ -2,17 +2,6 @@ package mirage.model.estado;
 
 import mirage.controller.GameController;
 
-/**
- * Estado: partida terminada (vidas del Mirage = 0).
- *
- * Al entrar: registra fin de partida en estadísticas, notifica al HOME
- * que el módulo finalizó, y configura la pantalla de Game Over en el renderer.
- *
- * Durante update(): no hace nada — espera input del jugador.
- * onKeyPressed(): R reinicia, ESC vuelve al HOME.
- *
- * Patrón: State
- */
 public class EstadoGameOver implements EstadoJuego {
 
     @Override
