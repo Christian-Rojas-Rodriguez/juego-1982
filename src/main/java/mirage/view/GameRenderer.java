@@ -22,6 +22,7 @@ import mirage.model.entidades.Proyectil;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.view.pantallas.Pantalla;
 import mirage.view.sprites.SpriteLoader;
+import processing.core.PImage;
 
 import java.util.List;
 
@@ -33,16 +34,13 @@ public class GameRenderer {
     /** Precarga de sprites diferida al primer render (necesita el PApplet vivo). */
     private boolean spritesListos;
 
-    /** Fondo de mar con islas (Guerra de Malvinas). */
-    private final FondoMar fondo = new FondoMar();
-
     // --- Renderizado principal ---
     public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles,
                        List<Explosion> efectos, PApplet sketch) {
         if (!spritesListos) {
             // El pixel-art nítido (noSmooth/nearest-neighbor) se configura en
             // settings() de los runners (Juego1982/HomeRunner): noSmooth() solo
-            // tiene efecto ahí. El buffer offscreen de FondoMar lo aplica aparte.
+            // tiene efecto ahí.
             SpriteLoader.precargarTodos(sketch);
             spritesListos = true;
         }
@@ -55,9 +53,22 @@ public class GameRenderer {
         if (pantallaActual != null) pantallaActual.render(sketch);
     }
 
-    /** Fondo: mar del Atlántico Sur con islas que se desplazan (ver {@link FondoMar}). */
+    /** Fondo: imagen completa cargada desde data/sprites/fondo.png. */
     private void dibujarFondo(PApplet sk) {
-        fondo.render(sk);
+        PImage fondo = SpriteLoader.get("fondo.png");
+        if (fondo == null) {
+            sk.background(8, 22, 40);
+            return;
+        }
+
+        float escala = Math.max(sk.width / (float) fondo.width, sk.height / (float) fondo.height);
+        float ancho = fondo.width * escala;
+        float alto = fondo.height * escala;
+        float x = (sk.width - ancho) / 2f;
+        float y = (sk.height - alto) / 2f;
+
+        sk.imageMode(PApplet.CORNER);
+        sk.image(fondo, x, y, ancho, alto);
     }
 
     private void dibujarHUD(PApplet sketch, Mirage mirage) {
