@@ -16,8 +16,6 @@ import java.util.List;
  * Los enemigos nuevos se acumulan en nuevosEsteFrame; getEnemigosNuevos()
  * los retorna y limpia el buffer. GameController los agrega a su lista activa.
  *
- * En MVP 2 recibirá ConfiguradorDificultad para escalar vida y velocidad.
- *
  * Patrón: GRASP Pure Fabrication
  */
 public class EnemySpawner {
@@ -57,10 +55,5 @@ public class EnemySpawner {
         List<Enemigo> resultado = new ArrayList<>(nuevosEsteFrame);
         nuevosEsteFrame.clear();
         return resultado;
-    }
-
-    /** Permite ajustar la cadencia en MVPs futuros (ConfiguradorDificultad). */
-    public void setIntervalo(int nuevoIntervalo) {
-        this.intervaloFrames = nuevoIntervalo;
     }
 }

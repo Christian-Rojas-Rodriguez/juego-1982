@@ -43,5 +43,4 @@ public abstract class Nave {
 
     public float getX() { return x; }
     public float getY() { return y; }
-    public int getVida()  { return vida; }
 }

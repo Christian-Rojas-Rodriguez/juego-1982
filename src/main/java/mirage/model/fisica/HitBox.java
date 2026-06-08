@@ -1,27 +1,13 @@
-// ============================================================
-// HitBox — Caja de colisión rectangular (AABB)
-// ============================================================
-// GRASP : Information Expert (sabe si colisiona con otra HitBox)
-// ============================================================
-// Qué implementar:
-//   - colisionaCon(HitBox otro): detectar solapamiento AABB
-//     Algoritmo: dos rectángulos NO colisionan si uno está
-//     completamente a la izquierda, derecha, arriba o abajo del otro.
-//     Negar esa condición da la colisión.
-//   - moverA(x, y): actualizar posición (llamado en cada frame)
-// ============================================================
-
 package mirage.model.fisica;
 
+/** Caja de colisión rectangular (AABB). */
 public class HitBox {
 
-    // --- Atributos ---
     private float x;
     private float y;
     private final float ancho;
     private final float alto;
 
-    // --- Constructor ---
     public HitBox(float x, float y, float ancho, float alto) {
         this.x     = x;
         this.y     = y;
@@ -29,7 +15,7 @@ public class HitBox {
         this.alto  = alto;
     }
 
-    // --- Detección AABB ---
+    /** Dos rectángulos colisionan salvo que uno esté del todo a un lado del otro. */
     public boolean colisionaCon(HitBox otro) {
         return !(this.x + this.ancho < otro.x ||
                   otro.x  + otro.ancho < this.x  ||
@@ -37,13 +23,6 @@ public class HitBox {
                   otro.y  + otro.alto  < this.y);
     }
 
-    // --- Actualizar posición cada frame ---
-    public void moverA(float x, float y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    // --- Getters ---
     public float getX()     { return x; }
     public float getY()     { return y; }
     public float getAncho() { return ancho; }

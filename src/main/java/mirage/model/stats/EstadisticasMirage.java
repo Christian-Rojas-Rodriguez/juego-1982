@@ -103,11 +103,6 @@ public class EstadisticasMirage {
 
     // ── Persistencia ────────────────────────────────────────────────────────
 
-    public void guardar() {
-        // TODO: escribir a "data/estadisticas_mirage.csv"
-        // Columnas: fecha, puntaje, enemigosDerribados, precision, duracion
-    }
-
     public void cargar() {
         // No-op en v1: persistencia CSV fuera de v1 (no se leen archivos).
     }
@@ -115,9 +110,7 @@ public class EstadisticasMirage {
     // ── Getters ───────────────────────────────────────────────────────────────
 
     public int getEnemigosDerribados()          { return enemigosDerribados; }
-    public int getPuntajeMaximo()               { return puntajeMaximo; }
     public int getPartidasJugadas()             { return partidasJugadas; }
     public int getPartidasGanadas()             { return partidasGanadas; }
     public int getPartidasPerdidas()            { return partidasPerdidas; }
-    public Map<String, Integer> getPorTipo()    { return enemigosPorTipo; }
 }
