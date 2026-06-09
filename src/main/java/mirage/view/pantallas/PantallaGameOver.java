@@ -36,8 +36,4 @@ public class PantallaGameOver implements Pantalla {
         sketch.text("R: Reiniciar   |   ESC: Volver al menu",
                     sketch.width / 2f, sketch.height * 0.75f);
     }
-
-    @Override
-    public void update() {
-    }
 }

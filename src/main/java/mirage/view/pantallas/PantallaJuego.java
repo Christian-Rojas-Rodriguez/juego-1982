@@ -22,7 +22,4 @@ public class PantallaJuego implements Pantalla {
         sketch.image(fondo, x, y, ancho, alto);
     }
 
-    @Override
-    public void update() {
-    }
 }
