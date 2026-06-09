@@ -176,6 +176,7 @@ sequenceDiagram
     participant EstadoJugando
     participant EstadoPausado
     participant GameRenderer
+    participant PantallaPausa
 
     Note over Jugador,ModuloMirage: keyPressed() en HomeRunner → HomeJuego.manejarTecla() → reenvía vía ModuloConInput
     Jugador->>+ModuloMirage: onKeyPressed(key, keyCode)
@@ -205,6 +206,16 @@ sequenceDiagram
     Note over InputHandler: 'P' no está registrada como comando → no hace nada
     deactivate GameController
     deactivate ModuloMirage
+
+    Note over GameController,PantallaPausa: En cada frame siguiente mientras el estado sea PAUSADO (ciclo de render)
+    loop por frame (estado == PAUSADO)
+        GameController->>+EstadoPausado: render(controller)
+        EstadoPausado->>+GameRenderer: render(mirage, enemigos, proyectiles, efectos, sketch)
+        Note over GameRenderer: dibuja el juego congelado y al final el overlay activo
+        GameRenderer->>PantallaPausa: render(sketch)
+        deactivate GameRenderer
+        deactivate EstadoPausado
+    end
 ```
 
 ---
