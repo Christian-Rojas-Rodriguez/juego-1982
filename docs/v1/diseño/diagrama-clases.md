@@ -347,11 +347,11 @@ classDiagram
 
     %% ── VISTA ────────────────────────────────────────────────────
     class GameRenderer {
+        -pantallaFondo Pantalla
         -pantallaActual Pantalla
         -spritesListos bool
         +render(mirage Mirage, enemigos List~Enemigo~, proyectiles List~Proyectil~, efectos List~Explosion~, sketch PApplet) void
         +setPantalla(pantalla Pantalla) void
-        -dibujarFondo(sk PApplet) void
         -dibujarHUD(sketch PApplet, mirage Mirage) void
     }
 
@@ -371,7 +371,7 @@ classDiagram
         +update() void
     }
 
-    class PantallaJuego    { }
+    class PantallaJuego    { +render(sketch PApplet) void }
     class PantallaGameOver { -puntajeFinal int -enemigosDerribados int }
 
     class SpriteLoader {
@@ -472,7 +472,7 @@ classDiagram
 | Un solo tipo de enemigo | `HarrierEnemigo` | Estructura extensible: agregar tipo = 1 subclase nueva que sobreescribe `moverIA()` y `getTipo()` |
 | Factory de enemigos | `EnemyFactory` (Factory Method) usado por `EnemySpawner` | Centraliza la creación; agregar un tipo = nuevo case + subclase, sin tocar `EnemySpawner` |
 | Gráficos | Sprites Kenney "Pixel Shmup" (CC0) vía `SpriteLoader`; jugador **gris**, enemigos de color | El gris del protagonista reserva los colores a los enemigos. `precargarTodos()` se llama una vez en el primer render. Fallback a formas si falta el sprite → tests headless siguen en verde |
-| Fondo | `GameRenderer` dibuja `data/sprites/fondo.png` cargado por `SpriteLoader` | El fondo se carga una sola vez junto con el resto de sprites y se escala para cubrir la pantalla. Si falta el asset, `GameRenderer` usa un azul oscuro de respaldo |
+| Fondo | `PantallaJuego` dibuja `data/sprites/fondo.png`; `GameRenderer` lo delega via `pantallaFondo` | Separación de responsabilidades: `GameRenderer` dibuja objetos dinámicos, `PantallaJuego` el fondo estático. Si falta el asset, usa un azul oscuro de respaldo |
 | Explosión | Procedural (sin sprite): clase `Explosion` | Ráfaga de partículas que se expande y desvanece. `GameController` posee `List<Explosion>`; `EstadoJugando` la crea al morir un enemigo |
 | Estadísticas | `EstadisticasMirage` (en vivo) → `ResumenPartida` (snapshot) → `EstadisticasGenerales` (DTO HOME) | Information Expert: `EstadisticasMirage` registra; `exportar()` arma el `ResumenPartida` (8 campos); `ModuloMirage` lo mapea al DTO del HOME. `cargar()` es no-op en v1 (persistencia CSV fuera de v1) |
 | Excepciones | Jerarquía del HOME (`contracts.JuegoException`) | `EstadoInvalidoException` (HOME) la lanzan los métodos de ciclo de vida en `ModuloMirage` y la atrapa `EstadoGameOver` |
