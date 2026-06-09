@@ -13,10 +13,12 @@ import contracts.ModuloEvento;
 import contracts.ModuloJuego;
 import contracts.NoIniciadoState;
 import contracts.PausadoState;
+
 import mirage.controller.GameController;
 import mirage.model.estado.EstadoJugando;
 import mirage.model.estado.EstadoPausado;
 import mirage.model.stats.ResumenPartida;
+
 import processing.core.PApplet;
 
 import java.util.ArrayList;
@@ -228,11 +230,11 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     @Override
     public void reset() {
-        estadoActual = new NoIniciadoState();
+        estadoActual = new EnEjecucionState();
         puntaje = 0;
         tAcumuladoMs = 0;
+        tInicioJuegoMs = System.currentTimeMillis();
         if (controller != null) controller.init();  // recrea entidades/nivel desde cero
-        observers.clear();   // el lobby se re-registra en seleccionarModulo()
     }
 
     // ── Input (NO forma parte del contrato HOME) ──────────────────────────────
