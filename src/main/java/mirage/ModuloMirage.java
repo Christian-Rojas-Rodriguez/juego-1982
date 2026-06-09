@@ -230,11 +230,11 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
 
     @Override
     public void reset() {
-        estadoActual = new EnEjecucionState();
+        estadoActual = new NoIniciadoState();
         puntaje = 0;
         tAcumuladoMs = 0;
-        tInicioJuegoMs = System.currentTimeMillis();
-        if (controller != null) controller.init();  // recrea entidades/nivel desde cero
+        observers.clear();
+        if (controller != null) controller.init();
     }
 
     // ── Input (NO forma parte del contrato HOME) ──────────────────────────────

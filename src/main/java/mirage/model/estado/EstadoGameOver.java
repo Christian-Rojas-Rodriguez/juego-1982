@@ -37,7 +37,7 @@ public class EstadoGameOver implements EstadoJuego {
     @Override
     public void onKeyPressed(GameController controller, char key, int keyCode) {
         if (key == 'r' || key == 'R') {
-            controller.getMirageModulo().reset();
+            controller.init(); // reinicia gameplay sin tocar el ciclo de vida HOME
         } else if (keyCode == 27) { // ESC → volver al HOME
             try {
                 controller.getMirageModulo().finalizar();
