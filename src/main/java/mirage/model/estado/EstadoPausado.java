@@ -23,10 +23,13 @@ public class EstadoPausado implements EstadoJuego {
                 controller.getEfectos(),
                 controller.getSketch()
         );
-        // Overlay "PAUSA" centrado en pantalla.
         processing.core.PApplet sk = controller.getSketch();
-        sk.fill(255, 220, 0);
+        sk.fill(0, 0, 0, 140);
+        sk.rectMode(processing.core.PApplet.CORNER);
+        sk.rect(0, 0, sk.width, sk.height);
+
         sk.textAlign(processing.core.PApplet.CENTER, processing.core.PApplet.CENTER);
+        sk.fill(255, 220, 0);
         sk.textSize(28);
         sk.text("PAUSA", sk.width / 2f, sk.height / 2f);
     }
