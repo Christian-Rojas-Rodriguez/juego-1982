@@ -6,6 +6,8 @@ public class EstadoJugando implements EstadoJuego {
 
     @Override
     public void alEntrar(GameController controller) {
+        // Limpia cualquier overlay previo (p. ej. PantallaPausa) al (re)anudar el juego.
+        controller.getRenderer().setPantalla(null);
     }
 
     @Override

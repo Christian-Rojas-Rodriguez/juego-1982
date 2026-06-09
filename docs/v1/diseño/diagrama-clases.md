@@ -372,6 +372,7 @@ classDiagram
 
     class PantallaJuego    { +render(sketch PApplet) void }
     class PantallaGameOver { -puntajeFinal int -enemigosDerribados int }
+    class PantallaPausa    { +render(sketch PApplet) void }
 
     class SpriteLoader {
         <<Pure Fabrication>>
@@ -448,6 +449,10 @@ classDiagram
     GameRenderer ..> Explosion
     Pantalla <|.. PantallaJuego
     Pantalla <|.. PantallaGameOver
+    Pantalla <|.. PantallaPausa
+
+    EstadoGameOver ..> PantallaGameOver : <<creates>>
+    EstadoPausado  ..> PantallaPausa    : <<creates>>
 
     JuegoExceptionContracts <|-- EstadoInvalidoException
 

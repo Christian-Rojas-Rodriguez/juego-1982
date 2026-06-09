@@ -6,6 +6,9 @@ public class EstadoPausado implements EstadoJuego {
 
     @Override
     public void alEntrar(GameController controller) {
+        // Overlay de pausa como Pantalla (Strategy), igual que EstadoGameOver.
+        controller.getRenderer()
+                  .setPantalla(new mirage.view.pantallas.PantallaPausa());
     }
 
     @Override
@@ -15,7 +18,8 @@ public class EstadoPausado implements EstadoJuego {
 
     @Override
     public void render(GameController controller) {
-        // El juego se dibuja "congelado": las entidades no se actualizaron en update().
+        // El juego se dibuja "congelado" (no se actualizó en update()) y el
+        // GameRenderer superpone la PantallaPausa seteada en alEntrar().
         controller.getRenderer().render(
                 controller.getMirage(),
                 controller.getEnemigos(),
@@ -23,15 +27,6 @@ public class EstadoPausado implements EstadoJuego {
                 controller.getEfectos(),
                 controller.getSketch()
         );
-        processing.core.PApplet sk = controller.getSketch();
-        sk.fill(0, 0, 0, 140);
-        sk.rectMode(processing.core.PApplet.CORNER);
-        sk.rect(0, 0, sk.width, sk.height);
-
-        sk.textAlign(processing.core.PApplet.CENTER, processing.core.PApplet.CENTER);
-        sk.fill(255, 220, 0);
-        sk.textSize(28);
-        sk.text("PAUSA", sk.width / 2f, sk.height / 2f);
     }
 
     @Override

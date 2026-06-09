@@ -175,6 +175,7 @@ sequenceDiagram
     participant GameController
     participant EstadoJugando
     participant EstadoPausado
+    participant GameRenderer
 
     Note over Jugador,ModuloMirage: keyPressed() en HomeRunner → HomeJuego.manejarTecla() → reenvía vía ModuloConInput
     Jugador->>+ModuloMirage: onKeyPressed(key, keyCode)
@@ -186,15 +187,17 @@ sequenceDiagram
         EstadoJugando-->>GameController: setEstado(new EstadoPausado())
         deactivate EstadoJugando
         GameController->>+EstadoPausado: alEntrar(this)
-        Note over EstadoPausado: alEntrar() está vacío
+        EstadoPausado->>GameRenderer: setPantalla(new PantallaPausa())
         deactivate EstadoPausado
-        Note over EstadoPausado: el "congelar" (no actualiza, solo renderiza) vive en update()/render() de EstadoPausado
+        Note over EstadoPausado,GameRenderer: el overlay "PAUSA" se modela como Pantalla (Strategy), igual que Game Over; update() no avanza el juego → queda congelado
     else estadoActual == EstadoPausado (PAUSADO → JUGANDO, reanudar)
         GameController->>+EstadoPausado: onKeyPressed(this, 'P', keyCode)
         EstadoPausado-->>GameController: setEstado(new EstadoJugando())
         deactivate EstadoPausado
         GameController->>+EstadoJugando: alEntrar(this)
+        EstadoJugando->>GameRenderer: setPantalla(null)
         deactivate EstadoJugando
+        Note over EstadoJugando,GameRenderer: limpia el overlay para que "PAUSA" no quede pegado al reanudar
     end
 
     Note over GameController: setEstado() asigna estadoActual y luego invoca alEntrar() en el nuevo estado
