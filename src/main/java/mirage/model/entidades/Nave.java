@@ -2,17 +2,6 @@ package mirage.model.entidades;
 
 import mirage.model.fisica.HitBox;
 
-/**
- * Clase abstracta base para todas las entidades móviles del juego.
- *
- * Define estado y comportamiento común: posición, velocidad, vida, hitBox.
- * GameController y ColisionDetector usan esta base para tratar Mirage,
- * Proyectil y Enemigo de forma uniforme donde sea posible.
- *
- * Template Method: update() define el ciclo de vida; cada subclase lo implementa.
- *
- * Patrón: Template Method (update abstracto)
- */
 public abstract class Nave {
 
     protected float x;
@@ -34,15 +23,13 @@ public abstract class Nave {
     public abstract HitBox getHitBox();
 
     public boolean estaViva() {
-        // TODO: return vida > 0
-        return false;
+        return vida > 0;
     }
 
     public void recibirDanio(int danio) {
-        // TODO: vida -= danio
+        vida -= danio;
     }
 
     public float getX() { return x; }
     public float getY() { return y; }
-    public int getVida()  { return vida; }
 }

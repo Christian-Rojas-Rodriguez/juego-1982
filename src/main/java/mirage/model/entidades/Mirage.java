@@ -1,26 +1,13 @@
 package mirage.model.entidades;
 
 import mirage.model.fisica.HitBox;
+import mirage.view.sprites.SpriteLoader;
 import processing.core.PApplet;
+import processing.core.PImage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * El avión Mirage controlado por el jugador.
- *
- * Es el objeto más referenciado del sistema: GameController lo actualiza,
- * ColisionDetector lo consulta, Commands le setean flags de movimiento.
- *
- * Movimiento con flags booleanos: keyPressed activa el flag, keyReleased lo baja.
- * update() lee los flags cada frame → movimiento suave, independiente del OS key-repeat.
- *
- * Dueño de sus proyectiles: disparar() los agrega a la lista interna.
- * GameController accede via getProyectiles() para colisionar y limpiar.
- * disparosTotales se incrementa aquí; EstadisticasMirage lo consulta al exportar.
- *
- * Patrón: Information Expert (posee proyectiles y contador de disparos)
- */
 public class Mirage extends Nave {
 
     // ── Constantes ───────────────────────────────────────────────────────────
@@ -28,6 +15,7 @@ public class Mirage extends Nave {
     private static final int VIDAS_MAX               = 3;
     private static final int ANCHO_HITBOX            = 30;
     private static final int ALTO_HITBOX             = 30;
+    private static final int TAM_SPRITE              = 48;   // tamaño de dibujo del sprite
     private static final int COOLDOWN_BASE           = 15;  // frames entre disparos
 
     // ── Estado del jugador ───────────────────────────────────────────────────
@@ -70,22 +58,34 @@ public class Mirage extends Nave {
 
     @Override
     public void update() {
-        // TODO: if (moverIzquierda) x -= velocidad
-        // TODO: if (moverDerecha)   x += velocidad
-        // TODO: if (moverArriba)    y -= velocidad
-        // TODO: if (moverAbajo)     y += velocidad
-        // TODO: x = PApplet.constrain(x, 0, sketch.width)
-        // TODO: y = PApplet.constrain(y, 0, sketch.height)
-        // TODO: if (cooldownActual > 0) cooldownActual--
-        // TODO: if (invencible) { frameInvencible--; if (frameInvencible <= 0) invencible = false }
-        // TODO: proyectiles.forEach(Proyectil::update)
-        // TODO: proyectiles.removeIf(p -> !p.isActivo())
+        if (moverIzquierda) x -= velocidad;
+        if (moverDerecha)   x += velocidad;
+        if (moverArriba)    y -= velocidad;
+        if (moverAbajo)     y += velocidad;
+        x = PApplet.constrain(x, 0, sketch.width);
+        y = PApplet.constrain(y, 0, sketch.height);
+        if (cooldownActual > 0) cooldownActual--;
+        if (invencible) {
+            frameInvencible--;
+            if (frameInvencible <= 0) invencible = false;
+        }
+        proyectiles.forEach(Proyectil::update);
+        proyectiles.removeIf(p -> !p.isActivo());
     }
 
     public void render(PApplet sk) {
-        // TODO: si invencible y sk.frameCount % 10 < 5 → no dibujar (efecto parpadeo)
-        // TODO: dibujar sprite del Mirage centrado en (x, y)
-        // TODO: for (Proyectil p : proyectiles) p.render(sk)
+        if (invencible && sk.frameCount % 10 < 5) return; // efecto parpadeo
+        PImage sprite = SpriteLoader.get("player.png");
+        if (sprite != null) {
+            // Sprite Kenney (apunta hacia arriba), centrado en (x, y).
+            sk.imageMode(PApplet.CENTER);
+            sk.image(sprite, x, y, TAM_SPRITE, TAM_SPRITE);
+        } else {
+            // Respaldo: triángulo apuntando hacia arriba (modo headless / sin assets).
+            sk.fill(120, 200, 255);
+            sk.triangle(x, y - 15, x - 12, y + 12, x + 12, y + 12);
+        }
+        for (Proyectil p : proyectiles) p.render(sk);
     }
 
     // ── Disparo ──────────────────────────────────────────────────────────────
@@ -95,25 +95,37 @@ public class Mirage extends Nave {
      * Llamado por DispararCmd.ejecutar(mirage) — el comando no conoce la lista.
      */
     public void disparar() {
-        // TODO: if (cooldownActual > 0) return
-        // TODO: proyectiles.add(new Proyectil(x, y - 20, sketch))
-        // TODO: disparosTotales++
-        // TODO: cooldownActual = cooldownDisparo
+        if (cooldownActual > 0) return;
+        proyectiles.add(new Proyectil(x, y - 20));
+        disparosTotales++;
+        cooldownActual = cooldownDisparo;
     }
 
     // ── Daño e invencibilidad ────────────────────────────────────────────────
 
     @Override
     public void recibirDanio(int danio) {
-        // TODO: if (invencible) return
-        // TODO: vidas = Math.max(0, vidas - danio)
-        // TODO: if (vidas > 0) { invencible = true; frameInvencible = DURACION_INVENCIBILIDAD }
+        if (invencible) return;
+        vidas = Math.max(0, vidas - danio);
+        if (vidas > 0) {
+            invencible = true;
+            frameInvencible = DURACION_INVENCIBILIDAD;
+        }
+    }
+
+    /**
+     * El Mirage usa su propio campo {@code vidas} (≠ {@code Nave.vida}).
+     * Se sobreescribe para que el estado de "vivo" refleje las vidas reales,
+     * permitiendo que EstadoJugando detecte el game over correctamente.
+     */
+    @Override
+    public boolean estaViva() {
+        return vidas > 0;
     }
 
     @Override
     public HitBox getHitBox() {
-        // TODO: return new HitBox(x - ANCHO_HITBOX/2, y - ALTO_HITBOX/2, ANCHO_HITBOX, ALTO_HITBOX)
-        return null;
+        return new HitBox(x - ANCHO_HITBOX / 2f, y - ALTO_HITBOX / 2f, ANCHO_HITBOX, ALTO_HITBOX);
     }
 
     // ── Setters de movimiento (llamados por Commands) ─────────────────────────
@@ -132,6 +144,6 @@ public class Mirage extends Nave {
     public int getDisparosTotales()         { return disparosTotales; }
 
     public void sumarPuntos(int puntos) {
-        // TODO: puntuacion += puntos
+        puntuacion += puntos;
     }
 }

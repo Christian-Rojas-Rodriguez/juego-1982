@@ -205,7 +205,19 @@ juego-1982/
 ## Cómo ejecutar
 
 1. Agregar `lib/core.jar` como dependencia en IntelliJ
-2. Ejecutar la clase principal con `PApplet.main(...)`
+2. Ejecutar la clase principal con `PApplet.main(...)` — `HomeRunner` (lobby + Mirage) o `Juego1982` (Mirage solo)
+
+> **Nota (JDK 24+):** al correr aparece un warning benigno de la JVM
+> (`restricted method … System::load … ThinkDifferent … --enable-native-access`).
+> Proviene de `lib/core.jar` (integración macOS de Processing), **no** del proyecto, y
+> no afecta al juego. Para silenciarlo, agregar a las *VM options* de la Run Configuration:
+> `--enable-native-access=ALL-UNNAMED`.
+
+---
+
+## Créditos de assets
+
+- **Gráficos:** [Kenney — Pixel Shmup](https://kenney.nl/assets/pixel-shmup) (CC0). Ver [`data/sprites/CREDITS.md`](data/sprites/CREDITS.md) y `LICENSE-kenney.txt`.
 
 ---
 

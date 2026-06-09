@@ -1,15 +1,3 @@
-// ============================================================
-// EstadoPausado — Estado: juego pausado, solo renderiza
-// ============================================================
-// GRASP : High Cohesion
-// Patrón: State (estado concreto)
-// ============================================================
-// Qué implementar:
-//   - update(): NO actualizar nada (es la razón de existir de este estado)
-//   - render(): mostrar la pantalla de juego "congelada" + texto "PAUSADO"
-//   - onKeyPressed(): tecla P → setEstado(new EstadoJugando())
-// ============================================================
-
 package mirage.model.estado;
 
 import mirage.controller.GameController;
@@ -18,22 +6,38 @@ public class EstadoPausado implements EstadoJuego {
 
     @Override
     public void alEntrar(GameController controller) {
-        // TODO: mostrar indicador visual de pausa
     }
 
     @Override
     public void update(GameController controller) {
-        // No actualizar nada — el juego está pausado
+        // El juego está pausado: no se actualiza ninguna entidad.
     }
 
     @Override
     public void render(GameController controller) {
-        // TODO: renderizar el estado actual del juego (congelado)
-        // TODO: dibujar encima texto "PAUSADO" centrado en pantalla
+        // El juego se dibuja "congelado": las entidades no se actualizaron en update().
+        controller.getRenderer().render(
+                controller.getMirage(),
+                controller.getEnemigos(),
+                controller.getMirage().getProyectiles(),
+                controller.getEfectos(),
+                controller.getSketch()
+        );
+        processing.core.PApplet sk = controller.getSketch();
+        sk.fill(0, 0, 0, 140);
+        sk.rectMode(processing.core.PApplet.CORNER);
+        sk.rect(0, 0, sk.width, sk.height);
+
+        sk.textAlign(processing.core.PApplet.CENTER, processing.core.PApplet.CENTER);
+        sk.fill(255, 220, 0);
+        sk.textSize(28);
+        sk.text("PAUSA", sk.width / 2f, sk.height / 2f);
     }
 
     @Override
     public void onKeyPressed(GameController controller, char key, int keyCode) {
-        // TODO: si key == 'p' o key == 'P' → controller.setEstado(new EstadoJugando())
+        if (key == 'p' || key == 'P') {
+            controller.setEstado(new EstadoJugando());
+        }
     }
 }

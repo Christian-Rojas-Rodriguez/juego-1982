@@ -1,55 +1,52 @@
-// ============================================================
-// GameRenderer — Renderiza el estado del Model en pantalla
-// ============================================================
-// GRASP : High Cohesion (solo dibuja, nunca modifica estado)
-// ============================================================
-// Qué implementar:
-//   - render(): dibujar fondo, luego entidades, luego HUD
-//               Orden: fondo → proyectiles → enemigos → mirage → HUD
-//   - dibujarFondo(sketch): fondo negro + estrellas (efecto parallax opcional)
-//   - dibujarHUD(sketch, mirage): mostrar vidas y puntuación
-//   - setPantalla(): cambiar la pantalla activa (para Game Over, etc.)
-// REGLA: este archivo NO modifica ningún campo del Model.
-//        Solo llama métodos de lectura (get...) y render(sketch).
-// ============================================================
-
 package mirage.view;
 
 import processing.core.PApplet;
+import mirage.model.efectos.Explosion;
 import mirage.model.entidades.Mirage;
 import mirage.model.entidades.Proyectil;
 import mirage.model.entidades.enemigos.Enemigo;
 import mirage.view.pantallas.Pantalla;
+import mirage.view.pantallas.PantallaJuego;
+import mirage.view.sprites.SpriteLoader;
 
 import java.util.List;
 
 public class GameRenderer {
 
-    // --- Atributos ---
+    /** Fondo estático — se dibuja primero. */
+    private final Pantalla pantallaFondo = new PantallaJuego();
+
+    /** Overlay activo (Game Over, etc.) — se dibuja al final. */
     private Pantalla pantallaActual;
 
-    // --- Renderizado principal ---
-    public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles, PApplet sketch) {
-        // TODO: dibujarFondo(sketch)
-        // TODO: for proyectil : proyectiles → proyectil.render(sketch)
-        // TODO: for enemigo   : enemigos   → enemigo.render(sketch)
-        // TODO: mirage.render(sketch)
-        // TODO: dibujarHUD(sketch, mirage)
-        // TODO: si pantallaActual != null → pantallaActual.render(sketch)
-    }
+    /** Precarga de sprites diferida al primer render (necesita el PApplet vivo). */
+    private boolean spritesListos;
 
-    private void dibujarFondo(PApplet sketch) {
-        // TODO: sketch.background(10, 10, 30)  // azul oscuro de noche
-        // TODO: dibujar estrellas estáticas o con efecto de movimiento
+    public void render(Mirage mirage, List<Enemigo> enemigos, List<Proyectil> proyectiles,
+                       List<Explosion> efectos, PApplet sketch) {
+        if (!spritesListos) {
+            SpriteLoader.precargarTodos(sketch);
+            spritesListos = true;
+        }
+        pantallaFondo.render(sketch);
+        for (Proyectil p : proyectiles) p.render(sketch);
+        for (Enemigo e : enemigos) e.render(sketch);
+        mirage.render(sketch);
+        for (Explosion ex : efectos) ex.render(sketch);
+        dibujarHUD(sketch, mirage);
+        if (pantallaActual != null) pantallaActual.render(sketch);
     }
 
     private void dibujarHUD(PApplet sketch, Mirage mirage) {
-        // TODO: mostrar puntuación arriba a la izquierda
-        // TODO: mostrar vidas (íconos o número) arriba a la derecha
+        sketch.fill(255);
+        sketch.textSize(12);
+        sketch.textAlign(PApplet.LEFT, PApplet.TOP);
+        sketch.text("Puntos: " + mirage.getPuntuacion(), 10, 10);
+        sketch.textAlign(PApplet.RIGHT, PApplet.TOP);
+        sketch.text("Vidas: " + mirage.getVidas(), sketch.width - 10, 10);
     }
 
-    // --- Cambiar pantalla superpuesta ---
     public void setPantalla(Pantalla pantalla) {
-        // TODO: this.pantallaActual = pantalla
+        this.pantallaActual = pantalla;
     }
 }

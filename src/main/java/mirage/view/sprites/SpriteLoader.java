@@ -1,16 +1,3 @@
-// ============================================================
-// SpriteLoader — Carga y cachea imágenes de Processing
-// ============================================================
-// GRASP : Pure Fabrication (servicio sin dominio propio)
-// ============================================================
-// Qué implementar:
-//   - cargar(nombre, sketch): carga la imagen desde assets/images/
-//                             y la guarda en el cache para no recargar
-//   - get(nombre): retorna la imagen del cache (null si no existe)
-// Uso: llamar cargar() en setup(), luego get() en render()
-// Ruta base sugerida: "assets/images/mirage/"
-// ============================================================
-
 package mirage.view.sprites;
 
 import processing.core.PApplet;
@@ -21,28 +8,29 @@ import java.util.Map;
 
 public class SpriteLoader {
 
-    // --- Cache singleton de imágenes ---
+    /** Carpeta base dentro de data/ (Processing resuelve loadImage desde ahí). */
+    private static final String BASE = "sprites/";
+
     private static final Map<String, PImage> cache = new HashMap<>();
 
-    // --- Cargar imagen y guardar en cache ---
+    private SpriteLoader() { } // servicio estático, no instanciable
+
     public static void cargar(String nombre, PApplet sketch) {
-        // TODO: si !cache.containsKey(nombre):
-        //         PImage img = sketch.loadImage("assets/images/mirage/" + nombre)
-        //         cache.put(nombre, img)
+        if (!cache.containsKey(nombre)) {
+            // loadImage devuelve null (y loguea) si no encuentra el archivo;
+            // lo guardamos igual para no reintentar cada frame.
+            cache.put(nombre, sketch.loadImage(BASE + nombre));
+        }
     }
 
-    // --- Obtener imagen del cache ---
     public static PImage get(String nombre) {
-        // TODO: return cache.get(nombre)
-        return null;
+        return cache.get(nombre);
     }
 
-    // --- Precargar todos los sprites del módulo ---
     public static void precargarTodos(PApplet sketch) {
-        // TODO: cargar("mirage.png", sketch)
-        // TODO: cargar("harrier.png", sketch)
-        // TODO: cargar("fragata.png", sketch)
-        // TODO: cargar("proyectil.png", sketch)
-        // TODO: cargar("explosion.png", sketch)
+        cargar("player.png", sketch);         // Kenney Ships/ship_0012.png (nave gris)
+        cargar("enemy-harrier.png", sketch);  // Kenney Ships/ship_0001.png
+        cargar("bullet.png", sketch);         // Kenney Tiles/tile_0000.png
+        cargar("fondo.png", sketch);
     }
 }
