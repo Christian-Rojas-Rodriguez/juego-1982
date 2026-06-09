@@ -189,7 +189,7 @@ sequenceDiagram
         GameController->>+EstadoPausado: alEntrar(this)
         EstadoPausado->>GameRenderer: setPantalla(new PantallaPausa())
         deactivate EstadoPausado
-        Note over EstadoPausado,GameRenderer: el overlay "PAUSA" se modela como Pantalla (Strategy), igual que Game Over; update() no avanza el juego → queda congelado
+        Note over EstadoPausado,GameRenderer: el overlay PAUSA se modela como Pantalla (Strategy), igual que Game Over. update() no avanza el juego, queda congelado
     else estadoActual == EstadoPausado (PAUSADO → JUGANDO, reanudar)
         GameController->>+EstadoPausado: onKeyPressed(this, 'P', keyCode)
         EstadoPausado-->>GameController: setEstado(new EstadoJugando())
