@@ -392,12 +392,13 @@ sequenceDiagram
 
 ## UC-07: Game Over
 
-**Actor:** Sistema  
+**Actor:** Sistema / Jugador  
 **Precondición:** `mirage.getVidas() == 0`  
-**Postcondición:** Estado = GAME_OVER, HOME notificado con evento FINALIZADO
+**Postcondición:** Estado = `EstadoGameOver`, pantalla de Game Over visible esperando input. Según la tecla: **R** reinicia la partida (`EstadoJugando`) · **ESC** notifica al HOME con evento FINALIZADO.
 
 ```mermaid
 sequenceDiagram
+    actor Jugador
     participant GameController
     participant EstadoGameOver
     participant Mirage
@@ -418,9 +419,21 @@ sequenceDiagram
     GameRenderer->>+PantallaGameOver: new PantallaGameOver(puntaje, derribados)
     PantallaGameOver-->>-GameRenderer: pantalla
     deactivate GameRenderer
-
-    Note over EstadoGameOver: finalizar() lo invoca el HOME cuando el jugador presiona ESC
     deactivate EstadoGameOver
+
+    Note over Jugador, PantallaGameOver: La pantalla queda visible (update() no avanza el juego) hasta que el jugador presiona una tecla
+
+    alt Jugador presiona R
+        Jugador->>+EstadoGameOver: onKeyPressed(controller, 'R')
+        EstadoGameOver->>GameController: init()
+        Note over GameController: Reconstruye Mirage, enemigos, estadísticas, etc. y setEstado(new EstadoJugando())
+        deactivate EstadoGameOver
+    else Jugador presiona ESC
+        Jugador->>+EstadoGameOver: onKeyPressed(controller, ESC)
+        EstadoGameOver->>GameController: getMirageModulo().finalizar()
+        Note over GameController: El HOME recibe el evento FINALIZADO y vuelve al lobby
+        deactivate EstadoGameOver
+    end
 ```
 
 ---
