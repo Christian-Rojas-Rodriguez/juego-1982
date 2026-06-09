@@ -13,12 +13,8 @@ public class EstadoGameOver implements EstadoJuego {
 
         controller.getRenderer()
                   .setPantalla(new mirage.view.pantallas.PantallaGameOver(puntaje, derribados));
-
-        try {
-            controller.getMirageModulo().finalizar();   // notifica FINALIZADO al HOME
-        } catch (contracts.EstadoInvalidoException e) {
-            // Ya finalizado o estado no válido: el HOME maneja el ciclo de vida.
-        }
+        // finalizar() lo llama el HOME cuando el jugador presiona ESC.
+        // No lo llamamos aquí para que la pantalla de Game Over sea visible.
     }
 
     @Override
@@ -40,9 +36,12 @@ public class EstadoGameOver implements EstadoJuego {
 
     @Override
     public void onKeyPressed(GameController controller, char key, int keyCode) {
-        // R reinicia. ESC lo intercepta el HOME; no se maneja acá.
         if (key == 'r' || key == 'R') {
-            controller.getMirageModulo().reset();
+            controller.init(); // reinicia gameplay sin tocar el ciclo de vida HOME
+        } else if (keyCode == 27) { // ESC → volver al HOME
+            try {
+                controller.getMirageModulo().finalizar();
+            } catch (contracts.EstadoInvalidoException e) { /* ignorar */ }
         }
     }
 }

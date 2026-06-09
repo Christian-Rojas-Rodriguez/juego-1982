@@ -398,6 +398,8 @@ classDiagram
     ModuloMirage --> IModuloObserver
     ModuloMirage ..> ModuloEvento
     ModuloMirage ..> EstadisticasGenerales
+    ModuloMirage ..> EstadoJugando
+    ModuloMirage ..> EstadoPausado
     ModuloJuego ..> ContextoJuego
 
     GameController --> ModuloMirage

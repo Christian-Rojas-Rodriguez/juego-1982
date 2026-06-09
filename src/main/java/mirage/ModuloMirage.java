@@ -13,8 +13,12 @@ import contracts.ModuloEvento;
 import contracts.ModuloJuego;
 import contracts.NoIniciadoState;
 import contracts.PausadoState;
+
 import mirage.controller.GameController;
+import mirage.model.estado.EstadoJugando;
+import mirage.model.estado.EstadoPausado;
 import mirage.model.stats.ResumenPartida;
+
 import processing.core.PApplet;
 
 import java.util.ArrayList;
@@ -84,6 +88,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
         estadoActual.pausar(this);
         estadoActual = new PausadoState();
         tAcumuladoMs += System.currentTimeMillis() - tInicioJuegoMs;
+        if (controller != null) controller.setEstado(new EstadoPausado());
         notificar(ModuloEvento.Tipo.PAUSADO, "Juego en pausa");
     }
 
@@ -92,6 +97,7 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
         estadoActual.reanudar(this);
         estadoActual = new EnEjecucionState();
         tInicioJuegoMs = System.currentTimeMillis();
+        if (controller != null) controller.setEstado(new EstadoJugando());
         notificar(ModuloEvento.Tipo.REANUDADO, "Juego reanudado");
     }
 
@@ -137,8 +143,8 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
     public void dibujar(PApplet app) {
         String estado = estadoActual.getNombre();
 
-        // Gameplay real: delega el render al GameController (usa el PApplet vivo).
-        if ("EN_EJECUCION".equals(estado) && controller != null) {
+        // Gameplay (jugando, pausado, game over): delega siempre al GameController.
+        if (controller != null && ("EN_EJECUCION".equals(estado) || "PAUSADO".equals(estado) || "FINALIZADO".equals(estado))) {
             controller.render();
             return;
         }
@@ -163,13 +169,6 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
             app.fill(120, 200, 255);
             app.textSize(9);
             app.text("CARGANDO... " + (int) (p * 100) + "%", app.width / 2f, app.height * 0.5f);
-        } else if ("PAUSADO".equals(estado)) {
-            app.fill(255, 220, 0);
-            app.textSize(16);
-            app.text("-- PAUSA --", app.width / 2f, app.height * 0.5f);
-            app.fill(90, 140, 180);
-            app.textSize(8);
-            app.text("ESC: reanudar   |   Q: finalizar", app.width / 2f, app.height * 0.62f);
         }
     }
 
@@ -234,8 +233,8 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
         estadoActual = new NoIniciadoState();
         puntaje = 0;
         tAcumuladoMs = 0;
-        if (controller != null) controller.init();  // recrea entidades/nivel desde cero
-        observers.clear();   // el lobby se re-registra en seleccionarModulo()
+        observers.clear();
+        if (controller != null) controller.init();
     }
 
     // ── Input (NO forma parte del contrato HOME) ──────────────────────────────
