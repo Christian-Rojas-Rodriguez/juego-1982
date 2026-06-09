@@ -148,28 +148,6 @@ public class ModuloMirage implements ModuloJuego, ModuloConInput {
             controller.render();
             return;
         }
-
-        app.background(8, 12, 24);
-        app.textAlign(PApplet.CENTER, PApplet.CENTER);
-
-        app.fill(120, 200, 255);
-        app.textSize(18);
-        app.text("MIRAGE", app.width / 2f, app.height * 0.18f);
-        app.fill(90, 140, 180);
-        app.textSize(8);
-        app.text(NOMBRE_AVION, app.width / 2f, app.height * 0.25f);
-
-        app.fill(0, 200, 120);
-        app.textSize(9);
-        app.text("ESTADO: " + estado, app.width / 2f, app.height * 0.34f);
-
-        if ("INICIANDO".equals(estado)) {
-            float p = PApplet.constrain(
-                    (System.currentTimeMillis() - tInicioCargaMs) / (float) CARGA_MS, 0, 1);
-            app.fill(120, 200, 255);
-            app.textSize(9);
-            app.text("CARGANDO... " + (int) (p * 100) + "%", app.width / 2f, app.height * 0.5f);
-        }
     }
 
     @Override

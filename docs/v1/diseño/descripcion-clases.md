@@ -137,7 +137,7 @@ Elimina el if-estado en cascada del `GameController`. La interfaz declara 4 mét
 |--------|-------------------------|
 | `EstadoJugando` | Pide enemigos al nivel, actualiza mirage/enemigos/proyectiles, detecta colisiones, spawnea explosiones, limpia entidades inactivas o fuera de pantalla. Si el Mirage muere → `setEstado(new EstadoGameOver())`. Tecla P → `EstadoPausado` |
 | `EstadoPausado` | No actualiza nada (juego congelado). Renderiza el estado de fondo + overlay "PAUSA". Tecla P → `EstadoJugando` |
-| `EstadoGameOver` | Al entrar (`alEntrar()`): registra fin de partida (`estadisticas.registrarFinPartida(puntaje)`), setea la `PantallaGameOver` en el renderer y llama `mirageModulo.finalizar()` (notifica `FINALIZADO` al HOME). `update()` no hace nada; tecla R → `mirageModulo.reset()` |
+| `EstadoGameOver` | Al entrar (`alEntrar()`): registra fin de partida (`estadisticas.registrarFinPartida(puntaje)`) y setea la `PantallaGameOver` en el renderer. Tecla R → `controller.init()` (reinicia sin pasar por el HOME). Tecla ESC → `mirageModulo.finalizar()` (notifica `FINALIZADO` al HOME) |
 
 ---
 
@@ -392,11 +392,11 @@ Efecto visual transitorio (procedural, sin sprite) al destruir un enemigo: una r
 
 **Paquete:** `mirage.view.pantallas` · **Patrón:** Strategy en la vista
 
-La interfaz `Pantalla` declara `render(sketch)` y `update()`. `GameRenderer` dibuja la pantalla activa.
+La interfaz `Pantalla` declara solo `render(sketch)`. `GameRenderer` dibuja la pantalla activa.
 
 | Clase | Qué muestra |
 |-------|------------|
-| `PantallaJuego` | Overlay del juego activo. Vacío en v1: el HUD lo dibuja `GameRenderer` |
+| `PantallaJuego` | Fondo estático (`fondo.png` escalado a cover). Si falta el asset usa azul oscuro de respaldo |
 | `PantallaGameOver` | "GAME OVER", puntaje final y enemigos derribados, instrucciones (R reinicia, ESC vuelve al menú) |
 
 ---

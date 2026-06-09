@@ -368,7 +368,6 @@ classDiagram
     class Pantalla {
         <<interface>>
         +render(sketch PApplet) void
-        +update() void
     }
 
     class PantallaJuego    { +render(sketch PApplet) void }
