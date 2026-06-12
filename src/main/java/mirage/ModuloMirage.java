@@ -1,0 +1,229 @@
+package mirage;
+
+import contracts.ContextoJuego;
+import contracts.EnEjecucionState;
+import contracts.EstadisticasGenerales;
+import contracts.EstadoInvalidoException;
+import contracts.EstadoJuego;
+import contracts.FinalizadoState;
+import contracts.IModuloObserver;
+import contracts.IniciandoState;
+import contracts.ModuloConInput;
+import contracts.ModuloEvento;
+import contracts.ModuloJuego;
+import contracts.NoIniciadoState;
+import contracts.PausadoState;
+
+import mirage.controller.GameController;
+import mirage.model.estado.EstadoJugando;
+import mirage.model.estado.EstadoPausado;
+import mirage.model.stats.ResumenPartida;
+
+import processing.core.PApplet;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ModuloMirage implements ModuloJuego, ModuloConInput {
+
+    private static final String NOMBRE_MODULO = "Mirage";
+    private static final String DESCRIPCION   =
+            "Shooter aereo vertical inspirado en 1982. Pilota un Dassault Mirage III.";
+    private static final String NOMBRE_AVION  = "Dassault Mirage III";
+
+    /** Duración (ms) de la fase de carga simulada antes de jugar. */
+    private static final int CARGA_MS = 600;
+
+    /** Estado del ciclo de vida del HOME (no confundir con mirage.model.estado). */
+    private EstadoJuego estadoActual;
+
+    /** Observers registrados por el HOME (normalmente solo HomeJuego). */
+    private final List<IModuloObserver> observers = new ArrayList<>();
+
+    /** Game loop real (lazy-init en actualizar(), donde llega el PApplet vivo). */
+    private GameController controller;
+
+    // ── Marcas de tiempo y puntaje para las stats del HOME ────────────────────
+    private long tInicioCargaMs;
+    private long tInicioJuegoMs;
+    private long tAcumuladoMs;       // tiempo jugado acumulado (para stats)
+    private int  puntaje;
+
+    public ModuloMirage() {
+        this.estadoActual = new NoIniciadoState();
+    }
+
+    // ── Identidad ─────────────────────────────────────────────────────────────
+
+    @Override
+    public String getNombreModulo() { return NOMBRE_MODULO; }
+
+    @Override
+    public String getDescripcion()  { return DESCRIPCION; }
+
+    @Override
+    public String getNombreAvion()  { return NOMBRE_AVION; }
+
+    // ── Inicialización ────────────────────────────────────────────────────────
+
+    @Override
+    public void inicializarContexto(ContextoJuego ctx) {
+        // contrato HOME — v1 no necesita datos del contexto
+    }
+
+    // ── Ciclo de vida (valida en el estado actual, luego transiciona) ─────────
+
+    @Override
+    public void iniciar() throws EstadoInvalidoException {
+        estadoActual.iniciar(this);                 // lanza si la transición es inválida
+        estadoActual = new IniciandoState();
+        tInicioCargaMs = System.currentTimeMillis();
+        puntaje = 0;
+        tAcumuladoMs = 0;
+        notificar(ModuloEvento.Tipo.INICIADO, "Cargando modulo Mirage...");
+    }
+
+    @Override
+    public void pausar() throws EstadoInvalidoException {
+        estadoActual.pausar(this);
+        estadoActual = new PausadoState();
+        tAcumuladoMs += System.currentTimeMillis() - tInicioJuegoMs;
+        if (controller != null) controller.setEstado(new EstadoPausado());
+        notificar(ModuloEvento.Tipo.PAUSADO, "Juego en pausa");
+    }
+
+    @Override
+    public void reanudar() throws EstadoInvalidoException {
+        estadoActual.reanudar(this);
+        estadoActual = new EnEjecucionState();
+        tInicioJuegoMs = System.currentTimeMillis();
+        if (controller != null) controller.setEstado(new EstadoJugando());
+        notificar(ModuloEvento.Tipo.REANUDADO, "Juego reanudado");
+    }
+
+    @Override
+    public void finalizar() throws EstadoInvalidoException {
+        estadoActual.finalizar(this);
+        if ("EN_EJECUCION".equals(estadoActual.getNombre())) {
+            tAcumuladoMs += System.currentTimeMillis() - tInicioJuegoMs;
+        }
+        estadoActual = new FinalizadoState();
+        notificar(ModuloEvento.Tipo.FINALIZADO, "Juego finalizado");
+    }
+
+    // ── Game loop ─────────────────────────────────────────────────────────────
+
+    @Override
+    public void actualizar(PApplet app) {
+        // Lazy-init headless-safe: solo crea el controller (no toca graphics).
+        if (controller == null) {
+            controller = new GameController(app, this);
+            controller.init();
+        }
+        String estado = estadoActual.getNombre();
+
+        if ("INICIANDO".equals(estado)) {
+            // Fin de la carga simulada → pasar a ejecución.
+            if (System.currentTimeMillis() - tInicioCargaMs >= CARGA_MS) {
+                estadoActual = new EnEjecucionState();
+                tInicioJuegoMs = System.currentTimeMillis();
+                // INICIADO ya se notificó en iniciar(); no se reemite aquí.
+            }
+        } else if ("EN_EJECUCION".equals(estado)) {
+            controller.update();  // lógica de juego real (no llama graphics)
+            // Placeholder: el puntaje crece con el tiempo jugado.
+            long ms = tAcumuladoMs + (System.currentTimeMillis() - tInicioJuegoMs);
+            puntaje = (int) (ms / 100);
+            // finalizar() se invoca desde EstadoGameOver.alEntrar() vía State pattern.
+        }
+        // PAUSADO/FINALIZADO: no se actualiza lógica.
+    }
+
+    @Override
+    public void dibujar(PApplet app) {
+        String estado = estadoActual.getNombre();
+
+        // Gameplay (jugando, pausado, game over): delega siempre al GameController.
+        if (controller != null && ("EN_EJECUCION".equals(estado) || "PAUSADO".equals(estado) || "FINALIZADO".equals(estado))) {
+            controller.render();
+            return;
+        }
+    }
+
+    @Override
+    public EstadoJuego getEstado() {
+        return estadoActual;
+    }
+
+    // ── Estadísticas para el HOME (nunca null) ────────────────────────────────
+
+    @Override
+    public EstadisticasGenerales getEstadisticasGenerales() {
+        if (controller != null && controller.getMirage() != null) {
+            ResumenPartida r = controller.getEstadisticas()
+                    .exportar(controller.getMirage().getVidas(), controller.getMirage());
+            return new EstadisticasGenerales(
+                    NOMBRE_MODULO,
+                    r.getPuntajeFinal(),
+                    r.getPartidasJugadas(),
+                    r.getPartidasGanadas(),
+                    r.getPartidasPerdidas(),
+                    r.getEnemigosDerribados(),
+                    (long) r.getDuracionSegundos()
+            );
+        }
+        // Fallback (aún no se creó el game loop): DTO no-null sin partidas ficticias.
+        // partidasJugadas/Perdidas en 0 para no registrar una derrota inexistente si
+        // el HOME consulta antes de que haya empezado una partida real.
+        long enJuegoMs = tAcumuladoMs;
+        if ("EN_EJECUCION".equals(estadoActual.getNombre())) {
+            enJuegoMs += System.currentTimeMillis() - tInicioJuegoMs;
+        }
+        return new EstadisticasGenerales(NOMBRE_MODULO, puntaje, 0, 0, 0, 0, enJuegoMs / 1000);
+    }
+
+    // ── Observer ──────────────────────────────────────────────────────────────
+
+    @Override
+    public void agregarObserver(IModuloObserver observer) {
+        if (observer != null && !observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    @Override
+    public void removerObserver(IModuloObserver observer) {
+        observers.remove(observer);
+    }
+
+    /** Notifica a una copia de la lista (evita ConcurrentModification si un observer se desregistra). */
+    private void notificar(ModuloEvento.Tipo tipo, String mensaje) {
+        ModuloEvento evento = new ModuloEvento(tipo, NOMBRE_MODULO, mensaje);
+        for (IModuloObserver o : new ArrayList<>(observers)) {
+            o.onEventoModulo(evento);
+        }
+    }
+
+    // ── Reset (para volver a jugar) ───────────────────────────────────────────
+
+    @Override
+    public void reset() {
+        estadoActual = new NoIniciadoState();
+        puntaje = 0;
+        tAcumuladoMs = 0;
+        observers.clear();
+        if (controller != null) controller.init();
+    }
+
+    // ── Input (NO forma parte del contrato HOME) ──────────────────────────────
+    // El HOME intercepta ESC (pausar/reanudar) y Q (finalizar); el módulo NO los
+    // maneja. Estos métodos existen SOLO para el runner standalone Juego1982.
+
+    public void onKeyPressed(char key, int keyCode) {
+        if (controller != null) controller.onKeyPressed(key, keyCode);
+    }
+
+    public void onKeyReleased(char key, int keyCode) {
+        if (controller != null) controller.onKeyReleased(key, keyCode);
+    }
+}

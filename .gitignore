@@ -4,11 +4,17 @@
 *.iws
 *.ipr
 out/
+# Excepción: el .iml del módulo se versiona para compartir la config
+# (carpeta de test + librería JUnit) con todo el equipo.
+!juego-1982.iml
 
 # Compiled Java
 *.class
 *.jar
 target/
+# Excepción: librerías versionadas en lib/ (Processing + JUnit) para que
+# todo el equipo tenga lo necesario para compilar y correr tests al clonar.
+!lib/*.jar
 
 # Processing
 applet/
@@ -23,4 +29,9 @@ Thumbs.db
 # Logs y datos generados en runtime
 data/output/*.csv
 data/output/*.json
+<<<<<<< HEAD
 .vscode/
+=======
+# Estadísticas que el lobby (HomeJuego) persiste al correr el harness
+estadisticas/
+>>>>>>> origin/main

@@ -5,18 +5,6 @@ import mirage.model.entidades.Mirage;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Recolecta métricas de la partida en tiempo real.
- *
- * ColisionDetector la llama para registrar aciertos y derribos.
- * Al finalizar la partida, exportar() construye un ResumenPartida interno
- * que MirageModulo.getEstadisticasGenerales() mapea al DTO del HOME team.
- *
- * disparosTotales NO se almacena aquí: es responsabilidad de Mirage (quien dispara).
- * Para calcular precisión se consulta mirage.getDisparosTotales() en exportar().
- *
- * Patrón: GRASP Information Expert (quien registra sabe qué registrar)
- */
 public class EstadisticasMirage {
 
     // ── Métricas de la partida actual ────────────────────────────────────────
@@ -32,8 +20,8 @@ public class EstadisticasMirage {
     private int partidasPerdidas;
 
     public EstadisticasMirage() {
-        // TODO: cargar()  — recuperar historial previo de archivo
-        // TODO: tiempoInicioMs = System.currentTimeMillis()
+        this.tiempoInicioMs = System.currentTimeMillis();
+        cargar();  // no-op en v1 (persistencia CSV fuera de v1)
     }
 
     // ── Registro durante la partida ──────────────────────────────────────────
@@ -43,7 +31,7 @@ public class EstadisticasMirage {
      * Solo incrementa aciertos; el total de disparos está en Mirage.
      */
     public void registrarDisparoAcertado() {
-        // TODO: disparosAcertados++
+        disparosAcertados++;
     }
 
     /**
@@ -53,16 +41,15 @@ public class EstadisticasMirage {
      * @param puntos puntos que otorgó el derribo
      */
     public void registrarDerribo(String tipo, int puntos) {
-        // TODO: enemigosDerribados++
-        // TODO: enemigosPorTipo.merge(tipo, 1, Integer::sum)
+        enemigosDerribados++;
+        enemigosPorTipo.merge(tipo, 1, Integer::sum);
     }
 
     /** Llamado desde EstadoGameOver.alEntrar() al finalizar la partida. */
     public void registrarFinPartida(int puntajeFinal) {
-        // TODO: float duracion = (System.currentTimeMillis() - tiempoInicioMs) / 1000f
-        // TODO: partidasJugadas++
-        // TODO: partidasPerdidas++  (en MVP 1 toda partida termina en derrota)
-        // TODO: if (puntajeFinal > puntajeMaximo) puntajeMaximo = puntajeFinal
+        partidasJugadas++;
+        partidasPerdidas++;  // en v1 toda partida termina en derrota
+        if (puntajeFinal > puntajeMaximo) puntajeMaximo = puntajeFinal;
     }
 
     // ── Precisión ────────────────────────────────────────────────────────────
@@ -74,54 +61,44 @@ public class EstadisticasMirage {
      * @return valor entre 0.0 y 1.0, o 0.0 si no se disparó
      */
     public float getPrecision(Mirage mirage) {
-        // TODO: int totales = mirage.getDisparosTotales()
-        // TODO: if (totales == 0) return 0f
-        // TODO: return (float) disparosAcertados / totales
-        return 0f;
+        int totales = mirage.getDisparosTotales();
+        if (totales == 0) return 0f;
+        return (float) disparosAcertados / totales;
     }
 
     // ── Export al HOME ───────────────────────────────────────────────────────
 
     /**
      * Construye el ResumenPartida con todos los datos de la partida.
-     * MirageModulo.getEstadisticasGenerales() lo usa para crear el DTO del HOME.
+     * ModuloMirage.getEstadisticasGenerales() lo usa para crear el DTO del HOME.
      *
      * @param vidasRestantes vidas que le quedaban al Mirage al terminar
      * @param mirage         referencia para obtener disparosTotales y puntuacion
      */
     public ResumenPartida exportar(int vidasRestantes, Mirage mirage) {
-        // TODO: float duracion = (System.currentTimeMillis() - tiempoInicioMs) / 1000f
-        // TODO: return new ResumenPartida(
-        //           mirage.getPuntuacion(),
-        //           enemigosDerribados,
-        //           vidasRestantes,
-        //           duracion,
-        //           getPrecision(mirage),
-        //           partidasJugadas,
-        //           partidasGanadas,
-        //           partidasPerdidas
-        //       )
-        return null;
+        float duracion = (System.currentTimeMillis() - tiempoInicioMs) / 1000f;
+        return new ResumenPartida(
+                mirage.getPuntuacion(),
+                enemigosDerribados,
+                vidasRestantes,
+                duracion,
+                getPrecision(mirage),
+                partidasJugadas,
+                partidasGanadas,
+                partidasPerdidas
+        );
     }
 
     // ── Persistencia ────────────────────────────────────────────────────────
 
-    public void guardar() {
-        // TODO: escribir a "data/estadisticas_mirage.csv"
-        // Columnas: fecha, puntaje, enemigosDerribados, precision, duracion
-    }
-
     public void cargar() {
-        // TODO: leer "data/estadisticas_mirage.csv" si existe
-        // TODO: recuperar puntajeMaximo, partidasJugadas, etc.
+        // No-op en v1: persistencia CSV fuera de v1 (no se leen archivos).
     }
 
     // ── Getters ───────────────────────────────────────────────────────────────
 
     public int getEnemigosDerribados()          { return enemigosDerribados; }
-    public int getPuntajeMaximo()               { return puntajeMaximo; }
     public int getPartidasJugadas()             { return partidasJugadas; }
     public int getPartidasGanadas()             { return partidasGanadas; }
     public int getPartidasPerdidas()            { return partidasPerdidas; }
-    public Map<String, Integer> getPorTipo()    { return enemigosPorTipo; }
 }

@@ -1,29 +1,20 @@
 package mirage.model.estado;
 
-import home.TipoEvento;
 import mirage.controller.GameController;
 
-/**
- * Estado: partida terminada (vidas del Mirage = 0).
- *
- * Al entrar: registra fin de partida en estadísticas, notifica al HOME
- * que el módulo finalizó, y configura la pantalla de Game Over en el renderer.
- *
- * Durante update(): no hace nada — espera input del jugador.
- * onKeyPressed(): R reinicia, ESC vuelve al HOME.
- *
- * Patrón: State
- */
 public class EstadoGameOver implements EstadoJuego {
 
     @Override
     public void alEntrar(GameController controller) {
-        // TODO: int puntaje = controller.getMirage().getPuntuacion()
-        // TODO: controller.getEstadisticas().registrarFinPartida(puntaje)
-        // TODO: controller.getEstadisticas().guardar()
-        // TODO: controller.getMirageModulo().notificar(TipoEvento.FINALIZADO)
-        // TODO: PantallaGameOver pantalla = new PantallaGameOver(puntaje, enemigosDerribados)
-        // TODO: controller.getRenderer().setPantalla(pantalla)
+        int puntaje    = controller.getMirage().getPuntuacion();
+        int derribados = controller.getEstadisticas().getEnemigosDerribados();
+
+        controller.getEstadisticas().registrarFinPartida(puntaje);
+
+        controller.getRenderer()
+                  .setPantalla(new mirage.view.pantallas.PantallaGameOver(puntaje, derribados));
+        // finalizar() lo llama el HOME cuando el jugador presiona ESC.
+        // No lo llamamos aquí para que la pantalla de Game Over sea visible.
     }
 
     @Override
@@ -33,13 +24,24 @@ public class EstadoGameOver implements EstadoJuego {
 
     @Override
     public void render(GameController controller) {
-        // TODO: controller.getRenderer().render(controller.getSketch(),
-        //           controller.getMirage(), controller.getEnemigos())
+        // Juego de fondo + la pantalla de Game Over (ya seteada en alEntrar()).
+        controller.getRenderer().render(
+                controller.getMirage(),
+                controller.getEnemigos(),
+                controller.getMirage().getProyectiles(),
+                controller.getEfectos(),
+                controller.getSketch()
+        );
     }
 
     @Override
     public void onKeyPressed(GameController controller, char key, int keyCode) {
-        // TODO: si key == 'r' o key == 'R' → controller.getMirageModulo().reset()
-        // TODO: si keyCode == ESC → controller.getMirageModulo().finalizar()
+        if (key == 'r' || key == 'R') {
+            controller.init(); // reinicia gameplay sin tocar el ciclo de vida HOME
+        } else if (keyCode == 27) { // ESC → volver al HOME
+            try {
+                controller.getMirageModulo().finalizar();
+            } catch (contracts.EstadoInvalidoException e) { /* ignorar */ }
+        }
     }
 }
